@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import 'router.dart';
 import 'theme.dart';
 
 class App extends StatelessWidget {
@@ -11,8 +12,8 @@ class App extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
-      // ponytail: empty placeholder; routes and screens arrive in T-011.
-      home: const Scaffold(),
+      routes: AppRoutes.table,
+      initialRoute: AppRoutes.initial,
     );
   }
 }
