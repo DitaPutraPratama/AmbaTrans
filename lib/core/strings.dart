@@ -78,6 +78,10 @@ abstract final class Strings {
   static const sameLanguage = 'Bahasa sumber dan tujuan tidak boleh sama';
 
   // Model download
+  static String downloadModelBody(String languages, int megabytes) =>
+      '$languages, ±$megabytes MB. Cukup sekali, setelah itu bisa dipakai offline.';
+  static const downloadFailed =
+      'Gagal mengunduh. Periksa koneksi internet lalu coba lagi.';
   static const downloadModelTitle = 'Unduh model bahasa';
   static const downloading = 'Mengunduh model…';
   static const later = 'Nanti saja';

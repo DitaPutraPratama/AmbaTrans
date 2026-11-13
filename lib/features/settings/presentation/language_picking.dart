@@ -6,6 +6,7 @@ import '../../../core/strings.dart';
 import '../../../core/widgets/app_bottom_sheet.dart';
 import '../application/settings_controller.dart';
 import 'widgets/language_picker_sheet.dart';
+import 'widgets/model_download_sheet.dart';
 
 /// Opens the language sheet for [side] and saves the choice; shows a snackbar on failure.
 Future<void> pickLanguage(
@@ -26,6 +27,10 @@ Future<void> pickLanguage(
   if (code == null) return;
   try {
     await ref.read(settingsControllerProvider.notifier).setLanguage(side, code);
+    final models = ref.read(settingsControllerProvider).value?.models;
+    if (models != null && !models.ready && context.mounted) {
+      await showModelDownloadSheet(context);
+    }
   } on InvalidValueException {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context)

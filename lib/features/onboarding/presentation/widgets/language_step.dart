@@ -7,6 +7,8 @@ import '../../../../core/strings.dart';
 import '../../../../core/widgets/selectable_card.dart';
 import '../../../settings/application/settings_controller.dart';
 import '../../../settings/presentation/language_picking.dart';
+import '../../../settings/presentation/widgets/model_download_sheet.dart';
+import '../../../settings/presentation/widgets/model_status_card.dart';
 
 /// Step 1: two cards, "Dari" and "Ke", each opening the language sheet.
 class LanguageStep extends ConsumerWidget {
@@ -44,6 +46,11 @@ class LanguageStep extends ConsumerWidget {
             selected: true,
             onTap: () =>
                 pickLanguage(context, ref, LanguageSide.target, settings),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          ModelStatusCard(
+            ready: settings.models.ready,
+            onDownload: () => showModelDownloadSheet(context),
           ),
         ] else
           const Center(child: CircularProgressIndicator()),

@@ -1,5 +1,6 @@
 import 'package:ambatrans/app/theme.dart';
 import 'package:ambatrans/core/widgets/app_bottom_sheet.dart';
+import 'package:ambatrans/core/widgets/icon_circle_button.dart';
 import 'package:ambatrans/core/widgets/pill_button.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -70,5 +71,22 @@ void main() {
     await tester.tap(find.text('Buka'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('close button can be disabled', (tester) async {
+    await pumpApp(
+      tester,
+      const AppBottomSheet(
+        icon: Icons.translate_rounded,
+        iconColors: AppPastels.blue,
+        title: 'Judul',
+        closeLabel: 'Tutup',
+        closeEnabled: false,
+      ),
+    );
+    final close = tester.widget<IconCircleButton>(
+      find.byType(IconCircleButton),
+    );
+    expect(close.onPressed, isNull);
   });
 }

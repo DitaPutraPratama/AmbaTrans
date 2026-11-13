@@ -6,9 +6,10 @@ import '../../../core/languages.dart';
 import '../../../core/strings.dart';
 import '../../../core/widgets/icon_circle_button.dart';
 import '../../../core/widgets/section_title.dart';
-import '../../../core/widgets/status_chip.dart';
 import '../application/settings_controller.dart';
 import 'language_picking.dart';
+import 'widgets/model_download_sheet.dart';
+import 'widgets/model_status_card.dart';
 import 'widgets/setting_row.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -60,7 +61,11 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.xl),
                 const SectionTitle(Strings.offlineModel),
                 const SizedBox(height: AppSpacing.md),
-                if (state != null) _ModelCard(ready: state.models.ready),
+                if (state != null)
+                  ModelStatusCard(
+                    ready: state.models.ready,
+                    onDownload: () => showModelDownloadSheet(context),
+                  ),
               ],
             ),
           ),
@@ -93,43 +98,6 @@ class _Header extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _ModelCard extends StatelessWidget {
-  const _ModelCard({required this.ready});
-
-  final bool ready;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                Strings.offlineModel,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            // Flexible: at large font scales the chip text wraps instead of overflowing.
-            Flexible(
-              child: StatusChip(
-                ready ? Strings.readyOffline : Strings.notDownloaded,
-                tone: ready ? StatusChipTone.success : StatusChipTone.warning,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

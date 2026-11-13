@@ -33,6 +33,7 @@ class AppBottomSheet extends StatelessWidget {
     required this.closeLabel,
     this.subtitle,
     this.onClose,
+    this.closeEnabled = true,
     this.child,
     this.actions = const [],
   });
@@ -43,6 +44,9 @@ class AppBottomSheet extends StatelessWidget {
   final String closeLabel;
   final String? subtitle;
   final VoidCallback? onClose;
+
+  /// When false the close button is disabled (e.g. while a download runs).
+  final bool closeEnabled;
   final Widget? child;
   final List<Widget> actions;
 
@@ -99,7 +103,9 @@ class AppBottomSheet extends StatelessWidget {
                 IconCircleButton(
                   icon: Icons.close_rounded,
                   semanticLabel: closeLabel,
-                  onPressed: onClose ?? () => Navigator.of(context).maybePop(),
+                  onPressed: closeEnabled
+                      ? (onClose ?? () => Navigator.of(context).maybePop())
+                      : null,
                 ),
               ],
             ),
