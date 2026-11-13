@@ -6,6 +6,7 @@ abstract final class Strings {
   static const close = 'Tutup';
   static const back = 'Kembali';
   static const retry = 'Coba lagi';
+  static const loading = 'memuat';
   static const from = 'Dari';
   static const to = 'Ke';
 
@@ -43,6 +44,15 @@ abstract final class Strings {
   static const download = 'Unduh';
   static const accurateMode = 'Mode akurat (Aksesibilitas)';
   static const autoDetect = 'Deteksi otomatis';
+
+  static const languageSection = 'Bahasa';
+  static const sourceSheetSubtitle = 'Bahasa teks di layar';
+  static const targetSheetSubtitle = 'Bahasa hasil terjemahan';
+  static const searchLanguageHint = 'Cari bahasa';
+  static const languageNotFound = 'Bahasa tidak ditemukan';
+  static const alreadyChosenAsTarget = 'Sudah dipilih sebagai bahasa tujuan';
+  static const alreadyChosenAsSource = 'Sudah dipilih sebagai bahasa sumber';
+  static const settingsSaveFailed = 'Pengaturan tidak dapat disimpan';
 
   // Validation
   static const sameLanguage = 'Bahasa sumber dan tujuan tidak boleh sama';

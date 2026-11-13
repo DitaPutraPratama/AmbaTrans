@@ -173,6 +173,19 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: c.background,
       fontFamily: fontFamily,
       textTheme: _textTheme(c),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: c.surfaceVariant,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+          borderSide: BorderSide.none,
+        ),
+        hintStyle: TextStyle(color: c.textSecondary),
+      ),
       extensions: [c],
     );
   }
