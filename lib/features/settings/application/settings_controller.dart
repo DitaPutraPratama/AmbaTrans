@@ -118,6 +118,9 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     state = AsyncData(current.copyWith(accessibilityMode: enabled));
   }
 
+  Future<void> openBatterySettings() =>
+      ref.read(permissionsChannelProvider).openBatterySettings();
+
   Future<void> openAccessibilitySettings() =>
       ref.read(permissionsChannelProvider).openAccessibilitySettings();
 

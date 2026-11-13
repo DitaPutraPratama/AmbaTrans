@@ -42,6 +42,10 @@ abstract final class Strings {
   static const readyOffline = 'Siap offline';
   static const notDownloaded = 'Belum diunduh';
   static const download = 'Unduh';
+  static const tipsTitle = 'Agar bubble tidak mati';
+  static const tipsBody =
+      'Beberapa ponsel menghentikan aplikasi di latar belakang untuk menghemat baterai. Izinkan AmbaTrans berjalan tanpa pembatasan baterai, dan aktifkan "Mulai otomatis" bila tersedia (Xiaomi, Oppo, Vivo).';
+  static const tipsAction = 'Buka pengaturan baterai';
   static const accurateMode = 'Mode akurat (Aksesibilitas)';
   static const accurateModeDescription =
       'Membaca teks dan posisinya lewat layanan Aksesibilitas agar hasil lebih akurat.';

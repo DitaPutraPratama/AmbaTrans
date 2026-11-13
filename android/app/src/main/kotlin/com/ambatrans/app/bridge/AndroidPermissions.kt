@@ -3,6 +3,7 @@ package com.ambatrans.app.bridge
 import android.Manifest
 import android.app.Activity
 import android.app.NotificationManager
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -29,6 +30,17 @@ class AndroidPermissions(private val activity: Activity) {
     fun openOverlaySettings() {
         val uri = Uri.parse("package:${activity.packageName}")
         activity.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, uri))
+    }
+
+    /** Opens the battery-optimization list; falls back to this app's details page. */
+    fun openBatterySettings() {
+        val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+        try {
+            activity.startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            val uri = Uri.parse("package:${activity.packageName}")
+            activity.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri))
+        }
     }
 
     fun openAccessibilitySettings() {

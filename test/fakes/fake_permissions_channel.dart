@@ -17,6 +17,7 @@ class FakePermissionsChannel implements PermissionsChannel {
   int openOverlaySettingsCalls = 0;
   int openAccessibilitySettingsCalls = 0;
   int requestNotificationsCalls = 0;
+  int openBatterySettingsCalls = 0;
 
   @override
   Future<PermissionStatus> getStatus() async => PermissionStatus(
@@ -27,6 +28,9 @@ class FakePermissionsChannel implements PermissionsChannel {
 
   @override
   Future<void> openOverlaySettings() async => openOverlaySettingsCalls++;
+
+  @override
+  Future<void> openBatterySettings() async => openBatterySettingsCalls++;
 
   @override
   Future<void> openAccessibilitySettings() async =>

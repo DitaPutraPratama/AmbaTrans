@@ -34,6 +34,13 @@ class PermissionsMethodHandlerTest {
     }
 
     @Test
+    fun `openBatterySettings calls through and succeeds`() {
+        handler.onMethodCall(MethodCall("openBatterySettings", null), result)
+        verify { permissions.openBatterySettings() }
+        verify { result.success(null) }
+    }
+
+    @Test
     fun `requestNotifications answers when the callback fires`() {
         val callback = slot<(Boolean) -> Unit>()
         every { permissions.requestNotifications(capture(callback)) } returns Unit

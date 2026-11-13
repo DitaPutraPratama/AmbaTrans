@@ -34,6 +34,9 @@ abstract class PermissionsChannel {
   Future<bool> requestNotifications();
 
   Future<void> openAccessibilitySettings();
+
+  /// Opens battery-optimization settings so the user can exempt the app (F-02 reliability).
+  Future<void> openBatterySettings();
 }
 
 class MethodPermissionsChannel implements PermissionsChannel {
@@ -61,6 +64,10 @@ class MethodPermissionsChannel implements PermissionsChannel {
   @override
   Future<bool> requestNotifications() async =>
       await _channel.invokeMethod<bool>('requestNotifications') ?? false;
+
+  @override
+  Future<void> openBatterySettings() =>
+      _channel.invokeMethod<void>('openBatterySettings');
 
   @override
   Future<void> openAccessibilitySettings() =>

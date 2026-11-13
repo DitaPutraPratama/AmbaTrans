@@ -17,6 +17,10 @@ class PermissionsMethodHandler(private val permissions: AndroidPermissions) : Me
                 permissions.openOverlaySettings()
                 result.success(null)
             }
+            "openBatterySettings" -> {
+                permissions.openBatterySettings()
+                result.success(null)
+            }
             "openAccessibilitySettings" -> {
                 permissions.openAccessibilitySettings()
                 result.success(null)
