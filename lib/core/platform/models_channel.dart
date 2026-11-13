@@ -34,6 +34,9 @@ class ModelDownloadException implements Exception {
 abstract class ModelsChannel {
   Future<List<String>> getSupportedLanguages();
 
+  /// Languages that can be the *source*: translatable and readable by OCR.
+  Future<List<String>> getSourceLanguages();
+
   Future<ModelStatus> getStatus(String source, String target);
 
   /// Completes when every model of the pair is installed.
@@ -52,6 +55,10 @@ class MethodModelsChannel implements ModelsChannel {
   Future<List<String>> getSupportedLanguages() async =>
       await _channel.invokeListMethod<String>('getSupportedLanguages') ??
       const [];
+
+  @override
+  Future<List<String>> getSourceLanguages() async =>
+      await _channel.invokeListMethod<String>('getSourceLanguages') ?? const [];
 
   @override
   Future<ModelStatus> getStatus(String source, String target) async {

@@ -1,5 +1,6 @@
 package com.ambatrans.app.bridge
 
+import com.ambatrans.app.ocr.LanguageCatalog
 import com.ambatrans.app.translate.ModelDownloadException
 import com.ambatrans.app.translate.ModelManager
 import io.flutter.plugin.common.MethodCall
@@ -15,6 +16,7 @@ class ModelsMethodHandler(
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "getSupportedLanguages" -> result.success(supportedLanguages())
+            "getSourceLanguages" -> result.success(LanguageCatalog.sourceLanguages(supportedLanguages()))
             "getStatus" -> scope.launch {
                 val status = manager.getStatus(
                     call.argument<String>("source").orEmpty(),

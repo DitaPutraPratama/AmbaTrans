@@ -36,7 +36,9 @@ class _LanguagePickerSheetState extends ConsumerState<LanguagePickerSheet> {
   @override
   Widget build(BuildContext context) {
     final isSource = widget.side == LanguageSide.source;
-    final languages = ref.watch(supportedLanguagesProvider);
+    final languages = ref.watch(
+      isSource ? supportedSourceLanguagesProvider : supportedLanguagesProvider,
+    );
     return AppBottomSheet(
       icon: Icons.translate_rounded,
       iconColors: AppPastels.blue,

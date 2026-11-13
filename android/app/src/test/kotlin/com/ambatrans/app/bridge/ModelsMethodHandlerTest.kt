@@ -15,12 +15,19 @@ import org.junit.Test
 class ModelsMethodHandlerTest {
     private val manager = mockk<ModelManager>()
     private val result = mockk<MethodChannel.Result>(relaxed = true)
-    private val handler = ModelsMethodHandler(manager, { listOf("en", "id") }, CoroutineScope(Dispatchers.Unconfined))
+    private val handler =
+        ModelsMethodHandler(manager, { listOf("en", "id", "ru") }, CoroutineScope(Dispatchers.Unconfined))
     private val pair = mapOf("source" to "en", "target" to "id")
 
     @Test
     fun `getSupportedLanguages returns the list`() {
         handler.onMethodCall(MethodCall("getSupportedLanguages", null), result)
+        verify { result.success(listOf("en", "id", "ru")) }
+    }
+
+    @Test
+    fun `getSourceLanguages drops languages OCR cannot read`() {
+        handler.onMethodCall(MethodCall("getSourceLanguages", null), result)
         verify { result.success(listOf("en", "id")) }
     }
 

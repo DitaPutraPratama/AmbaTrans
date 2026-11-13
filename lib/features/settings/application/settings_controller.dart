@@ -32,18 +32,33 @@ class SettingsState {
 
 enum LanguageSide { source, target }
 
-/// Language codes offered in the picker, sorted by their Indonesian display name.
-final supportedLanguagesProvider = FutureProvider<List<String>>((ref) async {
+/// Language codes offered as the *target*, sorted by Indonesian display name.
+final supportedLanguagesProvider = FutureProvider<List<String>>(
+  (ref) => _sortedLanguages(
+    () => ref.read(modelsChannelProvider).getSupportedLanguages(),
+  ),
+);
+
+/// Language codes offered as the *source*: only those OCR can read.
+final supportedSourceLanguagesProvider = FutureProvider<List<String>>(
+  (ref) => _sortedLanguages(
+    () => ref.read(modelsChannelProvider).getSourceLanguages(),
+  ),
+);
+
+Future<List<String>> _sortedLanguages(
+  Future<List<String>> Function() load,
+) async {
   List<String> codes;
   try {
-    codes = await ref.read(modelsChannelProvider).getSupportedLanguages();
+    codes = await load();
   } on PlatformException {
     codes = const [];
   }
   if (codes.isEmpty) codes = Languages.codes.toList();
   return [...codes]
     ..sort((a, b) => Languages.nameOf(a).compareTo(Languages.nameOf(b)));
-});
+}
 
 final settingsControllerProvider =
     AsyncNotifierProvider<SettingsController, SettingsState>(

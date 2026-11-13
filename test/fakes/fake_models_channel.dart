@@ -8,12 +8,16 @@ class FakeModelsChannel implements ModelsChannel {
   FakeModelsChannel({
     Set<String>? downloaded,
     this.languages = const ['en', 'id', 'ja', 'fr'],
+    this.unsupportedSources = const {},
     this.failDownload = false,
     this.downloadGate,
   }) : downloaded = downloaded ?? {};
 
   final Set<String> downloaded;
   final List<String> languages;
+
+  /// Languages that exist as targets but cannot be read by OCR.
+  final Set<String> unsupportedSources;
   bool failDownload;
   Completer<void>? downloadGate;
 
@@ -21,6 +25,10 @@ class FakeModelsChannel implements ModelsChannel {
 
   @override
   Future<List<String>> getSupportedLanguages() async => languages;
+
+  @override
+  Future<List<String>> getSourceLanguages() async =>
+      languages.where((c) => !unsupportedSources.contains(c)).toList();
 
   @override
   Future<ModelStatus> getStatus(String source, String target) async {

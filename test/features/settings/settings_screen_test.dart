@@ -45,6 +45,27 @@ void main() {
     expect(cards.firstWhere((c) => c.title == 'Inggris').selected, isTrue);
   });
 
+  testWidgets(
+    'source sheet hides languages OCR cannot read; target keeps them',
+    (tester) async {
+      final models = FakeModelsChannel(
+        downloaded: {'en', 'id'},
+        languages: ['en', 'id', 'ru', 'ja'],
+        unsupportedSources: {'ru'},
+      );
+      await pumpScreen(tester, const SettingsScreen(), models: models);
+      await openSourceSheet(tester);
+      expect(find.text('Rusia'), findsNothing);
+      expect(find.text('Jepang'), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.close_rounded));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text(Strings.targetLanguage));
+      await tester.pumpAndSettle();
+      expect(find.text('Rusia'), findsOneWidget);
+    },
+  );
+
   testWidgets('search filters the list and shows an empty state', (
     tester,
   ) async {
