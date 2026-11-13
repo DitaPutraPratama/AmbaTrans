@@ -138,8 +138,10 @@ class OverlayRenderer(private val context: Context, private val onOutsideTouch: 
     }
 
     companion object {
-        private const val WINDOW_ALPHA = 0.8f
-        private const val WATCHER_ALPHA = 0.02f
+        // Android 12+ blocks touches under overlays whose combined opacity exceeds 0.8. Window alphas add up
+        // as 1 - (1 - a)(1 - b), so 0.8 + any watcher already goes over; keep a margin.
+        private const val WINDOW_ALPHA = 0.75f
+        private const val WATCHER_ALPHA = 0.01f
         private const val LABEL_COLOR = 0xFF424242.toInt()
         private const val PAD_H_DP = 4f
         private const val PAD_V_DP = 2f
