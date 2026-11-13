@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="splash_background">#F2F4F9</color>
+    <color name="splash_background">#EFF1FD</color>
     <color name="bubble_primary">#616161</color>
     <color name="bubble_success">#2E7D32</color>
     <color name="menu_surface">#FFFFFF</color>
