@@ -3,10 +3,14 @@ package com.ambatrans.app
 import android.content.Context
 import com.ambatrans.app.bridge.AndroidPermissions
 import com.ambatrans.app.bridge.PermissionsMethodHandler
+import com.ambatrans.app.bridge.ServiceMethodHandler
+import com.ambatrans.app.bridge.ServiceStateStreamHandler
 import com.ambatrans.app.bridge.SettingsMethodHandler
 import com.ambatrans.app.data.SettingsStore
+import com.ambatrans.app.service.ServiceLauncher
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
@@ -23,6 +27,11 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(messenger, PermissionsMethodHandler.CHANNEL)
             .setMethodCallHandler(PermissionsMethodHandler(permissions))
+
+        MethodChannel(messenger, ServiceMethodHandler.CHANNEL)
+            .setMethodCallHandler(ServiceMethodHandler(ServiceLauncher(applicationContext)))
+        EventChannel(messenger, ServiceStateStreamHandler.CHANNEL)
+            .setStreamHandler(ServiceStateStreamHandler())
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
