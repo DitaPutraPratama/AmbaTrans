@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../../app/theme.dart';
 import '../../../../core/strings.dart';
 import '../../../../core/widgets/pastel_icon_tile.dart';
+import '../../../../core/widgets/press_scale.dart';
 import '../../application/home_state.dart';
 
 /// Four readiness tiles (overlay, notifications, models, accurate mode).
@@ -92,25 +93,27 @@ class _Tile extends StatelessWidget {
       label: '$label, $status',
       onTap: onTap,
       excludeSemantics: true,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.tile),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              PastelIconTile(icon: icon, colors: colors, badge: badge),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: context.colors.textPrimary,
-                  fontWeight: FontWeight.w600,
+      child: PressScale(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.tile),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PastelIconTile(icon: icon, colors: colors, badge: badge),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: context.colors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

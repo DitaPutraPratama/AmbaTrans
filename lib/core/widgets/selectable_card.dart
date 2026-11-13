@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/theme.dart';
+import 'press_scale.dart';
 
 /// Outlined card. Selected = primary border + selectedBg; disabled = dimmed, no taps.
 class SelectableCard extends StatelessWidget {
@@ -31,40 +32,43 @@ class SelectableCard extends StatelessWidget {
       label: subtitle == null ? title : '$title, $subtitle',
       onTap: enabled ? onTap : null,
       excludeSemantics: true,
-      child: Opacity(
-        opacity: enabled ? 1 : 0.5,
-        child: Material(
-          color: selected ? colors.selectedBg : colors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: shape,
-            side: BorderSide(
-              color: selected ? colors.primary : colors.outline,
-              width: selected ? 2 : 1,
+      child: PressScale(
+        enabled: enabled && onTap != null,
+        child: Opacity(
+          opacity: enabled ? 1 : 0.5,
+          child: Material(
+            color: selected ? colors.selectedBg : colors.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: shape,
+              side: BorderSide(
+                color: selected ? colors.primary : colors.outline,
+                width: selected ? 2 : 1,
+              ),
             ),
-          ),
-          child: InkWell(
-            borderRadius: shape,
-            onTap: enabled ? onTap : null,
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(title, style: textTheme.labelLarge),
-                        if (subtitle != null) ...[
-                          const SizedBox(height: AppSpacing.xs),
-                          Text(subtitle!, style: textTheme.bodySmall),
+            child: InkWell(
+              borderRadius: shape,
+              onTap: enabled ? onTap : null,
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(title, style: textTheme.labelLarge),
+                          if (subtitle != null) ...[
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(subtitle!, style: textTheme.bodySmall),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-                  ),
-                  if (selected)
-                    Icon(Icons.check_circle_rounded, color: colors.primary),
-                ],
+                    if (selected)
+                      Icon(Icons.check_circle_rounded, color: colors.primary),
+                  ],
+                ),
               ),
             ),
           ),

@@ -7,8 +7,7 @@ import '../../../core/languages.dart';
 import '../../../core/platform/service_channel.dart';
 import '../../../core/strings.dart';
 import '../../../core/widgets/hero_card.dart';
-import '../../../core/widgets/icon_circle_button.dart';
-import '../../../core/widgets/info_card.dart';
+import '../../../core/widgets/language_pair_card.dart';
 import '../../../core/widgets/pastel_icon_tile.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../core/widgets/status_chip.dart';
@@ -78,7 +77,7 @@ class _HomeContent extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
           children: [
-            _Header(onSettings: openSettings),
+            const _Header(),
             const SizedBox(height: AppSpacing.xl),
             _Hero(state: state, controller: controller),
             if (state.startError == ServiceStartError.startFailed) ...[
@@ -94,25 +93,10 @@ class _HomeContent extends ConsumerWidget {
               onAccurate: controller.openAccessibilitySettings,
             ),
             const SizedBox(height: AppSpacing.xl),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: InfoCard(
-                    title: Strings.from,
-                    value: Languages.nameOf(state.source),
-                    onTap: openSettings,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: InfoCard(
-                    title: Strings.to,
-                    value: Languages.nameOf(state.target),
-                    onTap: openSettings,
-                  ),
-                ),
-              ],
+            LanguagePairCard(
+              source: Languages.nameOf(state.source),
+              target: Languages.nameOf(state.target),
+              onTap: openSettings,
             ),
             const SizedBox(height: AppSpacing.xl),
             ProblemsSection(
@@ -130,9 +114,7 @@ class _HomeContent extends ConsumerWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.onSettings});
-
-  final VoidCallback onSettings;
+  const _Header();
 
   @override
   Widget build(BuildContext context) {
@@ -149,18 +131,13 @@ class _Header extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(Strings.greeting, style: textTheme.bodySmall),
               Semantics(
                 header: true,
                 child: Text(Strings.appName, style: textTheme.headlineMedium),
               ),
+              Text(Strings.appTagline, style: textTheme.bodySmall),
             ],
           ),
-        ),
-        IconCircleButton(
-          icon: Icons.settings_rounded,
-          semanticLabel: Strings.settingsTitle,
-          onPressed: onSettings,
         ),
       ],
     );

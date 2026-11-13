@@ -9,10 +9,11 @@ import '../../../core/widgets/section_title.dart';
 import '../application/settings_controller.dart';
 import 'language_picking.dart';
 import 'widgets/accurate_mode_card.dart';
-import 'widgets/battery_tips_card.dart';
 import 'widgets/accurate_mode_sheet.dart';
+import 'widgets/battery_tips_card.dart';
 import 'widgets/model_download_sheet.dart';
 import 'widgets/model_status_card.dart';
+import 'widgets/setting_group.dart';
 import 'widgets/setting_row.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -74,30 +75,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 const SizedBox(height: AppSpacing.xl),
                 const SectionTitle(Strings.languageSection),
                 const SizedBox(height: AppSpacing.md),
-                SettingRow(
-                  label: Strings.sourceLanguage,
-                  value: state == null ? null : Languages.nameOf(state.source),
-                  onTap: state == null
-                      ? null
-                      : () => pickLanguage(
-                          context,
-                          ref,
-                          LanguageSide.source,
-                          state,
-                        ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                SettingRow(
-                  label: Strings.targetLanguage,
-                  value: state == null ? null : Languages.nameOf(state.target),
-                  onTap: state == null
-                      ? null
-                      : () => pickLanguage(
-                          context,
-                          ref,
-                          LanguageSide.target,
-                          state,
-                        ),
+                SettingGroup(
+                  children: [
+                    SettingRow(
+                      label: Strings.sourceLanguage,
+                      value: state == null
+                          ? null
+                          : Languages.nameOf(state.source),
+                      onTap: state == null
+                          ? null
+                          : () => pickLanguage(
+                              context,
+                              ref,
+                              LanguageSide.source,
+                              state,
+                            ),
+                    ),
+                    SettingRow(
+                      label: Strings.targetLanguage,
+                      value: state == null
+                          ? null
+                          : Languages.nameOf(state.target),
+                      onTap: state == null
+                          ? null
+                          : () => pickLanguage(
+                              context,
+                              ref,
+                              LanguageSide.target,
+                              state,
+                            ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 const SectionTitle(Strings.offlineModel),
@@ -108,7 +116,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                     onDownload: () => showModelDownloadSheet(context),
                   ),
                 const SizedBox(height: AppSpacing.xl),
-                if (state != null)
+                const SectionTitle(Strings.advancedSection),
+                const SizedBox(height: AppSpacing.md),
+                if (state != null) ...[
                   AccurateModeCard(
                     enabled: state.accessibilityMode,
                     enabledInSystem: state.accessibilityEnabledInSystem,
@@ -117,7 +127,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                         .read(settingsControllerProvider.notifier)
                         .openAccessibilitySettings,
                   ),
-                const SizedBox(height: AppSpacing.xl),
+                  const SizedBox(height: AppSpacing.md),
+                ],
                 BatteryTipsCard(
                   onOpenBatterySettings: ref
                       .read(settingsControllerProvider.notifier)

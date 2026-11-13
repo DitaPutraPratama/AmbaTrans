@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/theme.dart';
+import 'press_scale.dart';
 
 /// 44 dp white round icon button with a 48 dp touch target.
 class IconCircleButton extends StatelessWidget {
@@ -23,18 +24,21 @@ class IconCircleButton extends StatelessWidget {
       label: semanticLabel,
       onTap: onPressed,
       excludeSemantics: true,
-      child: SizedBox.square(
-        dimension: 48,
-        child: Center(
-          child: Material(
-            color: colors.surface,
-            shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: onPressed,
-              child: SizedBox.square(
-                dimension: 44,
-                child: Icon(icon, size: 24, color: colors.textPrimary),
+      child: PressScale(
+        enabled: onPressed != null,
+        child: SizedBox.square(
+          dimension: 48,
+          child: Center(
+            child: Material(
+              color: colors.surface,
+              shape: const CircleBorder(),
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: onPressed,
+                child: SizedBox.square(
+                  dimension: 44,
+                  child: Icon(icon, size: 24, color: colors.textPrimary),
+                ),
               ),
             ),
           ),

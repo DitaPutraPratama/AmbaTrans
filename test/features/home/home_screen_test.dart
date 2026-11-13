@@ -1,6 +1,6 @@
 import 'package:ambatrans/core/platform/service_channel.dart';
 import 'package:ambatrans/core/strings.dart';
-import 'package:ambatrans/core/widgets/icon_circle_button.dart';
+import 'package:ambatrans/core/widgets/language_pair_card.dart';
 import 'package:ambatrans/features/settings/presentation/settings_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -117,11 +117,18 @@ void main() {
     expect(find.text(Strings.allReady), findsOneWidget);
   });
 
-  testWidgets('settings button and language cards open settings', (
+  testWidgets('header shows the name and tagline, no greeting or gear', (
     tester,
   ) async {
     await pumpHome(tester);
-    await tester.tap(find.byType(IconCircleButton));
+    expect(find.text(Strings.appName), findsOneWidget);
+    expect(find.text(Strings.appTagline), findsOneWidget);
+    expect(find.byIcon(Icons.settings_rounded), findsNothing);
+  });
+
+  testWidgets('language card opens settings', (tester) async {
+    await pumpHome(tester);
+    await tester.tap(find.byType(LanguagePairCard));
     await tester.pumpAndSettle();
     expect(find.byType(SettingsScreen), findsOneWidget);
   });

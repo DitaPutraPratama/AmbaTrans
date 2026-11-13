@@ -1,6 +1,7 @@
 /// All user-facing Flutter text (Bahasa Indonesia). Source: docs/DESIGN.md §8.
 abstract final class Strings {
   static const appName = 'AmbaTrans';
+  static const appTagline = 'Amba Translate';
 
   // Generic
   static const close = 'Tutup';
@@ -11,7 +12,6 @@ abstract final class Strings {
   static const to = 'Ke';
 
   // Home
-  static const greeting = 'Halo,';
   static const heroLabel = 'Layanan terjemahan layar';
   static const statusActive = 'Aktif';
   static const statusInactive = 'Tidak aktif';
@@ -59,6 +59,7 @@ abstract final class Strings {
   static const autoDetect = 'Deteksi otomatis';
 
   static const languageSection = 'Bahasa';
+  static const advancedSection = 'Lanjutan';
   static const sourceSheetSubtitle = 'Bahasa teks di layar';
   static const targetSheetSubtitle = 'Bahasa hasil terjemahan';
   static const searchLanguageHint = 'Cari bahasa';

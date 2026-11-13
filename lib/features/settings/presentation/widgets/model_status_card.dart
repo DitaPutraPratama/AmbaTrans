@@ -5,7 +5,7 @@ import '../../../../core/strings.dart';
 import '../../../../core/widgets/pill_button.dart';
 import '../../../../core/widgets/status_chip.dart';
 
-/// "Model offline" row: status chip, plus an "Unduh" button while models are missing.
+/// Model status chip, plus an "Unduh" button while models are missing.
 class ModelStatusCard extends StatelessWidget {
   const ModelStatusCard({
     super.key,
@@ -25,37 +25,23 @@ class ModelStatusCard extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        // Wrap: at large font scales the button drops below the chip.
+        child: Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.md,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    Strings.offlineModel,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                // Flexible: at large font scales the chip text wraps instead of overflowing.
-                Flexible(
-                  child: StatusChip(
-                    ready ? Strings.readyOffline : Strings.notDownloaded,
-                    tone: ready
-                        ? StatusChipTone.success
-                        : StatusChipTone.warning,
-                  ),
-                ),
-              ],
+            StatusChip(
+              ready ? Strings.readyOffline : Strings.notDownloaded,
+              tone: ready ? StatusChipTone.success : StatusChipTone.warning,
             ),
-            if (!ready) ...[
-              const SizedBox(height: AppSpacing.md),
+            if (!ready)
               PillButton(
                 label: Strings.download,
                 icon: Icons.download_rounded,
                 onPressed: onDownload,
               ),
-            ],
           ],
         ),
       ),

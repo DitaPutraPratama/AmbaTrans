@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/theme.dart';
+import 'press_scale.dart';
 
 enum PillButtonVariant {
   /// Solid primary fill.
@@ -54,26 +55,30 @@ class PillButton extends StatelessWidget {
       shape: const StadiumBorder(),
       textStyle: Theme.of(context).textTheme.labelLarge,
     );
-    return TextButton(
-      style: style,
-      onPressed: loading ? null : onPressed,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (loading)
-            SizedBox.square(
-              dimension: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: foreground,
-              ),
-            )
-          else if (icon != null)
-            Icon(icon, size: 20),
-          if (loading || icon != null) const SizedBox(width: AppSpacing.sm),
-          Flexible(child: Text(label, textAlign: TextAlign.center)),
-        ],
+    final active = !loading && onPressed != null;
+    return PressScale(
+      enabled: active,
+      child: TextButton(
+        style: style,
+        onPressed: loading ? null : onPressed,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (loading)
+              SizedBox.square(
+                dimension: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: foreground,
+                ),
+              )
+            else if (icon != null)
+              Icon(icon, size: 20),
+            if (loading || icon != null) const SizedBox(width: AppSpacing.sm),
+            Flexible(child: Text(label, textAlign: TextAlign.center)),
+          ],
+        ),
       ),
     );
   }
