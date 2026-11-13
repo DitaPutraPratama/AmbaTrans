@@ -8,6 +8,7 @@ import '../../../core/platform/service_channel.dart';
 import '../../../core/strings.dart';
 import '../../../core/widgets/hero_card.dart';
 import '../../../core/widgets/language_pair_card.dart';
+import '../../../core/widgets/pastel_icon_tile.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../core/widgets/status_chip.dart';
 import '../application/home_controller.dart';
@@ -120,15 +121,10 @@ class _Header extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return Row(
       children: [
-        ExcludeSemantics(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.tile),
-            child: Image.asset(
-              'assets/images/app_icon.png',
-              width: 48,
-              height: 48,
-            ),
-          ),
+        const PastelIconTile(
+          icon: Icons.translate_rounded,
+          colors: AppPastels.blue,
+          size: PastelTileSize.small,
         ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
