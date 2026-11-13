@@ -1,6 +1,5 @@
 import 'package:ambatrans/core/platform/service_channel.dart';
 import 'package:ambatrans/core/strings.dart';
-import 'package:ambatrans/core/widgets/language_pair_card.dart';
 import 'package:ambatrans/features/settings/presentation/settings_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -27,8 +26,6 @@ void main() {
     expect(find.text(Strings.start), findsOneWidget);
     expect(find.text(Strings.allReady), findsOneWidget);
     expect(find.text('Inggris → Indonesia'), findsOneWidget);
-    expect(find.text('Inggris'), findsOneWidget);
-    expect(find.text('Indonesia'), findsOneWidget);
   });
 
   testWidgets('missing overlay permission: complete-permissions flow', (
@@ -40,7 +37,8 @@ void main() {
     expect(find.text(Strings.start), findsNothing);
     expect(find.text(Strings.problemOverlay), findsOneWidget);
     await tester.tap(find.text(Strings.completePermissions));
-    expect(permissions.openOverlaySettingsCalls, 1);
+    await tester.pumpAndSettle();
+    expect(find.byType(SettingsScreen), findsOneWidget);
   });
 
   testWidgets('start and stop update the hero', (tester) async {
@@ -105,7 +103,7 @@ void main() {
     expect(find.byType(SettingsScreen), findsOneWidget);
   });
 
-  testWidgets('notification problem requests permission and clears', (
+  testWidgets('permission problems open Settings, where they are fixed', (
     tester,
   ) async {
     final permissions = FakePermissionsChannel(overlay: true);
@@ -113,18 +111,35 @@ void main() {
     expect(find.text(Strings.problemNotifications), findsOneWidget);
     await tester.tap(find.text(Strings.problemNotifications));
     await tester.pumpAndSettle();
+    expect(find.byType(SettingsScreen), findsOneWidget);
+    expect(permissions.requestNotificationsCalls, 0);
+
+    await tester.tap(
+      find.descendant(
+        of: find
+            .ancestor(
+              of: find.text(Strings.notificationsTitle),
+              matching: find.byType(Row),
+            )
+            .first,
+        matching: find.byType(Switch),
+      ),
+    );
+    await tester.pumpAndSettle();
     expect(permissions.requestNotificationsCalls, 1);
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.pumpAndSettle();
     expect(find.text(Strings.problemNotifications), findsNothing);
     expect(find.text(Strings.allReady), findsOneWidget);
   });
 
-  testWidgets('header shows the name and tagline, no greeting or gear', (
+  testWidgets('header shows the name, tagline and the settings button', (
     tester,
   ) async {
     await pumpHome(tester);
     expect(find.text(Strings.appName), findsOneWidget);
     expect(find.text(Strings.appTagline), findsOneWidget);
-    expect(find.byIcon(Icons.settings_rounded), findsNothing);
+    expect(find.byIcon(Icons.settings_rounded), findsOneWidget);
   });
 
   testWidgets(
@@ -156,7 +171,7 @@ void main() {
       models: FakeModelsChannel(downloaded: {'en', 'id', 'ja'}),
     );
     expect(find.text('Inggris → Indonesia'), findsOneWidget);
-    await tester.tap(find.byType(LanguagePairCard));
+    await tester.tap(find.byIcon(Icons.settings_rounded));
     await tester.pumpAndSettle();
     await tester.tap(find.text(Strings.targetLanguage));
     await tester.pumpAndSettle();
@@ -167,27 +182,11 @@ void main() {
     expect(find.text('Inggris → Jepang'), findsOneWidget);
   });
 
-  testWidgets('language card opens settings', (tester) async {
+  testWidgets('settings button opens settings', (tester) async {
     await pumpHome(tester);
-    await tester.tap(find.byType(LanguagePairCard));
+    await tester.tap(find.byIcon(Icons.settings_rounded));
     await tester.pumpAndSettle();
     expect(find.byType(SettingsScreen), findsOneWidget);
-  });
-
-  testWidgets('readiness tiles are exposed to accessibility', (tester) async {
-    final handle = tester.ensureSemantics();
-    await pumpHome(tester, models: FakeModelsChannel());
-    expect(
-      find.bySemanticsLabel(
-        '${Strings.tileModels}, ${Strings.tileNeedsAction}',
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.bySemanticsLabel('${Strings.tileOverlay}, ${Strings.tileReady}'),
-      findsOneWidget,
-    );
-    handle.dispose();
   });
 
   testWidgets('does not overflow at 200% font scale with all problems', (

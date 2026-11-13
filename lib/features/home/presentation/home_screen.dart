@@ -7,14 +7,13 @@ import '../../../core/languages.dart';
 import '../../../core/platform/service_channel.dart';
 import '../../../core/strings.dart';
 import '../../../core/widgets/hero_card.dart';
-import '../../../core/widgets/language_pair_card.dart';
+import '../../../core/widgets/icon_circle_button.dart';
 import '../../../core/widgets/pastel_icon_tile.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../core/widgets/status_chip.dart';
 import '../application/home_controller.dart';
 import '../application/home_state.dart';
 import 'widgets/problems_section.dart';
-import 'widgets/readiness_tiles.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -82,33 +81,21 @@ class _HomeContent extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
           children: [
-            const _Header(),
+            _Header(onSettings: openSettings),
             const SizedBox(height: AppSpacing.xl),
-            _Hero(state: state, controller: controller),
+            _Hero(
+              state: state,
+              controller: controller,
+              onSettings: openSettings,
+            ),
             if (state.startError == ServiceStartError.startFailed) ...[
               const SizedBox(height: AppSpacing.md),
               _StartErrorCard(onRetry: controller.start),
             ],
             const SizedBox(height: AppSpacing.xl),
-            ReadinessTiles(
-              state: state,
-              onOverlay: controller.openOverlaySettings,
-              onNotifications: controller.requestNotifications,
-              onModels: openSettings,
-              onAccurate: controller.openAccessibilitySettings,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            LanguagePairCard(
-              source: Languages.nameOf(state.source),
-              target: Languages.nameOf(state.target),
-              onTap: openSettings,
-            ),
-            const SizedBox(height: AppSpacing.xl),
             ProblemsSection(
               state: state,
-              onOverlay: controller.openOverlaySettings,
-              onNotifications: controller.requestNotifications,
-              onModels: openSettings,
+              onSettings: openSettings,
               onStart: controller.start,
               onCapture: controller.requestCapture,
             ),
@@ -120,7 +107,9 @@ class _HomeContent extends ConsumerWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header();
+  const _Header({required this.onSettings});
+
+  final VoidCallback onSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -145,16 +134,26 @@ class _Header extends StatelessWidget {
             ],
           ),
         ),
+        IconCircleButton(
+          icon: Icons.settings_rounded,
+          semanticLabel: Strings.settingsTitle,
+          onPressed: onSettings,
+        ),
       ],
     );
   }
 }
 
 class _Hero extends StatelessWidget {
-  const _Hero({required this.state, required this.controller});
+  const _Hero({
+    required this.state,
+    required this.controller,
+    required this.onSettings,
+  });
 
   final HomeState state;
   final HomeController controller;
+  final VoidCallback onSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +163,7 @@ class _Hero extends StatelessWidget {
         label: Strings.completePermissions,
         variant: PillButtonVariant.tonal,
         expand: true,
-        onPressed: controller.openOverlaySettings,
+        onPressed: onSettings,
       );
     } else if (state.running) {
       action = PillButton(

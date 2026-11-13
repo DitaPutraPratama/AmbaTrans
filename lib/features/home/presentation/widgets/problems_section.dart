@@ -11,17 +11,15 @@ class ProblemsSection extends StatelessWidget {
   const ProblemsSection({
     super.key,
     required this.state,
-    required this.onOverlay,
-    required this.onNotifications,
-    required this.onModels,
+    required this.onSettings,
     required this.onStart,
     required this.onCapture,
   });
 
   final HomeState state;
-  final VoidCallback onOverlay;
-  final VoidCallback onNotifications;
-  final VoidCallback onModels;
+
+  /// Opens Settings, where overlay, notification and model problems are fixed.
+  final VoidCallback onSettings;
   final VoidCallback onStart;
   final VoidCallback onCapture;
 
@@ -29,11 +27,11 @@ class ProblemsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final problems = <Widget>[
       if (!state.permissions.overlay)
-        ProblemTile(text: Strings.problemOverlay, onTap: onOverlay),
+        ProblemTile(text: Strings.problemOverlay, onTap: onSettings),
       if (!state.permissions.notifications)
-        ProblemTile(text: Strings.problemNotifications, onTap: onNotifications),
+        ProblemTile(text: Strings.problemNotifications, onTap: onSettings),
       if (!state.models.ready)
-        ProblemTile(text: Strings.problemModels, onTap: onModels),
+        ProblemTile(text: Strings.problemModels, onTap: onSettings),
       if (state.running && !state.permissions.capture)
         ProblemTile(text: Strings.problemCapture, onTap: onCapture),
       if (state.stoppedBySystem)

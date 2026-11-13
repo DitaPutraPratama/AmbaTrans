@@ -27,6 +27,7 @@ class _PressScaleState extends State<PressScale> {
       return widget.child;
     }
     return Listener(
+      behavior: HitTestBehavior.translucent,
       onPointerDown: (_) => _set(true),
       onPointerUp: (_) => _set(false),
       onPointerCancel: (_) => _set(false),

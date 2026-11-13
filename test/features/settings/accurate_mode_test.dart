@@ -7,18 +7,27 @@ import '../../fakes/fake_permissions_channel.dart';
 import '../../fakes/fake_settings_channel.dart';
 import '../../helpers/pump_home.dart';
 
+/// The Mode akurat switch (the Izin cards have switches too).
+Finder get accurateSwitch => find.descendant(
+  of: find
+      .ancestor(of: find.text(Strings.accurateMode), matching: find.byType(Row))
+      .first,
+  matching: find.byType(Switch),
+);
+
 Future<void> scrollToSwitch(WidgetTester tester) async {
+  // The list is lazy: reach the title first, then the switch next to it.
   await tester.scrollUntilVisible(
-    find.byType(Switch),
+    find.text(Strings.accurateMode),
     200,
     scrollable: find.byType(Scrollable).first,
   );
-  await tester.ensureVisible(find.byType(Switch));
+  await tester.ensureVisible(accurateSwitch);
   await tester.pumpAndSettle();
 }
 
 bool switchValue(WidgetTester tester) =>
-    tester.widget<Switch>(find.byType(Switch)).value;
+    tester.widget<Switch>(accurateSwitch).value;
 
 void main() {
   testWidgets('switch is off by default with a description', (tester) async {
@@ -41,7 +50,7 @@ void main() {
       permissions: permissions,
     );
     await scrollToSwitch(tester);
-    await tester.tap(find.byType(Switch));
+    await tester.tap(accurateSwitch);
     await tester.pumpAndSettle();
     expect(find.text(Strings.accurateSheetBody), findsOneWidget);
     expect(permissions.openAccessibilitySettingsCalls, 0);
@@ -66,7 +75,7 @@ void main() {
       permissions: permissions,
     );
     await scrollToSwitch(tester);
-    await tester.tap(find.byType(Switch));
+    await tester.tap(accurateSwitch);
     await tester.pumpAndSettle();
     await tester.tap(find.text(Strings.proceed));
     await tester.pumpAndSettle();
@@ -88,7 +97,7 @@ void main() {
       permissions: permissions,
     );
     await scrollToSwitch(tester);
-    await tester.tap(find.byType(Switch));
+    await tester.tap(accurateSwitch);
     await tester.pumpAndSettle();
     await tester.tap(find.text(Strings.proceed));
     await tester.pumpAndSettle();
@@ -112,7 +121,7 @@ void main() {
       permissions: permissions,
     );
     await scrollToSwitch(tester);
-    await tester.tap(find.byType(Switch));
+    await tester.tap(accurateSwitch);
     await tester.pumpAndSettle();
     await tester.tap(find.text(Strings.proceed));
     await tester.pumpAndSettle();
@@ -136,7 +145,7 @@ void main() {
       permissions: permissions,
     );
     await scrollToSwitch(tester);
-    await tester.tap(find.byType(Switch));
+    await tester.tap(accurateSwitch);
     await tester.pumpAndSettle();
     expect(find.text(Strings.accurateSheetBody), findsNothing);
     expect(permissions.openAccessibilitySettingsCalls, 0);
@@ -176,7 +185,7 @@ void main() {
       permissions: permissions,
     );
     await scrollToSwitch(tester);
-    await tester.tap(find.byType(Switch));
+    await tester.tap(accurateSwitch);
     await tester.pumpAndSettle();
     expect(find.text(Strings.accurateSheetBody), findsNothing);
     expect((await settings.getAll())['accessibility_mode'], isFalse);
@@ -196,9 +205,9 @@ void main() {
       permissions: permissions,
     );
     await scrollToSwitch(tester);
-    await tester.tap(find.byType(Switch)); // off
+    await tester.tap(accurateSwitch); // off
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(Switch)); // on again
+    await tester.tap(accurateSwitch); // on again
     await tester.pumpAndSettle();
     expect(find.text(Strings.accurateSheetBody), findsOneWidget);
     await tester.tap(find.text(Strings.proceed));
@@ -216,7 +225,7 @@ void main() {
     );
     await scrollToSwitch(tester);
     expect(tester.takeException(), isNull);
-    await tester.tap(find.byType(Switch));
+    await tester.tap(accurateSwitch);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });

@@ -11,11 +11,15 @@ class SettingRow extends StatelessWidget {
     required this.label,
     required this.value,
     required this.onTap,
+    this.valueColor,
   });
 
   final String label;
   final String? value;
   final VoidCallback? onTap;
+
+  /// Defaults to the primary colour; warning rows pass the warning colour.
+  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +60,7 @@ class SettingRow extends StatelessWidget {
                           value!,
                           textAlign: TextAlign.end,
                           style: textTheme.labelLarge?.copyWith(
-                            color: colors.primary,
+                            color: valueColor ?? colors.primary,
                           ),
                         ),
                       ),

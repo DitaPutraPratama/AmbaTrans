@@ -15,6 +15,8 @@ class SettingsState {
     required this.models,
     this.accessibilityMode = false,
     this.accessibilityEnabledInSystem = false,
+    this.overlayGranted = false,
+    this.notificationsGranted = false,
   });
 
   final String source;
@@ -24,6 +26,8 @@ class SettingsState {
   /// The user's choice (stored); the real service state is [accessibilityEnabledInSystem].
   final bool accessibilityMode;
   final bool accessibilityEnabledInSystem;
+  final bool overlayGranted;
+  final bool notificationsGranted;
 
   SettingsState copyWith({
     String? source,
@@ -31,6 +35,8 @@ class SettingsState {
     ModelStatus? models,
     bool? accessibilityMode,
     bool? accessibilityEnabledInSystem,
+    bool? overlayGranted,
+    bool? notificationsGranted,
   }) => SettingsState(
     source: source ?? this.source,
     target: target ?? this.target,
@@ -38,6 +44,8 @@ class SettingsState {
     accessibilityMode: accessibilityMode ?? this.accessibilityMode,
     accessibilityEnabledInSystem:
         accessibilityEnabledInSystem ?? this.accessibilityEnabledInSystem,
+    overlayGranted: overlayGranted ?? this.overlayGranted,
+    notificationsGranted: notificationsGranted ?? this.notificationsGranted,
   );
 }
 
@@ -93,6 +101,8 @@ class SettingsController extends AsyncNotifier<SettingsState> {
       accessibilityMode:
           all['accessibility_mode'] == true && permissions.accessibility,
       accessibilityEnabledInSystem: permissions.accessibility,
+      overlayGranted: permissions.overlay,
+      notificationsGranted: permissions.notifications,
     );
   }
 
@@ -117,8 +127,8 @@ class SettingsController extends AsyncNotifier<SettingsState> {
   Future<void> refreshAccessibility() async {
     final current = state.value;
     if (current == null) return;
-    final system =
-        (await ref.read(permissionsChannelProvider).getStatus()).accessibility;
+    final permissions = await ref.read(permissionsChannelProvider).getStatus();
+    final system = permissions.accessibility;
     var mode = current.accessibilityMode;
     if (_setupPending) {
       _setupPending = false;
@@ -133,8 +143,18 @@ class SettingsController extends AsyncNotifier<SettingsState> {
       current.copyWith(
         accessibilityMode: mode,
         accessibilityEnabledInSystem: system,
+        overlayGranted: permissions.overlay,
+        notificationsGranted: permissions.notifications,
       ),
     );
+  }
+
+  Future<void> openOverlaySettings() =>
+      ref.read(permissionsChannelProvider).openOverlaySettings();
+
+  Future<void> requestNotifications() async {
+    await ref.read(permissionsChannelProvider).requestNotifications();
+    await refreshAccessibility();
   }
 
   /// Turning off also switches the service off in system settings, so turning it on again
