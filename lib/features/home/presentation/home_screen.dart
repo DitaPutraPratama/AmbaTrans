@@ -70,7 +70,12 @@ class _HomeContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.read(homeControllerProvider.notifier);
-    void openSettings() => Navigator.of(context).pushNamed(AppRoutes.settings);
+    // Settings may change languages or models, so Home reloads when it comes back.
+    Future<void> openSettings() async {
+      await Navigator.of(context).pushNamed(AppRoutes.settings);
+      await controller.refresh();
+    }
+
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: AppSpacing.maxContentWidth),

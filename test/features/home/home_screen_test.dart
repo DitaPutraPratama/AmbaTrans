@@ -8,6 +8,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../fakes/fake_models_channel.dart';
 import '../../fakes/fake_permissions_channel.dart';
 import '../../fakes/fake_service_channel.dart';
+import '../../fakes/fake_settings_channel.dart';
 import '../../helpers/pump_home.dart';
 
 void main() {
@@ -145,6 +146,26 @@ void main() {
       expect(find.text(Strings.problemCapture), findsNothing);
     },
   );
+
+  testWidgets('languages changed in Settings show on Home after returning', (
+    tester,
+  ) async {
+    await pumpHome(
+      tester,
+      settings: FakeSettingsChannel({'onboarding_done': true}),
+      models: FakeModelsChannel(downloaded: {'en', 'id', 'ja'}),
+    );
+    expect(find.text('Inggris → Indonesia'), findsOneWidget);
+    await tester.tap(find.byType(LanguagePairCard));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(Strings.targetLanguage));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Jepang'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.pumpAndSettle();
+    expect(find.text('Inggris → Jepang'), findsOneWidget);
+  });
 
   testWidgets('language card opens settings', (tester) async {
     await pumpHome(tester);
