@@ -17,6 +17,18 @@ abstract final class Strings {
   static const start = 'Mulai';
   static const stop = 'Berhenti';
   static const completePermissions = 'Lengkapi izin';
+  static const tileOverlay = 'Izin tampil';
+  static const tileNotifications = 'Notifikasi';
+  static const tileModels = 'Model bahasa';
+  static const tileAccurate = 'Mode akurat';
+  static const tileReady = 'siap';
+  static const tileNeedsAction = 'perlu tindakan, ketuk untuk memperbaiki';
+  static const problemOverlay =
+      'Izin "Tampil di atas aplikasi lain" belum diberikan';
+  static const problemNotifications = 'Izin notifikasi belum diberikan';
+  static const problemModels = 'Model bahasa belum diunduh';
+  static const problemStoppedBySystem =
+      'Layanan berhenti. Tekan Mulai untuk mengaktifkan lagi.';
   static const needsAttention = 'Perlu diperhatikan';
   static const allReady = 'Semua siap. Buka aplikasi lain dan ketuk bubble.';
   static const startFailed = 'Gagal memulai layanan. Coba lagi.';

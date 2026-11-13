@@ -1,15 +1,15 @@
-import 'package:ambatrans/app/app.dart';
 import 'package:ambatrans/app/router.dart';
 import 'package:ambatrans/features/home/presentation/home_screen.dart';
 import 'package:ambatrans/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:ambatrans/features/settings/presentation/settings_screen.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../helpers/pump_home.dart';
+
 void main() {
   Future<NavigatorState> pumpRouter(WidgetTester tester) async {
-    await tester.pumpWidget(const ProviderScope(child: App()));
+    await pumpHome(tester);
     return tester.state<NavigatorState>(find.byType(Navigator));
   }
 
