@@ -1,6 +1,6 @@
 # AmbaTrans
 
-Bubble melayang yang menerjemahkan layar aplikasi apa pun. OCR dan terjemahan jalan di HP lewat Google ML Kit, offline setelah model bahasa diunduh.
+Menerjemahkan layar aplikasi apa pun. OCR dan terjemahan jalan di HP lewat Google ML Kit.
 
 ## Unduh
 
@@ -68,4 +68,4 @@ Daftar paket Dart lengkap ada di `pubspec.lock`.
 
 [Google ML Kit](https://developers.google.com/ml-kit) (Text Recognition, Translation) bukan open source, pakai [syarat layanan Google](https://developers.google.com/ml-kit/terms).
 
-Lisensi kode AmbaTrans belum ditentukan.
+AmbaTrans memakai lisensi [MIT](LICENSE).
