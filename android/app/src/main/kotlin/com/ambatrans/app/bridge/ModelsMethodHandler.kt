@@ -5,6 +5,7 @@ import com.ambatrans.app.translate.ModelDownloadException
 import com.ambatrans.app.translate.ModelManager
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -18,29 +19,36 @@ class ModelsMethodHandler(
             "getSupportedLanguages" -> result.success(supportedLanguages())
             "getSourceLanguages" -> result.success(LanguageCatalog.sourceLanguages(supportedLanguages()))
             "getStatus" -> scope.launch {
-                val status = manager.getStatus(
-                    call.argument<String>("source").orEmpty(),
-                    call.argument<String>("target").orEmpty(),
-                )
-                result.success(mapOf("ready" to status.ready, "missing" to status.missing))
+                try {
+                    val status = manager.getStatus(call.stringArg("source"), call.stringArg("target"))
+                    result.success(mapOf("ready" to status.ready, "missing" to status.missing))
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    result.error(ERROR_MODELS_FAILED, e.message, null)
+                }
             }
             "download" -> scope.launch {
                 try {
-                    manager.download(
-                        call.argument<String>("source").orEmpty(),
-                        call.argument<String>("target").orEmpty(),
-                    )
+                    manager.download(call.stringArg("source"), call.stringArg("target"))
                     result.success(null)
                 } catch (e: ModelDownloadException) {
                     result.error(ERROR_DOWNLOAD_FAILED, e.cause?.message, null)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    result.error(ERROR_MODELS_FAILED, e.message, null)
                 }
             }
             else -> result.notImplemented()
         }
     }
 
+    private fun MethodCall.stringArg(name: String): String = argument<String>(name).orEmpty()
+
     companion object {
         const val CHANNEL = "com.ambatrans.app/models"
+        const val ERROR_MODELS_FAILED = "E_MODELS_FAILED"
         const val ERROR_DOWNLOAD_FAILED = "E_MODEL_DOWNLOAD_FAILED"
     }
 }

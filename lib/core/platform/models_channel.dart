@@ -78,7 +78,7 @@ class MethodModelsChannel implements ModelsChannel {
         'target': target,
       });
     } on PlatformException catch (e) {
-      if (e.code == 'E_MODEL_DOWNLOAD_FAILED') {
+      if (e.code == 'E_MODEL_DOWNLOAD_FAILED' || e.code == 'E_MODELS_FAILED') {
         throw ModelDownloadException(e.message);
       }
       rethrow;

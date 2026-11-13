@@ -46,6 +46,19 @@ void main() {
       );
     });
 
+    test(
+      'a generic native models failure also counts as a failed download',
+      () async {
+        messenger.setMockMethodCallHandler(channel, (call) async {
+          throw PlatformException(code: 'E_MODELS_FAILED', message: 'ML Kit');
+        });
+        expect(
+          MethodModelsChannel().download('en', 'id'),
+          throwsA(isA<ModelDownloadException>()),
+        );
+      },
+    );
+
     test('other platform errors are rethrown', () async {
       messenger.setMockMethodCallHandler(channel, (call) async {
         throw PlatformException(code: 'E_OTHER');

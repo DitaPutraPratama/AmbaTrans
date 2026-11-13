@@ -31,6 +31,10 @@ android {
 
     buildTypes {
         release {
+            // Temporary: R8 removed/renamed classes that ML Kit and coroutines load reflectively, and a release
+            // build crashed on start. Re-enable with verified keep rules in T-042.
+            isMinifyEnabled = false
+            isShrinkResources = false
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")

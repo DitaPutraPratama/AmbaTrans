@@ -53,6 +53,20 @@ class ModelsMethodHandlerTest {
     }
 
     @Test
+    fun `an unexpected ML Kit failure in getStatus is reported, not thrown`() {
+        coEvery { manager.getStatus(any(), any()) } throws IllegalStateException("ML Kit not ready")
+        handler.onMethodCall(MethodCall("getStatus", pair), result)
+        verify { result.error("E_MODELS_FAILED", "ML Kit not ready", null) }
+    }
+
+    @Test
+    fun `an unexpected failure in download is reported, not thrown`() {
+        coEvery { manager.download(any(), any()) } throws IllegalStateException("boom")
+        handler.onMethodCall(MethodCall("download", pair), result)
+        verify { result.error("E_MODELS_FAILED", "boom", null) }
+    }
+
+    @Test
     fun `unknown method is not implemented`() {
         handler.onMethodCall(MethodCall("bogus", null), result)
         verify { result.notImplemented() }

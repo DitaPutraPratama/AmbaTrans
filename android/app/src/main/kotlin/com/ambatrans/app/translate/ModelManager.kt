@@ -52,7 +52,8 @@ class ModelManager(
         fun supportedLanguages(): List<String> = TranslateLanguage.getAllLanguages()
 
         fun create(): ModelManager {
-            val remote = RemoteModelManager.getInstance()
+            // Lazy: touching ML Kit must never happen while MainActivity is starting up.
+            val remote by lazy { RemoteModelManager.getInstance() }
             return ModelManager(
                 downloadedCodes = {
                     remote.getDownloadedModels(TranslateRemoteModel::class.java).await().map { it.language }.toSet()
