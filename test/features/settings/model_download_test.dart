@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ambatrans/core/strings.dart';
 import 'package:ambatrans/core/widgets/icon_circle_button.dart';
+import 'package:ambatrans/core/widgets/indeterminate_bar.dart';
 import 'package:ambatrans/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:ambatrans/features/settings/presentation/settings_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,7 +13,7 @@ import '../../fakes/fake_permissions_channel.dart';
 import '../../fakes/fake_settings_channel.dart';
 import '../../helpers/pump_home.dart';
 
-const _idleBody = 'Inggris dan Indonesia, ±60 MB. Cukup sekali.';
+const _idleBody = 'Inggris dan Indonesia, ±60 MB.';
 
 Future<void> openSheet(WidgetTester tester) async {
   await tester.tap(find.text(Strings.download));
@@ -48,7 +49,7 @@ void main() {
       expect(find.text(Strings.downloading(0)), findsOneWidget);
       await tester.pump(const Duration(seconds: 2));
       expect(find.text(Strings.downloading(2)), findsOneWidget);
-      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      expect(find.byType(IndeterminateBar), findsOneWidget);
       expect(find.text(Strings.later), findsNothing);
       final close = tester
           .widgetList<IconCircleButton>(find.byType(IconCircleButton))
@@ -117,7 +118,7 @@ void main() {
     await tester.tap(find.text('Jepang'));
     await tester.pumpAndSettle();
     expect(find.text(Strings.downloadModelTitle), findsOneWidget);
-    expect(find.text('Jepang, ±30 MB. Cukup sekali.'), findsOneWidget);
+    expect(find.text('Jepang, ±30 MB.'), findsOneWidget);
   });
 
   testWidgets('onboarding downloads the default pair', (tester) async {

@@ -36,6 +36,7 @@ class PastelIconTile extends StatelessWidget {
         ? AppRadius.tileLarge
         : AppRadius.tile;
     final dimension = size.dimension;
+    final badgeSize = dimension * 0.4;
     return SizedBox.square(
       dimension: dimension,
       child: Stack(
@@ -47,25 +48,28 @@ class PastelIconTile extends StatelessWidget {
                 color: colors.background,
                 borderRadius: BorderRadius.circular(radius),
               ),
-              child: Icon(icon, size: dimension * 0.5, color: colors.icon),
+              child: Icon(icon, size: dimension * 0.55, color: colors.icon),
             ),
           ),
           if (badge != PastelBadge.none)
             Positioned(
-              top: -4,
-              right: -4,
+              top: -6,
+              right: -6,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: badge == PastelBadge.ok ? app.success : app.warning,
                   shape: BoxShape.circle,
                   border: Border.all(color: app.surface, width: 2),
                 ),
-                child: Icon(
-                  badge == PastelBadge.ok
-                      ? Icons.check_rounded
-                      : Icons.priority_high_rounded,
-                  size: 14,
-                  color: app.onPrimary,
+                child: SizedBox.square(
+                  dimension: badgeSize,
+                  child: Icon(
+                    badge == PastelBadge.ok
+                        ? Icons.check_rounded
+                        : Icons.priority_high_rounded,
+                    size: badgeSize * 0.75,
+                    color: app.onPrimary,
+                  ),
                 ),
               ),
             ),

@@ -32,9 +32,10 @@ class SettingRow extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Row(
             children: [
-              Expanded(child: Text(label, style: textTheme.bodyMedium)),
+              Flexible(child: Text(label, style: textTheme.bodyMedium)),
               const SizedBox(width: AppSpacing.md),
-              if (value == null)
+              if (value == null) ...[
+                const Spacer(),
                 Container(
                   key: const Key('value-placeholder'),
                   width: 72,
@@ -43,9 +44,9 @@ class SettingRow extends StatelessWidget {
                     color: colors.surfaceVariant,
                     borderRadius: BorderRadius.circular(AppRadius.pill),
                   ),
-                )
-              else
-                Flexible(
+                ),
+              ] else
+                Expanded(
                   child: Text(
                     value!,
                     textAlign: TextAlign.end,

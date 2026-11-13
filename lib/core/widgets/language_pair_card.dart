@@ -38,9 +38,15 @@ class LanguagePairCard extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: _Side(Strings.from, source, textTheme)),
+                  Expanded(
+                    child: _Side(
+                      Strings.from,
+                      source,
+                      textTheme,
+                      CrossAxisAlignment.start,
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.md,
@@ -50,7 +56,14 @@ class LanguagePairCard extends StatelessWidget {
                       color: colors.textSecondary,
                     ),
                   ),
-                  Expanded(child: _Side(Strings.to, target, textTheme)),
+                  Expanded(
+                    child: _Side(
+                      Strings.to,
+                      target,
+                      textTheme,
+                      CrossAxisAlignment.end,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -62,21 +75,28 @@ class LanguagePairCard extends StatelessWidget {
 }
 
 class _Side extends StatelessWidget {
-  const _Side(this.title, this.value, this.textTheme);
+  const _Side(this.title, this.value, this.textTheme, this.align);
 
   final String title;
   final String value;
   final TextTheme textTheme;
+  final CrossAxisAlignment align;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: align,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(title, style: textTheme.bodySmall),
         const SizedBox(height: AppSpacing.xs),
-        Text(value, style: textTheme.titleMedium),
+        Text(
+          value,
+          style: textTheme.titleMedium,
+          textAlign: align == CrossAxisAlignment.end
+              ? TextAlign.end
+              : TextAlign.start,
+        ),
       ],
     );
   }

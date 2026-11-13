@@ -7,6 +7,7 @@ import '../../../../app/theme.dart';
 import '../../../../core/languages.dart';
 import '../../../../core/strings.dart';
 import '../../../../core/widgets/app_bottom_sheet.dart';
+import '../../../../core/widgets/indeterminate_bar.dart';
 import '../../../../core/widgets/pill_button.dart';
 import '../../application/model_download_controller.dart';
 import '../../application/settings_controller.dart';
@@ -73,7 +74,7 @@ class ModelDownloadSheet extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const LinearProgressIndicator(),
+            const IndeterminateBar(),
             const SizedBox(height: AppSpacing.md),
             const _ElapsedText(),
           ],

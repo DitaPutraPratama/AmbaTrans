@@ -148,7 +148,6 @@ class _ReadySummary extends ConsumerWidget {
           icon: Icons.check_rounded,
           colors: AppPastels.green,
           size: PastelTileSize.large,
-          badge: PastelBadge.ok,
         ),
         const SizedBox(height: AppSpacing.xl),
         Semantics(
