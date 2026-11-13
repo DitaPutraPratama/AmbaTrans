@@ -28,6 +28,22 @@ Cara memasang:
 
 Internet hanya dipakai untuk mengunduh model bahasa. Screenshot tidak disimpan.
 
+## Pustaka yang dipakai
+
+| Pustaka | Dipakai untuk | Lisensi |
+|---|---|---|
+| [Flutter](https://github.com/flutter/flutter) | UI | BSD-3-Clause |
+| [material_ui](https://pub.dev/packages/material_ui) | Komponen Material | BSD-3-Clause |
+| [flutter_riverpod](https://github.com/rrousselGit/riverpod) | State management | MIT |
+| [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) | Coroutine di sisi Android | Apache-2.0 |
+| [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans) | Font | SIL OFL 1.1 |
+| [ktlint](https://github.com/pinterest/ktlint) (plugin Gradle) | Lint Kotlin, hanya saat development | MIT |
+| [JUnit 4](https://junit.org/junit4/) dan [MockK](https://github.com/mockk/mockk) | Tes Kotlin, hanya saat development | EPL-1.0 dan Apache-2.0 |
+
+[Google ML Kit](https://developers.google.com/ml-kit) (Text Recognition dan Translation) dipakai untuk OCR dan terjemahan di perangkat. ML Kit bukan open source; pemakaiannya mengikuti [syarat layanan ML Kit](https://developers.google.com/ml-kit/terms).
+
+Daftar lengkap paket Dart ada di `pubspec.lock`.
+
 ## Jalankan dari source
 
 Butuh Flutter stable (Dart 3.14+), Android SDK, JDK 17+, dan HP Android dengan USB debugging. Uji di HP, bukan emulator.
