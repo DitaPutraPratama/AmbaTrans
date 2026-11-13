@@ -47,6 +47,7 @@ class _IndeterminateBarState extends State<IndeterminateBar>
                   alignment: Alignment(-1 + 2 * t, 0),
                   child: FractionallySizedBox(
                     widthFactor: 0.35,
+                    heightFactor: 1,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: colors.primary,

@@ -15,6 +15,14 @@ void main() {
           ),
         )
         .dx;
+    final segment = find.descendant(
+      of: find.byType(IndeterminateBar),
+      matching: find.byType(FractionallySizedBox),
+    );
+    expect(
+      tester.getSize(segment).height,
+      greaterThan(0),
+    ); // visible, not collapsed
     final first = segmentLeft();
     await tester.pump(const Duration(milliseconds: 450));
     final second = segmentLeft();

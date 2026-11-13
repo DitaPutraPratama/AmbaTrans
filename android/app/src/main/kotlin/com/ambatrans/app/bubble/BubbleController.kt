@@ -1,0 +1,243 @@
+package com.ambatrans.app.bubble
+
+import android.animation.ValueAnimator
+import android.content.Context
+import android.graphics.PixelFormat
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.view.Gravity
+import android.view.MotionEvent
+import android.view.View
+import android.view.WindowInsets
+import android.view.WindowManager
+import com.ambatrans.app.data.SettingsStore
+import kotlin.math.abs
+
+/** Callbacks from the bubble menu. The service decides what each one does. */
+interface BubbleActions {
+    fun onTranslate()
+
+    fun onClearTranslation()
+
+    fun onStop()
+}
+
+/**
+ * Floating bubble (F-02) plus its action menu (F-03), both `TYPE_APPLICATION_OVERLAY` windows.
+ * Must be used from the main thread.
+ */
+class BubbleController(
+    private val context: Context,
+    private val store: SettingsStore,
+    private val actions: BubbleActions,
+) {
+    private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private val handler = Handler(Looper.getMainLooper())
+    private val density = context.resources.displayMetrics.density
+    private val touchSlop = TOUCH_SLOP_DP * density
+
+    private var view: BubbleView? = null
+    private var params: WindowManager.LayoutParams? = null
+    private var menu: BubbleMenuView? = null
+    private var snapAnimator: ValueAnimator? = null
+    private var overlayActive = false
+    private val closeMenuRunnable = Runnable { closeMenu() }
+
+    val isShown: Boolean get() = view != null
+
+    fun show() {
+        if (view != null) return
+        val bubble = BubbleView(context)
+        val usable = usableBounds()
+        val size = bubble.windowSize
+        val layout = baseParams(size, size, focusable = false).apply {
+            x = BubbleGeometry.snappedX(store.bubbleEdge, size, usable)
+            y = BubbleGeometry.yFor(store.bubbleYFraction, size, usable)
+        }
+        bubble.overlayActive = overlayActive
+        bubble.setOnTouchListener { _, event -> onBubbleTouch(bubble, layout, event) }
+        windowManager.addView(bubble, layout)
+        view = bubble
+        params = layout
+    }
+
+    /** Removes the bubble and menu from screen, e.g. while capturing. Position is kept. */
+    fun hide() {
+        closeMenu()
+        snapAnimator?.cancel()
+        view?.let { runCatching { windowManager.removeView(it) } }
+        view = null
+        params = null
+    }
+
+    fun destroy() = hide()
+
+    fun setLoading(loading: Boolean) {
+        view?.loading = loading
+    }
+
+    fun setOverlayActive(active: Boolean) {
+        overlayActive = active
+        view?.overlayActive = active
+    }
+
+    private fun onBubbleTouch(bubble: BubbleView, layout: WindowManager.LayoutParams, event: MotionEvent): Boolean {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                touchDownX = event.rawX
+                touchDownY = event.rawY
+                startX = layout.x
+                startY = layout.y
+                moved = false
+                snapAnimator?.cancel()
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val dx = event.rawX - touchDownX
+                val dy = event.rawY - touchDownY
+                if (!moved && abs(dx) < touchSlop && abs(dy) < touchSlop) return true
+                if (!moved) {
+                    moved = true
+                    closeMenu()
+                    bubble.dragging = true
+                }
+                val usable = usableBounds()
+                layout.x = BubbleGeometry.clampX(startX + dx.toInt(), bubble.windowSize, usable)
+                layout.y = BubbleGeometry.clampY(startY + dy.toInt(), bubble.windowSize, usable)
+                windowManager.updateViewLayout(bubble, layout)
+            }
+            MotionEvent.ACTION_UP -> {
+                bubble.dragging = false
+                if (moved) snapToEdge(bubble, layout) else toggleMenu()
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                bubble.dragging = false
+                if (moved) snapToEdge(bubble, layout)
+            }
+        }
+        return true
+    }
+
+    private var touchDownX = 0f
+    private var touchDownY = 0f
+    private var startX = 0
+    private var startY = 0
+    private var moved = false
+
+    private fun snapToEdge(bubble: BubbleView, layout: WindowManager.LayoutParams) {
+        val usable = usableBounds()
+        val size = bubble.windowSize
+        val edge = BubbleGeometry.edgeFor(layout.x + size / 2, usable.left + usable.width)
+        val targetX = BubbleGeometry.snappedX(edge, size, usable)
+        store.set(SettingsStore.KEY_BUBBLE_EDGE, edge)
+        store.set(SettingsStore.KEY_BUBBLE_Y_FRACTION, BubbleGeometry.fractionFor(layout.y, size, usable).toDouble())
+        snapAnimator = ValueAnimator.ofInt(layout.x, targetX).apply {
+            duration = SNAP_MS
+            addUpdateListener {
+                layout.x = it.animatedValue as Int
+                if (bubble.isAttachedToWindow) windowManager.updateViewLayout(bubble, layout)
+            }
+            start()
+        }
+    }
+
+    private fun toggleMenu() {
+        if (menu != null) closeMenu() else openMenu()
+    }
+
+    private fun openMenu() {
+        val bubble = view ?: return
+        val layout = params ?: return
+        val usable = usableBounds()
+        val content = BubbleMenuView(
+            context,
+            showClear = overlayActive,
+            onTranslate = {
+                closeMenu()
+                actions.onTranslate()
+            },
+            onClear = {
+                closeMenu()
+                actions.onClearTranslation()
+            },
+            onStop = {
+                closeMenu()
+                actions.onStop()
+            },
+            onOutsideTouch = { closeMenu() },
+        )
+        val maxWidth = (BubbleMenuView.MAX_WIDTH_DP * density).toInt().coerceAtMost(usable.width)
+        content.measure(
+            View.MeasureSpec.makeMeasureSpec(maxWidth, View.MeasureSpec.AT_MOST),
+            View.MeasureSpec.makeMeasureSpec(usable.height, View.MeasureSpec.AT_MOST),
+        )
+        val (x, y) = BubbleGeometry.menuPosition(
+            bubbleX = layout.x,
+            bubbleY = layout.y,
+            bubbleSize = bubble.windowSize,
+            menuWidth = content.measuredWidth,
+            menuHeight = content.measuredHeight,
+            gap = 0,
+            usable = usable,
+        )
+        val menuParams = baseParams(content.measuredWidth, content.measuredHeight, focusable = false).apply {
+            this.x = x
+            this.y = y
+            flags = flags or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+        }
+        windowManager.addView(content, menuParams)
+        menu = content
+        handler.postDelayed(closeMenuRunnable, MENU_TIMEOUT_MS)
+    }
+
+    private fun closeMenu() {
+        handler.removeCallbacks(closeMenuRunnable)
+        menu?.let { runCatching { windowManager.removeView(it) } }
+        menu = null
+    }
+
+    private fun baseParams(width: Int, height: Int, focusable: Boolean): WindowManager.LayoutParams {
+        var flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+        if (!focusable) flags = flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        return WindowManager.LayoutParams(
+            width,
+            height,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            flags,
+            PixelFormat.TRANSLUCENT,
+        ).apply { gravity = Gravity.TOP or Gravity.START }
+    }
+
+    /** Screen area clear of status bar, navigation bar and cutout, in display coordinates. */
+    private fun usableBounds(): Bounds {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val metrics = windowManager.currentWindowMetrics
+            val insets = metrics.windowInsets.getInsetsIgnoringVisibility(
+                WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout(),
+            )
+            val b = metrics.bounds
+            return Bounds(b.left + insets.left, b.top + insets.top, b.right - insets.right, b.bottom - insets.bottom)
+        }
+        val res = context.resources
+        val display = res.displayMetrics
+        return Bounds(
+            0,
+            systemDimen("status_bar_height"),
+            display.widthPixels,
+            display.heightPixels - systemDimen("navigation_bar_height"),
+        )
+    }
+
+    private fun systemDimen(name: String): Int {
+        val id = context.resources.getIdentifier(name, "dimen", "android")
+        return if (id > 0) context.resources.getDimensionPixelSize(id) else 0
+    }
+
+    private companion object {
+        const val TOUCH_SLOP_DP = 8f
+        const val SNAP_MS = 150L
+        const val MENU_TIMEOUT_MS = 5_000L
+    }
+}

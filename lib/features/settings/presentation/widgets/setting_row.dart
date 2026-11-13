@@ -30,32 +30,43 @@ class SettingRow extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
+          // spaceBetween pins value + chevron to the right edge on every row.
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Flexible(child: Text(label, style: textTheme.bodyMedium)),
               const SizedBox(width: AppSpacing.md),
-              if (value == null) ...[
-                const Spacer(),
-                Container(
-                  key: const Key('value-placeholder'),
-                  width: 72,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    color: colors.surfaceVariant,
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                  ),
-                ),
-              ] else
-                Expanded(
-                  child: Text(
-                    value!,
-                    textAlign: TextAlign.end,
-                    style: textTheme.labelLarge?.copyWith(
-                      color: colors.primary,
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (value == null)
+                      Container(
+                        key: const Key('value-placeholder'),
+                        width: 72,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: colors.surfaceVariant,
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                        ),
+                      )
+                    else
+                      Flexible(
+                        child: Text(
+                          value!,
+                          textAlign: TextAlign.end,
+                          style: textTheme.labelLarge?.copyWith(
+                            color: colors.primary,
+                          ),
+                        ),
+                      ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: colors.textSecondary,
                     ),
-                  ),
+                  ],
                 ),
-              Icon(Icons.chevron_right_rounded, color: colors.textSecondary),
+              ),
             ],
           ),
         ),
