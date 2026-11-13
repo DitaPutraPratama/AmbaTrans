@@ -28,11 +28,10 @@ abstract final class Strings {
       'Izin "Tampil di atas aplikasi lain" belum diberikan';
   static const problemNotifications = 'Izin notifikasi belum diberikan';
   static const problemModels = 'Model bahasa belum diunduh';
-  static const problemStoppedBySystem =
-      'Layanan berhenti. Tekan Mulai untuk mengaktifkan lagi.';
+  static const problemStoppedBySystem = 'Layanan berhenti. Tekan Mulai.';
   static const needsAttention = 'Perlu diperhatikan';
-  static const allReady = 'Semua siap. Buka aplikasi lain dan ketuk bubble.';
-  static const startFailed = 'Gagal memulai layanan. Coba lagi.';
+  static const allReady = 'Semua siap. Ketuk bubble untuk menerjemahkan.';
+  static const startFailed = 'Gagal memulai layanan.';
 
   // Settings
   static const settingsTitle = 'Pengaturan';
@@ -44,13 +43,13 @@ abstract final class Strings {
   static const download = 'Unduh';
   static const tipsTitle = 'Agar bubble tidak mati';
   static const tipsBody =
-      'Beberapa ponsel menghentikan aplikasi di latar belakang untuk menghemat baterai. Izinkan AmbaTrans berjalan tanpa pembatasan baterai, dan aktifkan "Mulai otomatis" bila tersedia (Xiaomi, Oppo, Vivo).';
+      'Izinkan AmbaTrans berjalan tanpa batasan baterai agar bubble tidak mati.';
   static const tipsAction = 'Buka pengaturan baterai';
   static const accurateMode = 'Mode akurat (Aksesibilitas)';
   static const accurateModeDescription =
-      'Membaca teks dan posisinya lewat layanan Aksesibilitas agar hasil lebih akurat.';
+      'Baca teks lewat Aksesibilitas untuk hasil lebih akurat.';
   static const accurateModeNeedsSystem =
-      'Belum aktif di pengaturan Aksesibilitas. Aktifkan AmbaTrans di sana.';
+      'Aktifkan AmbaTrans di pengaturan Aksesibilitas.';
   static const accurateSheetTitle = 'Mode akurat';
   static const accurateSheetBody =
       'AmbaTrans hanya membaca teks dan posisinya di layar untuk meningkatkan akurasi. Data tidak disimpan atau dikirim, dan AmbaTrans tidak melakukan tindakan apa pun atas nama Anda.';
@@ -75,17 +74,13 @@ abstract final class Strings {
   static const openSettings = 'Buka pengaturan';
   static const permissionGranted = 'Izin diberikan';
   static const onboardingLanguageTitle = 'Pilih bahasa';
-  static const onboardingLanguageBody =
-      'Pilih bahasa teks yang ingin diterjemahkan dan bahasa hasil terjemahannya.';
+  static const onboardingLanguageBody = 'Pilih bahasa asal dan bahasa tujuan.';
   static const overlayTitle = 'Tampil di atas aplikasi lain';
-  static const overlayBody =
-      'AmbaTrans memerlukan izin ini agar bubble terjemahan dapat muncul di atas aplikasi apa pun. Aktifkan lalu kembali ke sini.';
+  static const overlayBody = 'Agar bubble bisa tampil di atas aplikasi lain.';
   static const notificationsTitle = 'Notifikasi';
-  static const notificationsBody =
-      'Notifikasi menandakan AmbaTrans aktif dan memudahkan Anda menghentikannya kapan saja.';
+  static const notificationsBody = 'Menandakan layanan sedang aktif.';
   static const readyTitle = 'Siap digunakan';
-  static const readyBody =
-      'Semua langkah selesai. Buka aplikasi lain dan ketuk bubble untuk menerjemahkan layar.';
+  static const readyBody = 'Buka aplikasi lain, lalu ketuk bubble.';
   static const startApp = 'Mulai AmbaTrans';
 
   // Validation
@@ -93,10 +88,9 @@ abstract final class Strings {
 
   // Model download
   static String downloadModelBody(String languages, int megabytes) =>
-      '$languages, ±$megabytes MB. Cukup sekali, setelah itu bisa dipakai offline.';
-  static const downloadFailed =
-      'Gagal mengunduh. Periksa koneksi internet lalu coba lagi.';
+      '$languages, ±$megabytes MB. Cukup sekali.';
+  static const downloadFailed = 'Gagal mengunduh. Periksa internet.';
   static const downloadModelTitle = 'Unduh model bahasa';
-  static const downloading = 'Mengunduh model…';
+  static String downloading(int seconds) => 'Mengunduh… $seconds dtk';
   static const later = 'Nanti saja';
 }

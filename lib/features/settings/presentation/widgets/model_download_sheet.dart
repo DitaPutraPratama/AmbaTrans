@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -73,7 +75,7 @@ class ModelDownloadSheet extends ConsumerWidget {
           children: [
             const LinearProgressIndicator(),
             const SizedBox(height: AppSpacing.md),
-            Text(Strings.downloading, style: textTheme.bodyMedium),
+            const _ElapsedText(),
           ],
         ),
         DownloadStatus.failed => DecoratedBox(
@@ -110,4 +112,39 @@ class ModelDownloadSheet extends ConsumerWidget {
     final names = codes.map(Languages.nameOf).join(' dan ');
     return Strings.downloadModelBody(names, codes.length * _megabytesPerModel);
   }
+}
+
+/// "Mengunduh… N dtk". ML Kit reports no progress, so the ticking counter is
+/// what shows the download is still alive.
+class _ElapsedText extends StatefulWidget {
+  const _ElapsedText();
+
+  @override
+  State<_ElapsedText> createState() => _ElapsedTextState();
+}
+
+class _ElapsedTextState extends State<_ElapsedText> {
+  int _seconds = 0;
+  late final Timer _timer = Timer.periodic(
+    const Duration(seconds: 1),
+    (_) => setState(() => _seconds++),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _timer; // starts the lazy timer
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Text(
+    Strings.downloading(_seconds),
+    style: Theme.of(context).textTheme.bodyMedium,
+  );
 }
