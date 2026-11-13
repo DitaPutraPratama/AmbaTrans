@@ -51,10 +51,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       await controller.setAccessibilityMode(false);
       return;
     }
-    // Explain first (S-06), then save the choice and open system settings.
+    if (ref
+            .read(settingsControllerProvider)
+            .value
+            ?.accessibilityEnabledInSystem ??
+        false) {
+      await controller.setAccessibilityMode(
+        true,
+      ); // already enabled in the system
+      return;
+    }
+    // Explain first (S-06), then open system settings; saved once the service is enabled.
     if (!await showAccurateModeSheet(context)) return;
-    await controller.setAccessibilityMode(true);
-    await controller.openAccessibilitySettings();
+    await controller.startAccessibilitySetup();
   }
 
   @override
@@ -121,11 +130,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 if (state != null) ...[
                   AccurateModeCard(
                     enabled: state.accessibilityMode,
-                    enabledInSystem: state.accessibilityEnabledInSystem,
                     onChanged: _toggleAccurate,
-                    onOpenSystemSettings: ref
-                        .read(settingsControllerProvider.notifier)
-                        .openAccessibilitySettings,
                   ),
                   const SizedBox(height: AppSpacing.md),
                 ],

@@ -54,7 +54,7 @@ void main() {
     expect((await settings.getAll())['accessibility_mode'], isFalse);
   });
 
-  testWidgets('proceeding saves the choice and opens system settings', (
+  testWidgets('proceeding opens system settings but saves nothing yet', (
     tester,
   ) async {
     final permissions = FakePermissionsChannel();
@@ -72,47 +72,106 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(permissions.openAccessibilitySettingsCalls, 1);
-    expect((await settings.getAll())['accessibility_mode'], isTrue);
-    expect(switchValue(tester), isTrue);
-    expect(find.text(Strings.accurateModeNeedsSystem), findsOneWidget);
+    expect((await settings.getAll())['accessibility_mode'], isFalse);
+    expect(switchValue(tester), isFalse);
   });
 
-  testWidgets('status follows the system when the user returns', (
+  testWidgets('backing out of system settings leaves the switch off', (
     tester,
   ) async {
     final permissions = FakePermissionsChannel();
+    final settings = FakeSettingsChannel();
     await pumpScreen(
       tester,
       const SettingsScreen(),
-      settings: FakeSettingsChannel({'accessibility_mode': true}),
+      settings: settings,
       permissions: permissions,
     );
     await scrollToSwitch(tester);
-    expect(find.text(Strings.accurateModeNeedsSystem), findsOneWidget);
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(Strings.proceed));
+    await tester.pumpAndSettle();
 
-    permissions.accessibility = true; // enabled in system settings
+    // The user comes back without enabling the service.
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
-    expect(find.text(Strings.accurateModeNeedsSystem), findsNothing);
+    expect(switchValue(tester), isFalse);
+    expect((await settings.getAll())['accessibility_mode'], isFalse);
+  });
+
+  testWidgets('enabling the service in system settings turns the switch on', (
+    tester,
+  ) async {
+    final permissions = FakePermissionsChannel();
+    final settings = FakeSettingsChannel();
+    await pumpScreen(
+      tester,
+      const SettingsScreen(),
+      settings: settings,
+      permissions: permissions,
+    );
+    await scrollToSwitch(tester);
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(Strings.proceed));
+    await tester.pumpAndSettle();
+
+    permissions.accessibility = true;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(switchValue(tester), isTrue);
+    expect((await settings.getAll())['accessibility_mode'], isTrue);
+  });
+
+  testWidgets('already enabled in the system: turning on needs no detour', (
+    tester,
+  ) async {
+    final permissions = FakePermissionsChannel(accessibility: true);
+    final settings = FakeSettingsChannel();
+    await pumpScreen(
+      tester,
+      const SettingsScreen(),
+      settings: settings,
+      permissions: permissions,
+    );
+    await scrollToSwitch(tester);
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.accurateSheetBody), findsNothing);
+    expect(permissions.openAccessibilitySettingsCalls, 0);
     expect(switchValue(tester), isTrue);
   });
 
-  testWidgets('tapping the hint opens the system settings', (tester) async {
-    final permissions = FakePermissionsChannel();
+  testWidgets('switching the service off in the system turns the mode off', (
+    tester,
+  ) async {
+    final permissions = FakePermissionsChannel(accessibility: true);
+    final settings = FakeSettingsChannel({'accessibility_mode': true});
     await pumpScreen(
       tester,
       const SettingsScreen(),
-      settings: FakeSettingsChannel({'accessibility_mode': true}),
+      settings: settings,
       permissions: permissions,
     );
     await scrollToSwitch(tester);
-    await tester.tap(find.text(Strings.accurateModeNeedsSystem));
-    expect(permissions.openAccessibilitySettingsCalls, 1);
+    expect(switchValue(tester), isTrue);
+
+    permissions.accessibility = false;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(switchValue(tester), isFalse);
+    expect((await settings.getAll())['accessibility_mode'], isFalse);
   });
 
   testWidgets('turning off saves without any prompt', (tester) async {
     final settings = FakeSettingsChannel({'accessibility_mode': true});
-    await pumpScreen(tester, const SettingsScreen(), settings: settings);
+    await pumpScreen(
+      tester,
+      const SettingsScreen(),
+      settings: settings,
+      permissions: FakePermissionsChannel(accessibility: true),
+    );
     await scrollToSwitch(tester);
     await tester.tap(find.byType(Switch));
     await tester.pumpAndSettle();
@@ -126,6 +185,7 @@ void main() {
       tester,
       const SettingsScreen(),
       settings: FakeSettingsChannel({'accessibility_mode': true}),
+      permissions: FakePermissionsChannel(accessibility: true),
       textScale: 2,
     );
     await scrollToSwitch(tester);

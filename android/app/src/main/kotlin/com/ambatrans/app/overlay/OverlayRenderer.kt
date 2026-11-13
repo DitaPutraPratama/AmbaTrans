@@ -17,8 +17,8 @@ import android.widget.TextView
 import com.ambatrans.app.pipeline.TranslatedBlock
 
 /**
- * Draws translated labels in one full-screen, touch-transparent overlay window (S-09).
- * Window alpha is 0.8: Android 12+ only forwards touches through overlays at or below that opacity.
+ * Draws translated labels in one full-screen overlay window (S-09) that swallows touches, so the page
+ * underneath cannot scroll away from its labels. The bubble sits above it and removes it.
  */
 class OverlayRenderer(private val context: Context) {
     private val windowManager = context.getSystemService(WindowManager::class.java)
@@ -31,6 +31,8 @@ class OverlayRenderer(private val context: Context) {
     fun show(blocks: List<TranslatedBlock>) {
         hide()
         val container = FrameLayout(context)
+        // Swallow touches: the labels do not follow the page, so the screen must not scroll under them.
+        container.setOnTouchListener { _, _ -> true }
         blocks.forEach { container.addView(label(it)) }
         windowManager.addView(container, windowParams())
         root = container
@@ -46,7 +48,6 @@ class OverlayRenderer(private val context: Context) {
         WindowManager.LayoutParams.MATCH_PARENT,
         WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
         PixelFormat.TRANSLUCENT,

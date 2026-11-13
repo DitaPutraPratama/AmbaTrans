@@ -48,8 +48,6 @@ abstract final class Strings {
   static const accurateMode = 'Mode akurat (Aksesibilitas)';
   static const accurateModeDescription =
       'Hasil lebih akurat lewat Aksesibilitas.';
-  static const accurateModeNeedsSystem =
-      'Aktifkan di pengaturan Aksesibilitas.';
   static const accurateSheetTitle = 'Mode akurat';
   static const accurateSheetBody =
       'AmbaTrans hanya membaca teks dan posisinya di layar. Tidak ada data yang disimpan atau dikirim, dan tidak ada tindakan atas nama Anda.';

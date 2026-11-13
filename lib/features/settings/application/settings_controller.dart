@@ -89,7 +89,9 @@ class SettingsController extends AsyncNotifier<SettingsState> {
       source: source,
       target: target,
       models: await _models(source, target),
-      accessibilityMode: all['accessibility_mode'] == true,
+      // The switch only counts as on while the system service is really enabled.
+      accessibilityMode:
+          all['accessibility_mode'] == true && permissions.accessibility,
       accessibilityEnabledInSystem: permissions.accessibility,
     );
   }
@@ -102,13 +104,36 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     }
   }
 
+  bool _setupPending = false;
+
+  /// Sends the user to system settings. The choice is saved only once the service is really
+  /// enabled (see [refreshAccessibility]), so backing out leaves the switch off.
+  Future<void> startAccessibilitySetup() async {
+    _setupPending = true;
+    await openAccessibilitySettings();
+  }
+
   /// Re-reads the system accessibility state (e.g. after returning from system settings).
   Future<void> refreshAccessibility() async {
     final current = state.value;
     if (current == null) return;
-    final permissions = await ref.read(permissionsChannelProvider).getStatus();
+    final system =
+        (await ref.read(permissionsChannelProvider).getStatus()).accessibility;
+    var mode = current.accessibilityMode;
+    if (_setupPending) {
+      _setupPending = false;
+      if (system) mode = true;
+    } else if (mode && !system) {
+      mode = false; // the user switched the service off in system settings
+    }
+    if (mode != current.accessibilityMode) {
+      await ref.read(settingsChannelProvider).set('accessibility_mode', mode);
+    }
     state = AsyncData(
-      current.copyWith(accessibilityEnabledInSystem: permissions.accessibility),
+      current.copyWith(
+        accessibilityMode: mode,
+        accessibilityEnabledInSystem: system,
+      ),
     );
   }
 
