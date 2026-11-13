@@ -22,7 +22,10 @@ void main() {
       tester,
       InfoCard(title: 'Ke', value: 'Indonesia', onTap: () {}),
     );
-    expect(find.bySemanticsLabel('Ke, Indonesia'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.byType(InfoCard)),
+      isSemantics(label: 'Ke, Indonesia', isButton: true, hasTapAction: true),
+    );
     handle.dispose();
   });
 

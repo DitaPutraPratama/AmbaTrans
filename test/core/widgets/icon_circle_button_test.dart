@@ -16,7 +16,10 @@ void main() {
         onPressed: () => taps++,
       ),
     );
-    expect(find.bySemanticsLabel('Pengaturan'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.byType(IconCircleButton)),
+      isSemantics(label: 'Pengaturan', isButton: true, hasTapAction: true),
+    );
     await tester.tap(find.byType(IconCircleButton));
     expect(taps, 1);
     handle.dispose();

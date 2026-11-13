@@ -21,6 +21,7 @@ class IconCircleButton extends StatelessWidget {
     return Semantics(
       button: true,
       label: semanticLabel,
+      onTap: onPressed,
       excludeSemantics: true,
       child: SizedBox.square(
         dimension: 48,

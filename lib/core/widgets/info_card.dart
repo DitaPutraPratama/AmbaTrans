@@ -21,6 +21,7 @@ class InfoCard extends StatelessWidget {
     return Semantics(
       button: onTap != null,
       label: '$title, $value',
+      onTap: onTap,
       excludeSemantics: true,
       child: Material(
         color: context.colors.surface,
