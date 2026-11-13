@@ -110,7 +110,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
             children: [
               StepIndicator(current: state.index, total: state.steps.length),
               const SizedBox(height: AppSpacing.xxl),
-              Expanded(child: SingleChildScrollView(child: body)),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: SizedBox(width: double.infinity, child: body),
+                ),
+              ),
               const SizedBox(height: AppSpacing.lg),
               PillButton(
                 label: primaryLabel,

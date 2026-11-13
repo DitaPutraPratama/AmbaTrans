@@ -1,3 +1,4 @@
+import 'package:ambatrans/app/theme.dart';
 import 'package:ambatrans/core/strings.dart';
 import 'package:ambatrans/core/widgets/pill_button.dart';
 import 'package:ambatrans/features/home/presentation/home_screen.dart';
@@ -111,6 +112,20 @@ void main() {
     await tapPrimary(tester, Strings.next);
     expect(find.text(Strings.readyTitle), findsOneWidget);
     expect(find.text(Strings.stepOf(3, 3)), findsOneWidget);
+  });
+
+  testWidgets('permission step content is left-aligned, not centred', (
+    tester,
+  ) async {
+    await pumpHome(
+      tester,
+      settings: FakeSettingsChannel(),
+      permissions: FakePermissionsChannel(overlay: true),
+    );
+    await tapPrimary(tester, Strings.next);
+    await tapPrimary(tester, Strings.next);
+    final left = tester.getTopLeft(find.text(Strings.notificationsTitle)).dx;
+    expect(left, AppSpacing.screenHorizontal);
   });
 
   testWidgets('notification step can be postponed', (tester) async {
