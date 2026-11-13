@@ -8,27 +8,22 @@ import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
 import android.view.MotionEvent
-import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import com.ambatrans.app.data.SettingsStore
 import kotlin.math.abs
 
-/** Callbacks from the bubble menu. The service decides what each one does. */
+/** Callbacks from the bubble. The service decides what each one does. */
 interface BubbleActions {
-    /** Short tap: start translating, or stop if a translation is running or showing. */
+    /** Short tap: translate the screen, again if a translation is already showing. */
     fun onTap()
 
-    /** Menu item: translate again, even if a translation is showing. */
-    fun onTranslate()
-
-    fun onClearTranslation()
-
-    fun onStop()
+    /** Long press: remove the bubble (stops the service). */
+    fun onLongPress()
 }
 
 /**
- * Floating bubble (F-02) plus its action menu (F-03, opened by long press), both `TYPE_APPLICATION_OVERLAY` windows.
+ * Floating bubble (F-02): drag, snap to an edge, tap to translate, long press to remove.
  * Must be used from the main thread.
  */
 class BubbleController(
@@ -43,15 +38,13 @@ class BubbleController(
 
     private var view: BubbleView? = null
     private var params: WindowManager.LayoutParams? = null
-    private var menu: BubbleMenuView? = null
     private var snapAnimator: ValueAnimator? = null
     private var overlayActive = false
-    private val closeMenuRunnable = Runnable { closeMenu() }
     private val fadeRunnable = Runnable { if (!loading) view?.fadeTo(BubbleView.FADED_ALPHA) }
     private val longPressRunnable = Runnable {
         if (!moved) {
             longPressed = true
-            openMenu()
+            actions.onLongPress()
         }
     }
     private var loading = false
@@ -78,7 +71,6 @@ class BubbleController(
 
     /** Removes the bubble and menu from screen, e.g. while capturing. Position is kept. */
     fun hide() {
-        closeMenu()
         handler.removeCallbacks(fadeRunnable)
         handler.removeCallbacks(longPressRunnable)
         snapAnimator?.cancel()
@@ -133,7 +125,6 @@ class BubbleController(
                 if (!moved) {
                     moved = true
                     handler.removeCallbacks(longPressRunnable)
-                    closeMenu()
                 }
                 val usable = usableBounds()
                 layout.x = BubbleGeometry.clampX(startX + dx.toInt(), bubble.windowSize, usable)
@@ -180,57 +171,6 @@ class BubbleController(
         }
     }
 
-    private fun openMenu() {
-        val bubble = view ?: return
-        val layout = params ?: return
-        val usable = usableBounds()
-        val content = BubbleMenuView(
-            context,
-            showClear = overlayActive,
-            onTranslate = {
-                closeMenu()
-                actions.onTranslate()
-            },
-            onClear = {
-                closeMenu()
-                actions.onClearTranslation()
-            },
-            onStop = {
-                closeMenu()
-                actions.onStop()
-            },
-            onOutsideTouch = { closeMenu() },
-        )
-        val maxWidth = (BubbleMenuView.MAX_WIDTH_DP * density).toInt().coerceAtMost(usable.width)
-        content.measure(
-            View.MeasureSpec.makeMeasureSpec(maxWidth, View.MeasureSpec.AT_MOST),
-            View.MeasureSpec.makeMeasureSpec(usable.height, View.MeasureSpec.AT_MOST),
-        )
-        val (x, y) = BubbleGeometry.menuPosition(
-            bubbleX = layout.x,
-            bubbleY = layout.y,
-            bubbleSize = bubble.windowSize,
-            menuWidth = content.measuredWidth,
-            menuHeight = content.measuredHeight,
-            gap = 0,
-            usable = usable,
-        )
-        val menuParams = baseParams(content.measuredWidth, content.measuredHeight, focusable = false).apply {
-            this.x = x
-            this.y = y
-            flags = flags or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-        }
-        windowManager.addView(content, menuParams)
-        menu = content
-        handler.postDelayed(closeMenuRunnable, MENU_TIMEOUT_MS)
-    }
-
-    private fun closeMenu() {
-        handler.removeCallbacks(closeMenuRunnable)
-        menu?.let { runCatching { windowManager.removeView(it) } }
-        menu = null
-    }
-
     private fun baseParams(width: Int, height: Int, focusable: Boolean): WindowManager.LayoutParams {
         var flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
@@ -273,7 +213,6 @@ class BubbleController(
     private companion object {
         const val TOUCH_SLOP_DP = 8f
         const val SNAP_MS = 150L
-        const val MENU_TIMEOUT_MS = 5_000L
         const val IDLE_FADE_MS = 2_000L
         const val LONG_PRESS_MS = 450L
     }

@@ -6,7 +6,7 @@ data class Bounds(val left: Int, val top: Int, val right: Int, val bottom: Int) 
     val height: Int get() = bottom - top
 }
 
-/** Position math for the bubble and its menu. All values are in pixels. */
+/** Position math for the bubble. All values are in pixels. */
 object BubbleGeometry {
     const val EDGE_LEFT = "left"
     const val EDGE_RIGHT = "right"
@@ -32,22 +32,4 @@ object BubbleGeometry {
 
     fun clampY(y: Int, size: Int, usable: Bounds): Int =
         y.coerceIn(usable.top, (usable.bottom - size).coerceAtLeast(usable.top))
-
-    /**
-     * Top-left of the menu: beside the bubble on the side facing screen centre,
-     * top-aligned with it, then clamped so it is never clipped.
-     */
-    fun menuPosition(
-        bubbleX: Int,
-        bubbleY: Int,
-        bubbleSize: Int,
-        menuWidth: Int,
-        menuHeight: Int,
-        gap: Int,
-        usable: Bounds,
-    ): Pair<Int, Int> {
-        val onLeftHalf = bubbleX + bubbleSize / 2 < (usable.left + usable.right) / 2
-        val x = if (onLeftHalf) bubbleX + bubbleSize + gap else bubbleX - gap - menuWidth
-        return clampX(x, menuWidth, usable) to clampY(bubbleY, menuHeight, usable)
-    }
 }

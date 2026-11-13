@@ -5,10 +5,7 @@
     <string name="notification_title">AmbaTrans aktif</string>
     <string name="notification_text">Ketuk bubble untuk menerjemahkan layar</string>
     <string name="notification_action_stop">Berhenti</string>
-    <string name="bubble_description">AmbaTrans, ketuk untuk membuka menu</string>
-    <string name="menu_translate">Terjemahkan layar ini</string>
-    <string name="menu_clear">Hapus terjemahan</string>
-    <string name="menu_stop">Berhenti</string>
+    <string name="bubble_description">AmbaTrans, ketuk untuk menerjemahkan</string>
     <string name="toast_capture_needed">Izin tangkap layar diperlukan</string>
     <string name="toast_screen_protected">Layar ini tidak dapat ditangkap</string>
     <string name="toast_no_text">Tidak ada teks ditemukan</string>

@@ -44,7 +44,7 @@ class OverlayService :
     private var bubble: BubbleController? = null
     private var pendingTranslate = false
     private val capture by lazy { CaptureManager(this) }
-    private val renderer by lazy { OverlayRenderer(this) }
+    private val renderer by lazy { OverlayRenderer(this, ::onScreenTouched) }
     private val recognizers by lazy { RecognizerProvider() }
     private val models by lazy { ModelManager.create() }
     private val translator by lazy { TranslationEngine.create(models) }
@@ -140,16 +140,17 @@ class OverlayService :
 
     // BubbleActions
 
-    override fun onTap() {
-        if (job?.isActive == true || renderer.isShowing) stopTranslation() else startTranslation()
+    override fun onTap() = startTranslation()
+
+    override fun onLongPress() {
+        stopSelf()
     }
 
-    override fun onTranslate() = startTranslation()
-
-    override fun onClearTranslation() = stopTranslation()
-
-    override fun onStop() {
-        stopSelf()
+    /** Any touch outside the bubble ends the translation; a running job is left alone. */
+    private fun onScreenTouched() {
+        if (job?.isActive == true) return
+        renderer.hide()
+        bubble?.setOverlayActive(false)
     }
 
     private fun startTranslation() {

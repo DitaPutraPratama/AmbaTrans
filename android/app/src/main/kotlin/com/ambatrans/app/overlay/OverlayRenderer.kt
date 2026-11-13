@@ -10,6 +10,7 @@ import android.text.TextPaint
 import android.text.TextUtils
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
@@ -17,13 +18,15 @@ import android.widget.TextView
 import com.ambatrans.app.pipeline.TranslatedBlock
 
 /**
- * Draws translated labels in one full-screen overlay window (S-09) that swallows touches, so the page
- * underneath cannot scroll away from its labels. The bubble sits above it and removes it.
+ * Draws translated labels in one full-screen, touch-transparent overlay window (S-09), so the page stays
+ * scrollable. A 1 px watcher window reports touches outside the bubble through [onOutsideTouch]; the
+ * caller removes the overlay then.
  */
-class OverlayRenderer(private val context: Context) {
+class OverlayRenderer(private val context: Context, private val onOutsideTouch: () -> Unit) {
     private val windowManager = context.getSystemService(WindowManager::class.java)
     private val density = context.resources.displayMetrics.density
     private var root: FrameLayout? = null
+    private var watcher: View? = null
 
     val isShowing: Boolean get() = root != null
 
@@ -31,16 +34,44 @@ class OverlayRenderer(private val context: Context) {
     fun show(blocks: List<TranslatedBlock>) {
         hide()
         val container = FrameLayout(context)
-        // Swallow touches: the labels do not follow the page, so the screen must not scroll under them.
-        container.setOnTouchListener { _, _ -> true }
         blocks.forEach { container.addView(label(it)) }
         windowManager.addView(container, windowParams())
         root = container
+        addWatcher()
+    }
+
+    /**
+     * A 1 px window that gets ACTION_OUTSIDE for every touch that lands elsewhere (the page being scrolled,
+     * the bubble). Touches still reach their targets. Nearly transparent, so it never counts as obscuring.
+     */
+    private fun addWatcher() {
+        val view = object : View(context) {
+            override fun onTouchEvent(event: MotionEvent): Boolean {
+                if (event.actionMasked == MotionEvent.ACTION_OUTSIDE) onOutsideTouch()
+                return false
+            }
+        }
+        val params = WindowManager.LayoutParams(
+            1,
+            1,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+            PixelFormat.TRANSLUCENT,
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            alpha = WATCHER_ALPHA
+        }
+        windowManager.addView(view, params)
+        watcher = view
     }
 
     fun hide() {
         root?.let { runCatching { windowManager.removeViewImmediate(it) } }
         root = null
+        watcher?.let { runCatching { windowManager.removeViewImmediate(it) } }
+        watcher = null
     }
 
     private fun windowParams() = WindowManager.LayoutParams(
@@ -48,6 +79,7 @@ class OverlayRenderer(private val context: Context) {
         WindowManager.LayoutParams.MATCH_PARENT,
         WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
         PixelFormat.TRANSLUCENT,
@@ -107,6 +139,7 @@ class OverlayRenderer(private val context: Context) {
 
     companion object {
         private const val WINDOW_ALPHA = 0.8f
+        private const val WATCHER_ALPHA = 0.02f
         private const val LABEL_COLOR = 0xFF424242.toInt()
         private const val PAD_H_DP = 4f
         private const val PAD_V_DP = 2f
