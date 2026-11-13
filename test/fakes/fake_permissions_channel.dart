@@ -30,6 +30,14 @@ class FakePermissionsChannel implements PermissionsChannel {
     capture: capture,
   );
 
+  int disableAccessibilityCalls = 0;
+
+  @override
+  Future<void> disableAccessibility() async {
+    disableAccessibilityCalls++;
+    accessibility = false;
+  }
+
   @override
   Future<void> requestCapture() async {
     requestCaptureCalls++;

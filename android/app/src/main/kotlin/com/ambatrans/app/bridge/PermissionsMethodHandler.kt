@@ -1,5 +1,6 @@
 package com.ambatrans.app.bridge
 
+import com.ambatrans.app.access.AccessibilityBridge
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
@@ -19,6 +20,10 @@ class PermissionsMethodHandler(
             )
             "openOverlaySettings" -> {
                 permissions.openOverlaySettings()
+                result.success(null)
+            }
+            "disableAccessibility" -> {
+                AccessibilityBridge.disable()
                 result.success(null)
             }
             "requestCapture" -> {

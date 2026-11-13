@@ -13,7 +13,7 @@ import com.ambatrans.app.pipeline.TextBlock
 class AmbaAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
-        AccessibilityBridge.attach(::readWindow)
+        AccessibilityBridge.attach(::readWindow, ::disableSelf)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {

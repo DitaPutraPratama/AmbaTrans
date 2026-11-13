@@ -44,6 +44,9 @@ abstract class PermissionsChannel {
   /// Shows the system screen-capture dialog (service must be running).
   Future<void> requestCapture();
 
+  /// Switches the Accessibility service off in system settings (no-op if it is off).
+  Future<void> disableAccessibility();
+
   /// Opens battery-optimization settings so the user can exempt the app (F-02 reliability).
   Future<void> openBatterySettings();
 }
@@ -74,6 +77,10 @@ class MethodPermissionsChannel implements PermissionsChannel {
   @override
   Future<bool> requestNotifications() async =>
       await _channel.invokeMethod<bool>('requestNotifications') ?? false;
+
+  @override
+  Future<void> disableAccessibility() =>
+      _channel.invokeMethod<void>('disableAccessibility');
 
   @override
   Future<void> requestCapture() =>

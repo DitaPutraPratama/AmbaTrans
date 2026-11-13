@@ -16,12 +16,22 @@ object AccessibilityBridge {
 
     val isAvailable: Boolean get() = reader != null
 
-    fun attach(read: () -> List<TextBlock>) {
+    @Volatile
+    private var disabler: (() -> Unit)? = null
+
+    fun attach(read: () -> List<TextBlock>, disableSelf: () -> Unit) {
         reader = read
+        disabler = disableSelf
     }
 
     fun detach() {
         reader = null
+        disabler = null
+    }
+
+    /** Switches the service off in system settings (only the service itself may do this). */
+    fun disable() {
+        disabler?.invoke()
     }
 
     fun notifyScrolled() {

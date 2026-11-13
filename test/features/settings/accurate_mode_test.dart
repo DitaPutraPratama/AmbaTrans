@@ -164,13 +164,16 @@ void main() {
     expect((await settings.getAll())['accessibility_mode'], isFalse);
   });
 
-  testWidgets('turning off saves without any prompt', (tester) async {
+  testWidgets('turning off also switches the service off in the system', (
+    tester,
+  ) async {
     final settings = FakeSettingsChannel({'accessibility_mode': true});
+    final permissions = FakePermissionsChannel(accessibility: true);
     await pumpScreen(
       tester,
       const SettingsScreen(),
       settings: settings,
-      permissions: FakePermissionsChannel(accessibility: true),
+      permissions: permissions,
     );
     await scrollToSwitch(tester);
     await tester.tap(find.byType(Switch));
@@ -178,6 +181,29 @@ void main() {
     expect(find.text(Strings.accurateSheetBody), findsNothing);
     expect((await settings.getAll())['accessibility_mode'], isFalse);
     expect(switchValue(tester), isFalse);
+    expect(permissions.disableAccessibilityCalls, 1);
+    expect(permissions.accessibility, isFalse);
+  });
+
+  testWidgets('turning on again after off goes to system settings', (
+    tester,
+  ) async {
+    final permissions = FakePermissionsChannel(accessibility: true);
+    await pumpScreen(
+      tester,
+      const SettingsScreen(),
+      settings: FakeSettingsChannel({'accessibility_mode': true}),
+      permissions: permissions,
+    );
+    await scrollToSwitch(tester);
+    await tester.tap(find.byType(Switch)); // off
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(Switch)); // on again
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.accurateSheetBody), findsOneWidget);
+    await tester.tap(find.text(Strings.proceed));
+    await tester.pumpAndSettle();
+    expect(permissions.openAccessibilitySettingsCalls, 1);
   });
 
   testWidgets('does not overflow at 200% font scale', (tester) async {

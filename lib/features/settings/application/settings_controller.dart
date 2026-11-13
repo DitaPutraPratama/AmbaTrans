@@ -137,10 +137,22 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     );
   }
 
+  /// Turning off also switches the service off in system settings, so turning it on again
+  /// goes through the system screen again.
   Future<void> setAccessibilityMode(bool enabled) async {
     final current = state.requireValue;
     await ref.read(settingsChannelProvider).set('accessibility_mode', enabled);
-    state = AsyncData(current.copyWith(accessibilityMode: enabled));
+    var system = current.accessibilityEnabledInSystem;
+    if (!enabled && system) {
+      await ref.read(permissionsChannelProvider).disableAccessibility();
+      system = false;
+    }
+    state = AsyncData(
+      current.copyWith(
+        accessibilityMode: enabled,
+        accessibilityEnabledInSystem: system,
+      ),
+    );
   }
 
   Future<void> openBatterySettings() =>
