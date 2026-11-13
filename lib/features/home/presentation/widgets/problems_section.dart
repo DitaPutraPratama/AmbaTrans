@@ -15,6 +15,7 @@ class ProblemsSection extends StatelessWidget {
     required this.onNotifications,
     required this.onModels,
     required this.onStart,
+    required this.onCapture,
   });
 
   final HomeState state;
@@ -22,6 +23,7 @@ class ProblemsSection extends StatelessWidget {
   final VoidCallback onNotifications;
   final VoidCallback onModels;
   final VoidCallback onStart;
+  final VoidCallback onCapture;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +34,8 @@ class ProblemsSection extends StatelessWidget {
         ProblemTile(text: Strings.problemNotifications, onTap: onNotifications),
       if (!state.models.ready)
         ProblemTile(text: Strings.problemModels, onTap: onModels),
+      if (state.running && !state.permissions.capture)
+        ProblemTile(text: Strings.problemCapture, onTap: onCapture),
       if (state.stoppedBySystem)
         ProblemTile(text: Strings.problemStoppedBySystem, onTap: onStart),
     ];

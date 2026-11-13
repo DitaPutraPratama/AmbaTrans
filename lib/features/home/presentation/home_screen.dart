@@ -105,6 +105,7 @@ class _HomeContent extends ConsumerWidget {
               onNotifications: controller.requestNotifications,
               onModels: openSettings,
               onStart: controller.start,
+              onCapture: controller.requestCapture,
             ),
           ],
         ),

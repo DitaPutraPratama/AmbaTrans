@@ -53,11 +53,10 @@ class BubbleView(context: Context) : View(context) {
             invalidate()
         }
 
-    var dragging = false
-        set(value) {
-            field = value
-            alpha = if (value) 1f else IDLE_ALPHA
-        }
+    /** Full opacity while touched or loading, [IDLE_ALPHA] resting, [FADED_ALPHA] after a quiet spell. */
+    fun fadeTo(target: Float) {
+        animate().alpha(target).setDuration(FADE_MS).start()
+    }
 
     init {
         setLayerType(LAYER_TYPE_SOFTWARE, null) // setShadowLayer needs software rendering
@@ -114,14 +113,17 @@ class BubbleView(context: Context) : View(context) {
         super.onDetachedFromWindow()
     }
 
-    private companion object {
-        const val BUBBLE_DP = 56f
-        const val SHADOW_DP = 8f
-        const val ICON_DP = 24f
-        const val DOT_DP = 12f
+    companion object {
         const val IDLE_ALPHA = 0.9f
-        const val SWEEP_DEGREES = 270f
-        const val FULL_TURN = 360f
-        const val SPIN_MS = 900L
+        const val FADED_ALPHA = 0.35f
+        const val ACTIVE_ALPHA = 1f
+        private const val FADE_MS = 250L
+        private const val BUBBLE_DP = 56f
+        private const val SHADOW_DP = 8f
+        private const val ICON_DP = 24f
+        private const val DOT_DP = 12f
+        private const val SWEEP_DEGREES = 270f
+        private const val FULL_TURN = 360f
+        private const val SPIN_MS = 900L
     }
 }

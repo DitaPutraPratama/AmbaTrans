@@ -6,12 +6,15 @@ class FakePermissionsChannel implements PermissionsChannel {
     this.overlay = false,
     this.notifications = false,
     this.accessibility = false,
+    this.capture = false,
     this.grantNotificationsOnRequest = true,
   });
 
   bool overlay;
   bool notifications;
   bool accessibility;
+  bool capture;
+  int requestCaptureCalls = 0;
   bool grantNotificationsOnRequest;
 
   int openOverlaySettingsCalls = 0;
@@ -24,7 +27,14 @@ class FakePermissionsChannel implements PermissionsChannel {
     overlay: overlay,
     notifications: notifications,
     accessibility: accessibility,
+    capture: capture,
   );
+
+  @override
+  Future<void> requestCapture() async {
+    requestCaptureCalls++;
+    capture = true;
+  }
 
   @override
   Future<void> openOverlaySettings() async => openOverlaySettingsCalls++;

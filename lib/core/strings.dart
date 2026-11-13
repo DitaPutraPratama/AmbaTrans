@@ -27,6 +27,7 @@ abstract final class Strings {
   static const problemOverlay =
       'Izin "Tampil di atas aplikasi lain" belum diberikan';
   static const problemNotifications = 'Izin notifikasi belum diberikan';
+  static const problemCapture = 'Izin tangkap layar belum diberikan';
   static const problemModels = 'Model bahasa belum diunduh';
   static const problemStoppedBySystem = 'Layanan berhenti. Ketuk untuk mulai.';
   static const needsAttention = 'Perlu diperhatikan';

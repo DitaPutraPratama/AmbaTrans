@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import com.ambatrans.app.capture.CaptureConsentActivity
 
 /** Thin wrapper over the platform calls behind the `permissions` channel. */
 class AndroidPermissions(private val activity: Activity) {
@@ -25,6 +26,11 @@ class AndroidPermissions(private val activity: Activity) {
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
         ).orEmpty()
         return enabled.split(':').any { it.equals(ACCESSIBILITY_COMPONENT, ignoreCase = true) }
+    }
+
+    /** Shows the system screen-capture dialog; the result goes to the running service. */
+    fun requestCapture() {
+        activity.startActivity(Intent(activity, CaptureConsentActivity::class.java))
     }
 
     fun openOverlaySettings() {

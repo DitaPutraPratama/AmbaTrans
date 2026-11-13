@@ -3,7 +3,10 @@ package com.ambatrans.app.bridge
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
-class PermissionsMethodHandler(private val permissions: AndroidPermissions) : MethodChannel.MethodCallHandler {
+class PermissionsMethodHandler(
+    private val permissions: AndroidPermissions,
+    private val captureReady: () -> Boolean = { false },
+) : MethodChannel.MethodCallHandler {
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "getStatus" -> result.success(
@@ -11,10 +14,15 @@ class PermissionsMethodHandler(private val permissions: AndroidPermissions) : Me
                     "overlay" to permissions.overlayGranted(),
                     "notifications" to permissions.notificationsGranted(),
                     "accessibility" to permissions.accessibilityEnabled(),
+                    "capture" to captureReady(),
                 ),
             )
             "openOverlaySettings" -> {
                 permissions.openOverlaySettings()
+                result.success(null)
+            }
+            "requestCapture" -> {
+                permissions.requestCapture()
                 result.success(null)
             }
             "openBatterySettings" -> {

@@ -7,7 +7,10 @@ import org.junit.Test
 
 class ServiceStateHolderTest {
     @After
-    fun reset() = ServiceStateHolder.set(false)
+    fun reset() {
+        ServiceStateHolder.set(false)
+        ServiceStateHolder.setCaptureReady(false)
+    }
 
     @Test
     fun `starts as not running and follows set`() {
@@ -16,5 +19,12 @@ class ServiceStateHolderTest {
         assertTrue(ServiceStateHolder.running.value)
         ServiceStateHolder.set(false)
         assertFalse(ServiceStateHolder.running.value)
+    }
+
+    @Test
+    fun `capture readiness is tracked separately`() {
+        assertFalse(ServiceStateHolder.captureReady.value)
+        ServiceStateHolder.setCaptureReady(true)
+        assertTrue(ServiceStateHolder.captureReady.value)
     }
 }

@@ -9,6 +9,7 @@ import com.ambatrans.app.bridge.ServiceStateStreamHandler
 import com.ambatrans.app.bridge.SettingsMethodHandler
 import com.ambatrans.app.data.SettingsStore
 import com.ambatrans.app.service.ServiceLauncher
+import com.ambatrans.app.service.ServiceStateHolder
 import com.ambatrans.app.translate.ModelManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -31,7 +32,7 @@ class MainActivity : FlutterActivity() {
             .setMethodCallHandler(SettingsMethodHandler(store))
 
         MethodChannel(messenger, PermissionsMethodHandler.CHANNEL)
-            .setMethodCallHandler(PermissionsMethodHandler(permissions))
+            .setMethodCallHandler(PermissionsMethodHandler(permissions) { ServiceStateHolder.captureReady.value })
 
         MethodChannel(messenger, ServiceMethodHandler.CHANNEL)
             .setMethodCallHandler(ServiceMethodHandler(ServiceLauncher(applicationContext)))

@@ -126,6 +126,26 @@ void main() {
     expect(find.byIcon(Icons.settings_rounded), findsNothing);
   });
 
+  testWidgets(
+    'running without a capture session lists the capture permission',
+    (tester) async {
+      final permissions = FakePermissionsChannel(
+        overlay: true,
+        notifications: true,
+      );
+      await pumpHome(tester, permissions: permissions);
+      expect(find.text(Strings.problemCapture), findsNothing); // not running
+      await tester.tap(find.text(Strings.start));
+      await tester.pumpAndSettle();
+      expect(find.text(Strings.problemCapture), findsOneWidget);
+      await tester.tap(find.text(Strings.problemCapture));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      expect(permissions.requestCaptureCalls, 1);
+      expect(find.text(Strings.problemCapture), findsNothing);
+    },
+  );
+
   testWidgets('language card opens settings', (tester) async {
     await pumpHome(tester);
     await tester.tap(find.byType(LanguagePairCard));

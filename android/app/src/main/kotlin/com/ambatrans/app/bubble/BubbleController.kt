@@ -16,6 +16,10 @@ import kotlin.math.abs
 
 /** Callbacks from the bubble menu. The service decides what each one does. */
 interface BubbleActions {
+    /** Short tap: start translating, or stop if a translation is running or showing. */
+    fun onTap()
+
+    /** Menu item: translate again, even if a translation is showing. */
     fun onTranslate()
 
     fun onClearTranslation()
@@ -24,7 +28,7 @@ interface BubbleActions {
 }
 
 /**
- * Floating bubble (F-02) plus its action menu (F-03), both `TYPE_APPLICATION_OVERLAY` windows.
+ * Floating bubble (F-02) plus its action menu (F-03, opened by long press), both `TYPE_APPLICATION_OVERLAY` windows.
  * Must be used from the main thread.
  */
 class BubbleController(
@@ -43,6 +47,15 @@ class BubbleController(
     private var snapAnimator: ValueAnimator? = null
     private var overlayActive = false
     private val closeMenuRunnable = Runnable { closeMenu() }
+    private val fadeRunnable = Runnable { if (!loading) view?.fadeTo(BubbleView.FADED_ALPHA) }
+    private val longPressRunnable = Runnable {
+        if (!moved) {
+            longPressed = true
+            openMenu()
+        }
+    }
+    private var loading = false
+    private var longPressed = false
 
     val isShown: Boolean get() = view != null
 
@@ -60,11 +73,14 @@ class BubbleController(
         windowManager.addView(bubble, layout)
         view = bubble
         params = layout
+        scheduleFade()
     }
 
     /** Removes the bubble and menu from screen, e.g. while capturing. Position is kept. */
     fun hide() {
         closeMenu()
+        handler.removeCallbacks(fadeRunnable)
+        handler.removeCallbacks(longPressRunnable)
         snapAnimator?.cancel()
         view?.let { runCatching { windowManager.removeView(it) } }
         view = null
@@ -74,7 +90,21 @@ class BubbleController(
     fun destroy() = hide()
 
     fun setLoading(loading: Boolean) {
+        this.loading = loading
         view?.loading = loading
+        if (loading) {
+            handler.removeCallbacks(fadeRunnable)
+            view?.fadeTo(BubbleView.ACTIVE_ALPHA)
+        } else {
+            scheduleFade()
+        }
+    }
+
+    /** Back to resting opacity now, faded after [IDLE_FADE_MS] without interaction. */
+    private fun scheduleFade() {
+        handler.removeCallbacks(fadeRunnable)
+        view?.fadeTo(BubbleView.IDLE_ALPHA)
+        handler.postDelayed(fadeRunnable, IDLE_FADE_MS)
     }
 
     fun setOverlayActive(active: Boolean) {
@@ -90,7 +120,11 @@ class BubbleController(
                 startX = layout.x
                 startY = layout.y
                 moved = false
+                longPressed = false
                 snapAnimator?.cancel()
+                handler.removeCallbacks(fadeRunnable)
+                bubble.fadeTo(BubbleView.ACTIVE_ALPHA)
+                handler.postDelayed(longPressRunnable, LONG_PRESS_MS)
             }
             MotionEvent.ACTION_MOVE -> {
                 val dx = event.rawX - touchDownX
@@ -98,8 +132,8 @@ class BubbleController(
                 if (!moved && abs(dx) < touchSlop && abs(dy) < touchSlop) return true
                 if (!moved) {
                     moved = true
+                    handler.removeCallbacks(longPressRunnable)
                     closeMenu()
-                    bubble.dragging = true
                 }
                 val usable = usableBounds()
                 layout.x = BubbleGeometry.clampX(startX + dx.toInt(), bubble.windowSize, usable)
@@ -107,12 +141,17 @@ class BubbleController(
                 windowManager.updateViewLayout(bubble, layout)
             }
             MotionEvent.ACTION_UP -> {
-                bubble.dragging = false
-                if (moved) snapToEdge(bubble, layout) else toggleMenu()
+                handler.removeCallbacks(longPressRunnable)
+                when {
+                    moved -> snapToEdge(bubble, layout)
+                    !longPressed -> actions.onTap()
+                }
+                if (!loading) scheduleFade()
             }
             MotionEvent.ACTION_CANCEL -> {
-                bubble.dragging = false
+                handler.removeCallbacks(longPressRunnable)
                 if (moved) snapToEdge(bubble, layout)
+                if (!loading) scheduleFade()
             }
         }
         return true
@@ -139,10 +178,6 @@ class BubbleController(
             }
             start()
         }
-    }
-
-    private fun toggleMenu() {
-        if (menu != null) closeMenu() else openMenu()
     }
 
     private fun openMenu() {
@@ -239,5 +274,7 @@ class BubbleController(
         const val TOUCH_SLOP_DP = 8f
         const val SNAP_MS = 150L
         const val MENU_TIMEOUT_MS = 5_000L
+        const val IDLE_FADE_MS = 2_000L
+        const val LONG_PRESS_MS = 450L
     }
 }

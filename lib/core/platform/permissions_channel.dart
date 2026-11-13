@@ -7,21 +7,27 @@ class PermissionStatus {
     required this.overlay,
     required this.notifications,
     required this.accessibility,
+    this.capture = false,
   });
 
   final bool overlay;
   final bool notifications;
   final bool accessibility;
 
+  /// A screen-capture session is live (needs the user's consent each session).
+  final bool capture;
+
   @override
   bool operator ==(Object other) =>
       other is PermissionStatus &&
       other.overlay == overlay &&
       other.notifications == notifications &&
-      other.accessibility == accessibility;
+      other.accessibility == accessibility &&
+      other.capture == capture;
 
   @override
-  int get hashCode => Object.hash(overlay, notifications, accessibility);
+  int get hashCode =>
+      Object.hash(overlay, notifications, accessibility, capture);
 }
 
 /// Client for the `permissions` channel (docs/ARCHITECTURE.md §6).
@@ -34,6 +40,9 @@ abstract class PermissionsChannel {
   Future<bool> requestNotifications();
 
   Future<void> openAccessibilitySettings();
+
+  /// Shows the system screen-capture dialog (service must be running).
+  Future<void> requestCapture();
 
   /// Opens battery-optimization settings so the user can exempt the app (F-02 reliability).
   Future<void> openBatterySettings();
@@ -54,6 +63,7 @@ class MethodPermissionsChannel implements PermissionsChannel {
       overlay: map?['overlay'] == true,
       notifications: map?['notifications'] == true,
       accessibility: map?['accessibility'] == true,
+      capture: map?['capture'] == true,
     );
   }
 
@@ -64,6 +74,10 @@ class MethodPermissionsChannel implements PermissionsChannel {
   @override
   Future<bool> requestNotifications() async =>
       await _channel.invokeMethod<bool>('requestNotifications') ?? false;
+
+  @override
+  Future<void> requestCapture() =>
+      _channel.invokeMethod<void>('requestCapture');
 
   @override
   Future<void> openBatterySettings() =>

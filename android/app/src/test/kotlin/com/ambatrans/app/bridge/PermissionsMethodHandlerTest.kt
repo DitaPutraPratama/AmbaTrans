@@ -20,7 +20,14 @@ class PermissionsMethodHandlerTest {
         every { permissions.accessibilityEnabled() } returns true
         handler.onMethodCall(MethodCall("getStatus", null), result)
         verify {
-            result.success(mapOf("overlay" to true, "notifications" to false, "accessibility" to true))
+            result.success(
+                mapOf(
+                    "overlay" to true,
+                    "notifications" to false,
+                    "accessibility" to true,
+                    "capture" to false,
+                ),
+            )
         }
     }
 

@@ -9,5 +9,9 @@
     <string name="menu_translate">Terjemahkan layar ini</string>
     <string name="menu_clear">Hapus terjemahan</string>
     <string name="menu_stop">Berhenti</string>
-    <string name="toast_translate_unavailable">Terjemahan belum tersedia</string>
+    <string name="toast_capture_needed">Izin tangkap layar diperlukan</string>
+    <string name="toast_screen_protected">Layar ini tidak dapat ditangkap</string>
+    <string name="toast_no_text">Tidak ada teks ditemukan</string>
+    <string name="toast_models_missing">Model bahasa belum siap</string>
+    <string name="toast_failed">Terjemahan gagal, coba lagi</string>
 </resources>

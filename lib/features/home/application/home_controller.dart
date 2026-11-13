@@ -101,6 +101,13 @@ class HomeController extends AsyncNotifier<HomeState> {
   Future<void> openAccessibilitySettings() =>
       ref.read(permissionsChannelProvider).openAccessibilitySettings();
 
+  /// Shows the capture dialog, then re-reads state once the service has taken the result.
+  Future<void> requestCapture() async {
+    await ref.read(permissionsChannelProvider).requestCapture();
+    await Future<void>.delayed(const Duration(milliseconds: 800));
+    await refresh();
+  }
+
   Future<void> requestNotifications() async {
     await ref.read(permissionsChannelProvider).requestNotifications();
     await refresh();
