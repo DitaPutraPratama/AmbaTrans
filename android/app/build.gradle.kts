@@ -58,6 +58,9 @@ dependencies {
     implementation("com.google.mlkit:text-recognition-japanese:16.0.1")
     implementation("com.google.mlkit:text-recognition-korean:16.0.1")
 
+    // ML Kit on-device translation; models are downloaded once by ModelManager (T-023).
+    implementation("com.google.mlkit:translate:17.0.3")
+
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.14.12")
 }
