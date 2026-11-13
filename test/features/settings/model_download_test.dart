@@ -73,6 +73,30 @@ void main() {
     },
   );
 
+  testWidgets('while downloading only "Batal" ends the sheet', (tester) async {
+    final gate = Completer<void>();
+    final models = FakeModelsChannel(downloadGate: gate);
+    await pumpScreen(tester, const SettingsScreen(), models: models);
+    await openSheet(tester);
+    await tester.tap(find.widgetWithText(TextButton, Strings.download).last);
+    await tester.pump();
+
+    await tester.binding.handlePopRoute(); // system back
+    await tester.pump(
+      const Duration(milliseconds: 400),
+    ); // bar animates forever
+    expect(find.text(Strings.downloadModelTitle), findsOneWidget);
+
+    await tester.tap(find.text(Strings.cancel));
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.downloadModelTitle), findsNothing);
+
+    gate.complete(); // a late result must not change anything
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.readyOffline), findsNothing);
+    expect(find.text(Strings.notDownloaded), findsOneWidget);
+  });
+
   testWidgets('failure shows an error and retry can succeed', (tester) async {
     final models = FakeModelsChannel(failDownload: true);
     await pumpScreen(tester, const SettingsScreen(), models: models);

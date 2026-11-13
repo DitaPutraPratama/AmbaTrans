@@ -10,15 +10,26 @@ fun interface Measurer {
 /** [maxLines] is [Int.MAX_VALUE] when the text fits without truncation. */
 data class Fit(val sizeSp: Float, val maxLines: Int)
 
-/** Picks a label font size: start near 70% of the box height, shrink to 8 sp, then truncate (F-07). */
+/** Picks a label font size: start near 70% of the box height, shrink to 10 sp, then truncate (F-07). */
 object FontFitter {
-    const val MIN_SP = 8f
+    const val MIN_SP = 10f
     private const val MAX_SP = 30f
     private const val START_FRACTION = 0.7f
     private const val STEP_SP = 1f
 
-    fun fit(text: String, widthPx: Int, heightPx: Int, pxPerSp: Float, measurer: Measurer): Fit {
-        var size = (heightPx * START_FRACTION / pxPerSp).coerceIn(MIN_SP, MAX_SP)
+    /** Size the text would get if it fit without shrinking. */
+    fun startSize(heightPx: Int, pxPerSp: Float): Float = (heightPx * START_FRACTION / pxPerSp).coerceIn(MIN_SP, MAX_SP)
+
+    /** [startHeightPx] sets the starting size when [heightPx] is a grown budget larger than the original box. */
+    fun fit(
+        text: String,
+        widthPx: Int,
+        heightPx: Int,
+        pxPerSp: Float,
+        measurer: Measurer,
+        startHeightPx: Int = heightPx,
+    ): Fit {
+        var size = startSize(startHeightPx, pxPerSp)
         while (true) {
             val measure = measurer.measure(text, size, widthPx)
             if (measure.heightPx <= heightPx) return Fit(size, Int.MAX_VALUE)

@@ -42,66 +42,83 @@ class ModelDownloadSheet extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final busy = status == DownloadStatus.downloading;
 
-    return AppBottomSheet(
-      icon: Icons.download_rounded,
-      iconColors: AppPastels.green,
-      title: Strings.downloadModelTitle,
-      closeLabel: Strings.close,
-      closeEnabled: !busy,
-      actions: [
-        if (status == DownloadStatus.idle)
-          PillButton(
-            label: Strings.download,
-            expand: true,
-            onPressed: download,
+    // While downloading the sheet cannot be dismissed (back, swipe, tap outside); only "Batal" ends it.
+    return PopScope(
+      canPop: !busy,
+      child: AppBottomSheet(
+        icon: Icons.download_rounded,
+        iconColors: AppPastels.green,
+        title: Strings.downloadModelTitle,
+        closeLabel: Strings.close,
+        closeEnabled: !busy,
+        actions: [
+          if (status == DownloadStatus.idle)
+            PillButton(
+              label: Strings.download,
+              expand: true,
+              onPressed: download,
+            ),
+          if (status == DownloadStatus.failed)
+            PillButton(label: Strings.retry, expand: true, onPressed: download),
+          if (busy)
+            PillButton(
+              label: Strings.cancel,
+              variant: PillButtonVariant.text,
+              expand: true,
+              onPressed: () {
+                ref.read(modelDownloadProvider.notifier).cancel();
+                // Close after the rebuild: PopScope blocks pops until busy is false.
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (context.mounted) Navigator.of(context).maybePop();
+                });
+              },
+            ),
+          if (status == DownloadStatus.idle || status == DownloadStatus.failed)
+            PillButton(
+              label: Strings.later,
+              variant: PillButtonVariant.text,
+              expand: true,
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
+        ],
+        child: switch (status) {
+          DownloadStatus.idle => Text(
+            _body(settings),
+            style: textTheme.bodyMedium,
           ),
-        if (status == DownloadStatus.failed)
-          PillButton(label: Strings.retry, expand: true, onPressed: download),
-        if (status == DownloadStatus.idle || status == DownloadStatus.failed)
-          PillButton(
-            label: Strings.later,
-            variant: PillButtonVariant.text,
-            expand: true,
-            onPressed: () => Navigator.of(context).maybePop(),
+          DownloadStatus.downloading => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const IndeterminateBar(),
+              const SizedBox(height: AppSpacing.md),
+              const _ElapsedText(),
+            ],
           ),
-      ],
-      child: switch (status) {
-        DownloadStatus.idle => Text(
-          _body(settings),
-          style: textTheme.bodyMedium,
-        ),
-        DownloadStatus.downloading => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const IndeterminateBar(),
-            const SizedBox(height: AppSpacing.md),
-            const _ElapsedText(),
-          ],
-        ),
-        DownloadStatus.failed => DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.errorBg,
-            borderRadius: BorderRadius.circular(AppRadius.card),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Text(
-              Strings.downloadFailed,
-              style: textTheme.bodyMedium?.copyWith(color: colors.error),
+          DownloadStatus.failed => DecoratedBox(
+            decoration: BoxDecoration(
+              color: colors.errorBg,
+              borderRadius: BorderRadius.circular(AppRadius.card),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Text(
+                Strings.downloadFailed,
+                style: textTheme.bodyMedium?.copyWith(color: colors.error),
+              ),
             ),
           ),
-        ),
-        DownloadStatus.done => Row(
-          children: [
-            Icon(Icons.check_circle_rounded, color: colors.success),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Text(Strings.readyOffline, style: textTheme.titleMedium),
-            ),
-          ],
-        ),
-      },
+          DownloadStatus.done => Row(
+            children: [
+              Icon(Icons.check_circle_rounded, color: colors.success),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(Strings.readyOffline, style: textTheme.titleMedium),
+              ),
+            ],
+          ),
+        },
+      ),
     );
   }
 

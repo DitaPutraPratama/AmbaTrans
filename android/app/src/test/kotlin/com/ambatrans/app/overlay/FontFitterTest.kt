@@ -31,12 +31,12 @@ class FontFitterTest {
     }
 
     @Test
-    fun `never goes below 8 sp and truncates with a line limit`() {
+    fun `never goes below the minimum size and truncates with a line limit`() {
         val text = "x".repeat(2000)
         val fit = FontFitter.fit(text, widthPx = 100, heightPx = 30, pxPerSp = 1f, measurer = wrapping)
         assertEquals(FontFitter.MIN_SP, fit.sizeSp, 0.001f)
-        // 30 px box / (8 * 1.2 = 9 px line) = 3 lines
-        assertEquals(3, fit.maxLines)
+        // 30 px box / (10 * 1.2 = 12 px line) = 2 lines
+        assertEquals(2, fit.maxLines)
     }
 
     @Test

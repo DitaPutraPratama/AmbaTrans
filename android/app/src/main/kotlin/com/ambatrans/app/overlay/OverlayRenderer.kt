@@ -65,11 +65,15 @@ class OverlayRenderer(private val context: Context) {
         val block = item.block
         val padH = (PAD_H_DP * density).toInt()
         val padV = (PAD_V_DP * density).toInt()
-        val fit = FontFitter.fit(
+        val screen = context.resources.displayMetrics
+        val fit = LabelPlacer.place(
             text = item.translated,
-            widthPx = (block.width - 2 * padH).coerceAtLeast(1),
-            heightPx = (block.height - 2 * padV).coerceAtLeast(1),
-            pxPerSp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 1f, context.resources.displayMetrics),
+            box = block,
+            screenWidth = screen.widthPixels,
+            screenHeight = screen.heightPixels,
+            padH = padH,
+            padV = padV,
+            pxPerSp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 1f, screen),
             measurer = ::measure,
         )
         return TextView(context).apply {
@@ -84,9 +88,9 @@ class OverlayRenderer(private val context: Context) {
                 setColor(LABEL_COLOR)
                 cornerRadius = CORNER_DP * density
             }
-            layoutParams = FrameLayout.LayoutParams(block.width, block.height).apply {
-                leftMargin = block.left
-                topMargin = block.top
+            layoutParams = FrameLayout.LayoutParams(fit.width, fit.height).apply {
+                leftMargin = fit.left
+                topMargin = fit.top
             }
         }
     }
