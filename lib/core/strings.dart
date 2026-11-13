@@ -54,6 +54,26 @@ abstract final class Strings {
   static const alreadyChosenAsSource = 'Sudah dipilih sebagai bahasa sumber';
   static const settingsSaveFailed = 'Pengaturan tidak dapat disimpan';
 
+  // Onboarding
+  static String stepOf(int step, int total) => 'Langkah $step dari $total';
+  static const next = 'Lanjut';
+  static const allow = 'Izinkan';
+  static const openSettings = 'Buka pengaturan';
+  static const permissionGranted = 'Izin diberikan';
+  static const onboardingLanguageTitle = 'Pilih bahasa';
+  static const onboardingLanguageBody =
+      'Pilih bahasa teks yang ingin diterjemahkan dan bahasa hasil terjemahannya.';
+  static const overlayTitle = 'Tampil di atas aplikasi lain';
+  static const overlayBody =
+      'AmbaTrans memerlukan izin ini agar bubble terjemahan dapat muncul di atas aplikasi apa pun. Aktifkan lalu kembali ke sini.';
+  static const notificationsTitle = 'Notifikasi';
+  static const notificationsBody =
+      'Notifikasi menandakan AmbaTrans aktif dan memudahkan Anda menghentikannya kapan saja.';
+  static const readyTitle = 'Siap digunakan';
+  static const readyBody =
+      'Semua langkah selesai. Buka aplikasi lain dan ketuk bubble untuk menerjemahkan layar.';
+  static const startApp = 'Mulai AmbaTrans';
+
   // Validation
   static const sameLanguage = 'Bahasa sumber dan tujuan tidak boleh sama';
 

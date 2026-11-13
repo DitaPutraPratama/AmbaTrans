@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import 'router.dart';
+import 'startup_gate.dart';
 import 'theme.dart';
 
 class App extends StatelessWidget {
@@ -13,7 +14,7 @@ class App extends StatelessWidget {
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
       routes: AppRoutes.table,
-      initialRoute: AppRoutes.initial,
+      home: const StartupGate(),
     );
   }
 }

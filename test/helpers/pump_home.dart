@@ -29,7 +29,7 @@ Future<void> pumpHome(
     ProviderScope(
       overrides: [
         settingsChannelProvider.overrideWithValue(
-          settings ?? FakeSettingsChannel(),
+          settings ?? FakeSettingsChannel({'onboarding_done': true}),
         ),
         permissionsChannelProvider.overrideWithValue(
           permissions ??

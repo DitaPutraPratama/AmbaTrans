@@ -3,14 +3,12 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/languages.dart';
-import '../../../core/platform/settings_channel.dart';
 import '../../../core/strings.dart';
-import '../../../core/widgets/app_bottom_sheet.dart';
 import '../../../core/widgets/icon_circle_button.dart';
 import '../../../core/widgets/section_title.dart';
 import '../../../core/widgets/status_chip.dart';
 import '../application/settings_controller.dart';
-import 'widgets/language_picker_sheet.dart';
+import 'language_picking.dart';
 import 'widgets/setting_row.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -39,7 +37,12 @@ class SettingsScreen extends ConsumerWidget {
                   value: state == null ? null : Languages.nameOf(state.source),
                   onTap: state == null
                       ? null
-                      : () => _pick(context, ref, LanguageSide.source, state),
+                      : () => pickLanguage(
+                          context,
+                          ref,
+                          LanguageSide.source,
+                          state,
+                        ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 SettingRow(
@@ -47,7 +50,12 @@ class SettingsScreen extends ConsumerWidget {
                   value: state == null ? null : Languages.nameOf(state.target),
                   onTap: state == null
                       ? null
-                      : () => _pick(context, ref, LanguageSide.target, state),
+                      : () => pickLanguage(
+                          context,
+                          ref,
+                          LanguageSide.target,
+                          state,
+                        ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 const SectionTitle(Strings.offlineModel),
@@ -59,38 +67,6 @@ class SettingsScreen extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _pick(
-    BuildContext context,
-    WidgetRef ref,
-    LanguageSide side,
-    SettingsState state,
-  ) async {
-    final isSource = side == LanguageSide.source;
-    final code = await showAppBottomSheet<String>(
-      context: context,
-      builder: (_) => LanguagePickerSheet(
-        side: side,
-        selected: isSource ? state.source : state.target,
-        other: isSource ? state.target : state.source,
-      ),
-    );
-    if (code == null) return;
-    try {
-      await ref
-          .read(settingsControllerProvider.notifier)
-          .setLanguage(side, code);
-    } on InvalidValueException {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text(Strings.sameLanguage)));
-    } catch (_) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text(Strings.settingsSaveFailed)));
-    }
   }
 }
 

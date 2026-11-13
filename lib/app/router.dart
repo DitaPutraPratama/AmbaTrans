@@ -9,9 +9,6 @@ abstract final class AppRoutes {
   static const home = '/home';
   static const settings = '/settings';
 
-  /// ponytail: opens Home directly; the onboarding_done redirect arrives in T-020.
-  static const initial = home;
-
   static final Map<String, WidgetBuilder> table = {
     onboarding: (_) => const OnboardingScreen(),
     home: (_) => const HomeScreen(),
