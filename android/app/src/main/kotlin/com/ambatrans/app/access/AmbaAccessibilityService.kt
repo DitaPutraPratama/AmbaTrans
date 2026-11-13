@@ -8,7 +8,7 @@ import com.ambatrans.app.pipeline.TextBlock
 
 /**
  * Optional "accurate mode" helper. It only reads on-screen text and bounds and reports scrolling;
- * it never performs gestures or actions and stores or sends nothing (CLAUDE.md).
+ * it never performs gestures or actions and stores or sends nothing.
  */
 class AmbaAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {

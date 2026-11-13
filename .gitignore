@@ -52,3 +52,9 @@ app.*.map.json
 key.properties
 *.jks
 *.keystore
+
+# Local notes and assistant files (kept on disk, not published)
+CLAUDE.md
+AGENTS.md
+.claude/
+docs/

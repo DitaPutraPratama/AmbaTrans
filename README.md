@@ -1,89 +1,113 @@
 # AmbaTrans
 
-Aplikasi Android untuk **menerjemahkan layar aplikasi apa pun**. Floating bubble tampil di atas aplikasi lain; ketuk bubble, pilih **"Terjemahkan layar ini"**, dan terjemahan muncul tepat di atas teks aslinya. Seluruh proses (OCR dan terjemahan) berjalan di perangkat dan bisa dipakai offline setelah model bahasa diunduh. Tanpa akun, tanpa server, tanpa iklan.
+Aplikasi Android untuk **menerjemahkan layar aplikasi apa pun**. Bubble melayang tampil di atas aplikasi lain; ketuk bubble dan terjemahan muncul tepat di atas teks aslinya. Pembacaan teks (OCR) dan terjemahan berjalan di perangkat dan bisa dipakai offline setelah model bahasa diunduh. Tanpa akun, tanpa server, tanpa iklan.
 
-> **Status:** tahap dokumentasi selesai; kode belum dimulai. Mulai dari `docs/TASKS.md` (T-001). Dibuat untuk pemakaian sendiri dan dibagikan gratis sebagai APK.
+## Unduh
+
+**[Unduh rilis terbaru](../../releases/latest)** → buka bagian **Assets** dan pilih APK:
+
+| File | Untuk |
+|---|---|
+| `app-arm64-v8a-release.apk` | Hampir semua ponsel Android sekarang (64-bit). **Pilih ini bila ragu.** |
+| `app-armeabi-v7a-release.apk` | Ponsel lama 32-bit |
+| `app-x86_64-release.apk` | Emulator / perangkat x86 |
+
+Syarat: Android 8.0 (API 26) atau lebih baru.
+
+**Memasang**
+1. Unduh APK ke ponsel, lalu ketuk berkasnya.
+2. Bila diminta, izinkan **Instal dari sumber tidak dikenal** untuk aplikasi yang dipakai membuka berkas (browser atau pengelola file). Jika Play Protect memperingatkan, pilih **Tetap instal**.
+3. Buka AmbaTrans dan ikuti panduan awal: pilih bahasa, unduh model bahasa, beri izin **Tampil di atas aplikasi lain** dan **Notifikasi**.
+4. Tekan **Mulai**, buka aplikasi lain, lalu ketuk bubble.
+
+Memperbarui: pasang APK versi baru di atas yang lama; data tetap ada.
 
 ## Fitur
-- Floating bubble + menu aksi di atas aplikasi lain
-- Tangkap layar → baca teks (OCR) → terjemahkan → overlay per blok teks
-- Pilih bahasa sumber dan tujuan (default: Inggris → Indonesia)
-- Terjemahan offline lewat ML Kit (model diunduh sekali, ±30 MB per bahasa)
-- Mode akurat opsional lewat layanan Aksesibilitas (hanya membaca teks dan posisinya)
+- Bubble melayang yang bisa digeser dan menempel ke tepi layar; memudar bila tidak disentuh
+- Ketuk bubble untuk menerjemahkan layar; tekan lama untuk menghapus bubble
+- Hasil terjemahan tampil per baris teks, tepat di atas teks aslinya
+- Pilih bahasa sumber dan tujuan (default Inggris → Indonesia)
+- Terjemahan offline lewat Google ML Kit (model diunduh sekali, ±30 MB per bahasa)
+- Mode akurat opsional lewat layanan Aksesibilitas (hanya membaca teks dan posisinya di layar)
 
-Rincian lengkap dan acceptance criteria ada di `docs/PRD.md`.
+## Cara memakai
+- **Mulai / Berhenti** ada di layar utama. Tombol pengaturan di pojok kanan atas.
+- Saat pertama kali menerjemahkan, Android meminta izin tangkap layar; pilih **seluruh layar**.
+- Terjemahan hilang saat kamu menyentuh layar di luar bubble. Ketuk bubble lagi untuk menerjemahkan ulang.
+- Bagian **Perlu diperhatikan** di layar utama menunjukkan izin atau model yang masih kurang; ketuk untuk membukanya di Pengaturan.
 
-## Persyaratan
-- Ponsel: Android 8.0+ (API 26+), arm64. Uji overlay dan screen capture di **perangkat fisik** (emulator hanya untuk UI Flutter).
-- Komputer pengembangan: Ubuntu 20.04 LTS atau lebih baru (64-bit), minimal 4 core CPU, 8 GB RAM, 11 GB disk kosong (disarankan 8 core, 16 GB RAM, 60 GB disk).
-- Perangkat lunak: Flutter SDK (stable), Android Studio versi lengkap (2024.1.1 Koala atau lebih baru), Android SDK, dan kabel USB. JDK memakai bawaan Android Studio; pasang JDK terpisah hanya jika `flutter doctor` memintanya.
+## Izin dan privasi
+| Izin | Dipakai untuk |
+|---|---|
+| Tampil di atas aplikasi lain | Bubble dan hasil terjemahan |
+| Notifikasi / layanan latar depan | Menjaga bubble tetap hidup |
+| Tangkap layar (diminta sistem) | Mengambil gambar layar untuk dibaca |
+| Internet | **Hanya** mengunduh model bahasa ML Kit |
+| Aksesibilitas (opsional) | Membaca teks dan posisinya agar hasil lebih akurat; tidak bisa mengetuk atau melakukan gestur |
 
-## Menyiapkan lingkungan di Ubuntu
-1. **Paket sistem**
-   ```bash
-   sudo apt-get update -y && sudo apt-get upgrade -y
-   sudo apt-get install -y curl git unzip xz-utils zip libglu1-mesa
-   sudo apt-get install libc6:amd64 libstdc++6:amd64 lib32z1 libbz2-1.0:amd64
-   ```
-   Jika `flutter doctor` menyarankan versi paket lain, ikuti sarannya.
-2. **Android Studio** — unduh versi Linux dari <https://developer.android.com/studio>, ekstrak, jalankan `bin/studio.sh`, ikuti wizard. Di **Tools → SDK Manager** pasang:
-   - SDK Platforms: Android API 35.0.2 (sesuai panduan Flutter saat ini)
-   - SDK Tools: Android SDK Command-line Tools, Build-Tools, Platform-Tools (Emulator opsional)
-3. **Flutter SDK** — unduh bundel stable `.tar.xz` dari <https://docs.flutter.dev/install/archive>, lalu:
-   ```bash
-   mkdir -p ~/development
-   tar -xf ~/Downloads/<berkas-flutter>.tar.xz -C ~/development/
-   echo 'export PATH="$HOME/development/flutter/bin:$PATH"' >> ~/.bashrc
-   ```
-   Buka terminal baru (di Ubuntu terminal biasa membaca `~/.bashrc`).
-4. **Lisensi dan pengecekan**
-   ```bash
-   flutter doctor --android-licenses
-   flutter doctor
-   ```
-   Peringatan Chrome dan Linux toolchain boleh diabaikan (kita hanya membangun untuk Android).
-5. **Perangkat fisik** — aktifkan *Opsi pengembang* (ketuk "Nomor versi/MIUI/OS" 7 kali) → **USB debugging**, sambungkan kabel, setujui dialog "Izinkan debugging USB", lalu cek `flutter devices`.
-   - Xiaomi/Redmi/POCO: aktifkan juga "Instal via USB" dan "USB debugging (Pengaturan keamanan)" di Opsi pengembang.
-   - Jika perangkat tidak terdeteksi (`no permissions`): `sudo apt install android-sdk-platform-tools-common`, cabut dan colok ulang kabel.
-6. **Editor** — Android Studio dengan plugin Flutter dan Dart, atau VS Code 1.86+ dengan ekstensi Flutter.
+Screenshot hanya ada di memori dan dibuang setelah dibaca; tidak disimpan ke penyimpanan. Tidak ada analytics, iklan, atau akun.
 
-## Instalasi (pengembangan)
+## Pengembangan
+
+### Persyaratan
+- [Flutter](https://docs.flutter.dev/install) stable (Dart 3.14 atau lebih baru)
+- Android Studio (membawa JDK 17+ dan Android SDK) atau JDK 17+ dan Android SDK terpisah
+- Ponsel Android 8.0+ dengan **USB debugging** aktif. Uji overlay dan tangkap layar di **perangkat fisik**; emulator tidak andal untuk itu.
+
+Pastikan `flutter doctor` tidak melaporkan masalah pada bagian Android.
+
+### Ambil dan jalankan
 ```bash
+git clone <url-repo-ini>
+cd <folder-hasil-clone>
 flutter pub get
+flutter devices          # ponsel harus terdaftar
+flutter run              # pasang dan jalankan di ponsel, dengan hot reload
 ```
+Pertama kali, Gradle mengunduh dependensi dan build bisa memakan beberapa menit.
 
-## Menjalankan
+### Tes dan lint
 ```bash
-flutter run                      # perangkat fisik Android
-flutter test                     # test Dart
-cd android && ./gradlew testDebugUnitTest   # test Kotlin
-flutter analyze && dart format --set-exit-if-changed .   # lint
-```
+flutter test                                   # tes Dart
+flutter analyze && dart format --set-exit-if-changed .
 
-## Build APK
+cd android
+./gradlew testDebugUnitTest                    # tes Kotlin
+./gradlew ktlintCheck lintDebug                # lint Kotlin dan Android
+```
+Perintah Gradle butuh `JAVA_HOME`; jika belum diatur, arahkan ke JDK Android Studio, misalnya `export JAVA_HOME=/path/ke/android-studio/jbr`.
+
+### Build APK rilis
 ```bash
 flutter build apk --release --split-per-abi
 ```
-Penandatanganan memakai keystore lokal (lihat `.env.example`; jangan commit keystore).
+Hasilnya ada di `build/app/outputs/flutter-apk/` (satu APK per arsitektur).
 
-## Memasang APK
-1. Unduh APK (arm64) ke ponsel dan izinkan instal dari sumber tidak dikenal untuk aplikasi yang dipakai membukanya.
-2. Buka AmbaTrans dan ikuti onboarding: pilih bahasa, beri izin "Tampil di atas aplikasi lain" dan notifikasi.
-3. Tekan **Mulai**, buka aplikasi lain, lalu ketuk bubble.
-4. Saat pertama kali menerjemahkan, setujui dialog tangkap layar dan pilih **seluruh layar**.
+Tanpa konfigurasi tambahan, APK rilis ditandatangani dengan kunci debug. Untuk menandatangani dengan kunci sendiri, buat keystore dan berkas `android/key.properties` (sudah masuk `.gitignore`, jangan di-commit):
+```properties
+storeFile=/path/ke/keystore.jks
+storePassword=...
+keyAlias=...
+keyPassword=...
+```
+Simpan keystore baik-baik: pembaruan aplikasi hanya bisa dipasang bila ditandatangani dengan kunci yang sama.
 
-## Privasi
-Screenshot dan hasil OCR tidak disimpan. Satu-satunya trafik jaringan adalah unduhan model bahasa oleh ML Kit. Tidak ada analytics atau iklan.
+### Struktur proyek
+```
+lib/                      UI Flutter (Home, Onboarding, Pengaturan), tema, channel ke native
+  app/  core/  features/
+android/app/src/main/kotlin/com/ambatrans/app/
+  bubble/   bubble melayang
+  capture/  tangkap layar (MediaProjection)
+  ocr/      pembacaan teks (ML Kit)
+  translate/ terjemahan dan model offline (ML Kit)
+  overlay/  tampilan hasil terjemahan
+  access/   layanan Aksesibilitas opsional
+  pipeline/ alur tangkap → baca → terjemah → tampil
+  service/  foreground service
+  bridge/   handler MethodChannel / EventChannel
+test/                     tes Dart
+```
 
-## Dokumentasi
-| Dokumen | Isi |
-|---|---|
-| [`CLAUDE.md`](CLAUDE.md) | Panduan kerja untuk Claude Code |
-| [`docs/PRD.md`](docs/PRD.md) | Produk, fitur, acceptance criteria, risiko |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Arsitektur, komponen, kontrak channel, testing |
-| [`docs/DATABASE.md`](docs/DATABASE.md) | Penyimpanan lokal (preferensi) |
-| [`docs/API.md`](docs/API.md) | Penjelasan bahwa tidak ada API jaringan |
-| [`docs/DESIGN.md`](docs/DESIGN.md) | Layar, token desain, komponen UI |
-| [`docs/TASKS.md`](docs/TASKS.md) | Daftar tugas T-001 … T-045 |
-| [`docs/PROGRESS.md`](docs/PROGRESS.md) | Status, pengukuran, checklist uji, log sesi |
-| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Catatan keputusan (ADR) |
+## Lisensi
+Font Plus Jakarta Sans memakai lisensi SIL OFL (`assets/fonts/OFL.txt`). Lisensi kode proyek ini belum ditentukan.
