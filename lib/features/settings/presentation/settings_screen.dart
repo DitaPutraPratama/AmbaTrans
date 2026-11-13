@@ -8,15 +8,55 @@ import '../../../core/widgets/icon_circle_button.dart';
 import '../../../core/widgets/section_title.dart';
 import '../application/settings_controller.dart';
 import 'language_picking.dart';
+import 'widgets/accurate_mode_card.dart';
+import 'widgets/accurate_mode_sheet.dart';
 import 'widgets/model_download_sheet.dart';
 import 'widgets/model_status_card.dart';
 import 'widgets/setting_row.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // The user may have toggled the Accessibility service in system settings.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(settingsControllerProvider.notifier).refreshAccessibility();
+    }
+  }
+
+  Future<void> _toggleAccurate(bool enable) async {
+    final controller = ref.read(settingsControllerProvider.notifier);
+    if (!enable) {
+      await controller.setAccessibilityMode(false);
+      return;
+    }
+    // Explain first (S-06), then save the choice and open system settings.
+    if (!await showAccurateModeSheet(context)) return;
+    await controller.setAccessibilityMode(true);
+    await controller.openAccessibilitySettings();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final settings = ref.watch(settingsControllerProvider);
     final state = settings.value;
     return Scaffold(
@@ -65,6 +105,16 @@ class SettingsScreen extends ConsumerWidget {
                   ModelStatusCard(
                     ready: state.models.ready,
                     onDownload: () => showModelDownloadSheet(context),
+                  ),
+                const SizedBox(height: AppSpacing.xl),
+                if (state != null)
+                  AccurateModeCard(
+                    enabled: state.accessibilityMode,
+                    enabledInSystem: state.accessibilityEnabledInSystem,
+                    onChanged: _toggleAccurate,
+                    onOpenSystemSettings: ref
+                        .read(settingsControllerProvider.notifier)
+                        .openAccessibilitySettings,
                   ),
               ],
             ),

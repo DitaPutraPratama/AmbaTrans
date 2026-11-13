@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../fakes/fake_models_channel.dart';
+import '../../fakes/fake_permissions_channel.dart';
 import '../../fakes/fake_settings_channel.dart';
 import '../../helpers/pump_home.dart';
 
@@ -151,6 +152,9 @@ void main() {
           settingsChannelProvider.overrideWithValue(settings),
           modelsChannelProvider.overrideWithValue(
             FakeModelsChannel(downloaded: {'en', 'id'}),
+          ),
+          permissionsChannelProvider.overrideWithValue(
+            FakePermissionsChannel(),
           ),
         ],
       );

@@ -13,20 +13,31 @@ class SettingsState {
     required this.source,
     required this.target,
     required this.models,
+    this.accessibilityMode = false,
+    this.accessibilityEnabledInSystem = false,
   });
 
   final String source;
   final String target;
   final ModelStatus models;
 
+  /// The user's choice (stored); the real service state is [accessibilityEnabledInSystem].
+  final bool accessibilityMode;
+  final bool accessibilityEnabledInSystem;
+
   SettingsState copyWith({
     String? source,
     String? target,
     ModelStatus? models,
+    bool? accessibilityMode,
+    bool? accessibilityEnabledInSystem,
   }) => SettingsState(
     source: source ?? this.source,
     target: target ?? this.target,
     models: models ?? this.models,
+    accessibilityMode: accessibilityMode ?? this.accessibilityMode,
+    accessibilityEnabledInSystem:
+        accessibilityEnabledInSystem ?? this.accessibilityEnabledInSystem,
   );
 }
 
@@ -73,10 +84,13 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     final all = await ref.read(settingsChannelProvider).getAll();
     final source = all['source_lang'] as String? ?? 'en';
     final target = all['target_lang'] as String? ?? 'id';
+    final permissions = await ref.read(permissionsChannelProvider).getStatus();
     return SettingsState(
       source: source,
       target: target,
       models: await _models(source, target),
+      accessibilityMode: all['accessibility_mode'] == true,
+      accessibilityEnabledInSystem: permissions.accessibility,
     );
   }
 
@@ -87,6 +101,25 @@ class SettingsController extends AsyncNotifier<SettingsState> {
       return const ModelStatus(ready: false, missing: []);
     }
   }
+
+  /// Re-reads the system accessibility state (e.g. after returning from system settings).
+  Future<void> refreshAccessibility() async {
+    final current = state.value;
+    if (current == null) return;
+    final permissions = await ref.read(permissionsChannelProvider).getStatus();
+    state = AsyncData(
+      current.copyWith(accessibilityEnabledInSystem: permissions.accessibility),
+    );
+  }
+
+  Future<void> setAccessibilityMode(bool enabled) async {
+    final current = state.requireValue;
+    await ref.read(settingsChannelProvider).set('accessibility_mode', enabled);
+    state = AsyncData(current.copyWith(accessibilityMode: enabled));
+  }
+
+  Future<void> openAccessibilitySettings() =>
+      ref.read(permissionsChannelProvider).openAccessibilitySettings();
 
   Future<void> refreshModels() async {
     final current = state.value;

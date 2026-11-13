@@ -54,6 +54,7 @@ Future<void> pumpScreen(
   Widget screen, {
   FakeSettingsChannel? settings,
   FakeModelsChannel? models,
+  FakePermissionsChannel? permissions,
   double textScale = 1.0,
   bool settle = true,
 }) async {
@@ -70,6 +71,9 @@ Future<void> pumpScreen(
         ),
         modelsChannelProvider.overrideWithValue(
           models ?? FakeModelsChannel(downloaded: {'en', 'id'}),
+        ),
+        permissionsChannelProvider.overrideWithValue(
+          permissions ?? FakePermissionsChannel(),
         ),
       ],
       child: MaterialApp(theme: AppTheme.light, home: screen),

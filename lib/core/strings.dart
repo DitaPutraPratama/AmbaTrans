@@ -43,6 +43,15 @@ abstract final class Strings {
   static const notDownloaded = 'Belum diunduh';
   static const download = 'Unduh';
   static const accurateMode = 'Mode akurat (Aksesibilitas)';
+  static const accurateModeDescription =
+      'Membaca teks dan posisinya lewat layanan Aksesibilitas agar hasil lebih akurat.';
+  static const accurateModeNeedsSystem =
+      'Belum aktif di pengaturan Aksesibilitas. Aktifkan AmbaTrans di sana.';
+  static const accurateSheetTitle = 'Mode akurat';
+  static const accurateSheetBody =
+      'AmbaTrans hanya membaca teks dan posisinya di layar untuk meningkatkan akurasi. Data tidak disimpan atau dikirim, dan AmbaTrans tidak melakukan tindakan apa pun atas nama Anda.';
+  static const proceed = 'Lanjutkan';
+  static const cancel = 'Batal';
   static const autoDetect = 'Deteksi otomatis';
 
   static const languageSection = 'Bahasa';
