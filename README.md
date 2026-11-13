@@ -56,8 +56,16 @@ keyPassword=...
 
 ## Pustaka
 
-Flutter dan material_ui (BSD-3), flutter_riverpod (MIT), kotlinx.coroutines (Apache-2.0), font Plus Jakarta Sans (SIL OFL), ktlint (MIT), JUnit (EPL-1.0), MockK (Apache-2.0). Daftar paket Dart lengkap ada di `pubspec.lock`.
+- [Flutter](https://github.com/flutter/flutter) dan [material_ui](https://pub.dev/packages/material_ui): BSD-3
+- [flutter_riverpod](https://github.com/rrousselGit/riverpod): MIT
+- [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines): Apache-2.0
+- [Plus Jakarta Sans](https://github.com/tokotype/PlusJakartaSans): SIL OFL
+- [ktlint](https://github.com/pinterest/ktlint): MIT
+- [JUnit 4](https://github.com/junit-team/junit4): EPL-1.0
+- [MockK](https://github.com/mockk/mockk): Apache-2.0
 
-Google ML Kit (Text Recognition, Translation) bukan open source, pakai syarat layanan Google.
+Daftar paket Dart lengkap ada di `pubspec.lock`.
+
+[Google ML Kit](https://developers.google.com/ml-kit) (Text Recognition, Translation) bukan open source, pakai [syarat layanan Google](https://developers.google.com/ml-kit/terms).
 
 Lisensi kode AmbaTrans belum ditentukan.
