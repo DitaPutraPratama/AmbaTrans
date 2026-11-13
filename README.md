@@ -8,6 +8,18 @@ Semua versi ada di halaman [Releases](../../releases), versi lama tetap tersedia
 
 Pilih `app-arm64-v8a-release.apk` untuk hampir semua HP (64-bit). `armeabi-v7a` untuk HP 32-bit lama. Butuh Android 8.0 atau lebih baru. Izinkan "instal dari sumber tidak dikenal" saat diminta.
 
+### Diblokir Play Protect?
+
+Muncul pesan "Aplikasi diblokir untuk melindungi perangkat Anda". Ini wajar: Play Protect memblokir aplikasi di luar Play Store yang meminta izin sensitif (Aksesibilitas, tampil di atas aplikasi lain, tangkap layar), dan AmbaTrans memakai ketiganya. Kode sumbernya terbuka di repo ini.
+
+Cara memasang:
+
+1. Matikan sementara: Play Store → ikon profil → Play Protect → ikon gerigi → matikan "Pindai aplikasi dengan Play Protect". Pasang APK, lalu nyalakan lagi.
+2. Jika masih diblokir, pasang lewat kabel dari komputer (USB debugging aktif):
+   ```bash
+   adb install -r app-arm64-v8a-release.apk
+   ```
+
 ## Pakai
 
 1. Buka aplikasi, pilih bahasa, unduh model, beri izin tampil di atas aplikasi lain dan notifikasi.
