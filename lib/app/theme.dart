@@ -136,6 +136,10 @@ class AppColors extends ThemeExtension<AppColors> {
       t < 0.5 ? this : (other ?? this);
 }
 
+extension AppThemeContext on BuildContext {
+  AppColors get colors => Theme.of(this).extension<AppColors>()!;
+}
+
 /// Colors the bubble, menu and overlay always use (native side mirrors these).
 abstract final class AppOverlayColors {
   static const label = Color(0xFF424242);
