@@ -8,8 +8,6 @@ import '../../../core/widgets/icon_circle_button.dart';
 import '../../../core/widgets/section_title.dart';
 import '../application/settings_controller.dart';
 import 'language_picking.dart';
-import 'widgets/accurate_mode_card.dart';
-import 'widgets/accurate_mode_sheet.dart';
 import 'widgets/battery_tips_card.dart';
 import 'widgets/model_download_sheet.dart';
 import 'widgets/model_status_card.dart';
@@ -38,33 +36,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     super.dispose();
   }
 
-  // The user may have toggled the Accessibility service in system settings.
+  // The user may have changed a permission in system settings.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      ref.read(settingsControllerProvider.notifier).refreshAccessibility();
+      ref.read(settingsControllerProvider.notifier).refreshPermissions();
     }
-  }
-
-  Future<void> _toggleAccurate(bool enable) async {
-    final controller = ref.read(settingsControllerProvider.notifier);
-    if (!enable) {
-      await controller.setAccessibilityMode(false);
-      return;
-    }
-    if (ref
-            .read(settingsControllerProvider)
-            .value
-            ?.accessibilityEnabledInSystem ??
-        false) {
-      await controller.setAccessibilityMode(
-        true,
-      ); // already enabled in the system
-      return;
-    }
-    // Explain first (S-06), then open system settings; saved once the service is enabled.
-    if (!await showAccurateModeSheet(context)) return;
-    await controller.startAccessibilitySetup();
   }
 
   @override
@@ -151,13 +128,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 const SizedBox(height: AppSpacing.xl),
                 const SectionTitle(Strings.advancedSection),
                 const SizedBox(height: AppSpacing.md),
-                if (state != null) ...[
-                  AccurateModeCard(
-                    enabled: state.accessibilityMode,
-                    onChanged: _toggleAccurate,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                ],
                 BatteryTipsCard(
                   onOpenBatterySettings: ref
                       .read(settingsControllerProvider.notifier)

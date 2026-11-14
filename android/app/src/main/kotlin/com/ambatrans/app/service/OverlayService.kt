@@ -10,7 +10,6 @@ import android.os.IBinder
 import android.provider.Settings
 import android.widget.Toast
 import com.ambatrans.app.R
-import com.ambatrans.app.access.AccessibilityBridge
 import com.ambatrans.app.bubble.BubbleActions
 import com.ambatrans.app.bubble.BubbleController
 import com.ambatrans.app.capture.CaptureConsentActivity
@@ -40,7 +39,6 @@ class OverlayService :
     TranslateUi {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var job: Job? = null
-    private var scrollWatcher: Job? = null
     private var bubble: BubbleController? = null
     private var pendingTranslate = false
     private val capture by lazy { CaptureManager(this) }
@@ -59,7 +57,6 @@ class OverlayService :
             capture = capture::captureBitmap,
             recognize = ocr::recognize,
             translate = translator::translateAll,
-            extraBlocks = { if (store.accessibilityMode) AccessibilityBridge.snapshot() else emptyList() },
         )
     }
 
@@ -79,7 +76,6 @@ class OverlayService :
             else -> {
                 enterForeground(withProjection = false)
                 showBubble()
-                watchScrolling()
                 ServiceStateHolder.set(true)
             }
         }
@@ -109,16 +105,6 @@ class OverlayService :
         // Without the permission the service still runs; Home already asks for it.
         if (!Settings.canDrawOverlays(this)) return
         bubble = BubbleController(this, store, this).also { it.show() }
-    }
-
-    /** With accurate mode on, scrolling makes the overlay stale, so it is removed (F-10, T-036). */
-    private fun watchScrolling() {
-        if (scrollWatcher?.isActive == true) return
-        scrollWatcher = scope.launch {
-            AccessibilityBridge.scrolled.collect {
-                if (store.accessibilityMode && renderer.isShowing && job?.isActive != true) stopTranslation()
-            }
-        }
     }
 
     private fun onProjectionGranted(intent: Intent) {

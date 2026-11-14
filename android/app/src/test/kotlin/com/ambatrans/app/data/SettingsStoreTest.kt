@@ -36,7 +36,6 @@ class SettingsStoreTest {
         assertEquals("right", all["bubble_edge"])
         assertEquals(0.35, all["bubble_y_fraction"] as Double, 0.0001)
         assertEquals(false, all["onboarding_done"])
-        assertEquals(false, all["accessibility_mode"])
         assertEquals(1, all["schema_version"])
     }
 

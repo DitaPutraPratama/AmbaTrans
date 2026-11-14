@@ -13,7 +13,6 @@ class SettingsStore(private val prefs: SharedPreferences) {
     val bubbleEdge: String get() = prefs.getString(KEY_BUBBLE_EDGE, DEFAULT_BUBBLE_EDGE) ?: DEFAULT_BUBBLE_EDGE
     val bubbleYFraction: Float get() = prefs.getFloat(KEY_BUBBLE_Y_FRACTION, DEFAULT_BUBBLE_Y_FRACTION)
     val onboardingDone: Boolean get() = prefs.getBoolean(KEY_ONBOARDING_DONE, false)
-    val accessibilityMode: Boolean get() = prefs.getBoolean(KEY_ACCESSIBILITY_MODE, false)
 
     fun getAll(): Map<String, Any> = mapOf(
         KEY_SCHEMA_VERSION to prefs.getInt(KEY_SCHEMA_VERSION, CURRENT_SCHEMA_VERSION),
@@ -23,7 +22,6 @@ class SettingsStore(private val prefs: SharedPreferences) {
         KEY_BUBBLE_EDGE to bubbleEdge,
         // Doubles: the platform channel codec transports doubles, not floats.
         KEY_BUBBLE_Y_FRACTION to bubbleYFraction.toDouble(),
-        KEY_ACCESSIBILITY_MODE to accessibilityMode,
     )
 
     /** Validates and stores one value. Throws [InvalidSettingException] when the rules are violated. */
@@ -31,7 +29,6 @@ class SettingsStore(private val prefs: SharedPreferences) {
         val editor = prefs.edit()
         when (key) {
             KEY_ONBOARDING_DONE -> editor.putBoolean(key, value.asBoolean(key))
-            KEY_ACCESSIBILITY_MODE -> editor.putBoolean(key, value.asBoolean(key))
             KEY_SOURCE_LANG -> {
                 val lang = value.asLanguage(key, allowAuto = true)
                 if (lang == targetLang) throw InvalidSettingException("source_lang must differ from target_lang")
@@ -87,7 +84,6 @@ class SettingsStore(private val prefs: SharedPreferences) {
         const val KEY_TARGET_LANG = "target_lang"
         const val KEY_BUBBLE_EDGE = "bubble_edge"
         const val KEY_BUBBLE_Y_FRACTION = "bubble_y_fraction"
-        const val KEY_ACCESSIBILITY_MODE = "accessibility_mode"
 
         const val DEFAULT_SOURCE_LANG = "en"
         const val DEFAULT_TARGET_LANG = "id"

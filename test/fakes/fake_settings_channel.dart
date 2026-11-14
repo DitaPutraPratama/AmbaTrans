@@ -11,7 +11,6 @@ class FakeSettingsChannel implements SettingsChannel {
         'target_lang': 'id',
         'bubble_edge': 'right',
         'bubble_y_fraction': 0.35,
-        'accessibility_mode': false,
         ...?initial,
       };
 

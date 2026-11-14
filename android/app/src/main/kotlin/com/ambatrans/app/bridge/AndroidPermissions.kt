@@ -20,14 +20,6 @@ class AndroidPermissions(private val activity: Activity) {
     fun notificationsGranted(): Boolean =
         activity.getSystemService(NotificationManager::class.java).areNotificationsEnabled()
 
-    fun accessibilityEnabled(): Boolean {
-        val enabled = Settings.Secure.getString(
-            activity.contentResolver,
-            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-        ).orEmpty()
-        return enabled.split(':').any { it.equals(ACCESSIBILITY_COMPONENT, ignoreCase = true) }
-    }
-
     /** Shows the system screen-capture dialog; the result goes to the running service. */
     fun requestCapture() {
         activity.startActivity(Intent(activity, CaptureConsentActivity::class.java))
@@ -47,10 +39,6 @@ class AndroidPermissions(private val activity: Activity) {
             val uri = Uri.parse("package:${activity.packageName}")
             activity.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri))
         }
-    }
-
-    fun openAccessibilitySettings() {
-        activity.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
     }
 
     /** Asks for POST_NOTIFICATIONS (Android 13+); [onResult] receives whether notifications are allowed. */
@@ -77,7 +65,5 @@ class AndroidPermissions(private val activity: Activity) {
 
     companion object {
         private const val REQUEST_NOTIFICATIONS = 1001
-        private const val ACCESSIBILITY_COMPONENT =
-            "com.ambatrans.app/com.ambatrans.app.access.AmbaAccessibilityService"
     }
 }

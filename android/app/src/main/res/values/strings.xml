@@ -11,6 +11,4 @@
     <string name="toast_no_text">Tidak ada teks ditemukan</string>
     <string name="toast_models_missing">Model bahasa belum siap</string>
     <string name="toast_failed">Terjemahan gagal, coba lagi</string>
-    <string name="accessibility_label">AmbaTrans</string>
-    <string name="accessibility_description">Membaca teks dan posisinya di layar agar terjemahan lebih akurat. Tidak ada data yang disimpan atau dikirim, dan tidak ada tindakan atas nama Anda.</string>
 </resources>

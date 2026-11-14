@@ -19,20 +19,12 @@ void main() {
     test('getStatus maps the native map', () async {
       messenger.setMockMethodCallHandler(
         channel,
-        (call) async => {
-          'overlay': true,
-          'notifications': false,
-          'accessibility': true,
-        },
+        (call) async => {'overlay': true, 'notifications': false},
       );
       final status = await MethodPermissionsChannel().getStatus();
       expect(
         status,
-        const PermissionStatus(
-          overlay: true,
-          notifications: false,
-          accessibility: true,
-        ),
+        const PermissionStatus(overlay: true, notifications: false),
       );
     });
 
@@ -41,7 +33,6 @@ void main() {
       final status = await MethodPermissionsChannel().getStatus();
       expect(status.overlay, isFalse);
       expect(status.notifications, isFalse);
-      expect(status.accessibility, isFalse);
     });
 
     test('requestNotifications returns the native answer', () async {
@@ -60,8 +51,7 @@ void main() {
       });
       final client = MethodPermissionsChannel();
       await client.openOverlaySettings();
-      await client.openAccessibilitySettings();
-      expect(calls, ['openOverlaySettings', 'openAccessibilitySettings']);
+      expect(calls, ['openOverlaySettings']);
     });
   });
 

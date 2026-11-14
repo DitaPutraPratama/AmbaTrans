@@ -14,17 +14,15 @@ class PermissionsMethodHandlerTest {
     private val handler = PermissionsMethodHandler(permissions)
 
     @Test
-    fun `getStatus reports all three permissions`() {
+    fun `getStatus reports overlay notifications and capture`() {
         every { permissions.overlayGranted() } returns true
         every { permissions.notificationsGranted() } returns false
-        every { permissions.accessibilityEnabled() } returns true
         handler.onMethodCall(MethodCall("getStatus", null), result)
         verify {
             result.success(
                 mapOf(
                     "overlay" to true,
                     "notifications" to false,
-                    "accessibility" to true,
                     "capture" to false,
                 ),
             )
@@ -34,10 +32,8 @@ class PermissionsMethodHandlerTest {
     @Test
     fun `open settings methods call through and succeed`() {
         handler.onMethodCall(MethodCall("openOverlaySettings", null), result)
-        handler.onMethodCall(MethodCall("openAccessibilitySettings", null), result)
         verify { permissions.openOverlaySettings() }
-        verify { permissions.openAccessibilitySettings() }
-        verify(exactly = 2) { result.success(null) }
+        verify { result.success(null) }
     }
 
     @Test

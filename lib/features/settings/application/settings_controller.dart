@@ -13,8 +13,6 @@ class SettingsState {
     required this.source,
     required this.target,
     required this.models,
-    this.accessibilityMode = false,
-    this.accessibilityEnabledInSystem = false,
     this.overlayGranted = false,
     this.notificationsGranted = false,
   });
@@ -22,10 +20,6 @@ class SettingsState {
   final String source;
   final String target;
   final ModelStatus models;
-
-  /// The user's choice (stored); the real service state is [accessibilityEnabledInSystem].
-  final bool accessibilityMode;
-  final bool accessibilityEnabledInSystem;
   final bool overlayGranted;
   final bool notificationsGranted;
 
@@ -33,17 +27,12 @@ class SettingsState {
     String? source,
     String? target,
     ModelStatus? models,
-    bool? accessibilityMode,
-    bool? accessibilityEnabledInSystem,
     bool? overlayGranted,
     bool? notificationsGranted,
   }) => SettingsState(
     source: source ?? this.source,
     target: target ?? this.target,
     models: models ?? this.models,
-    accessibilityMode: accessibilityMode ?? this.accessibilityMode,
-    accessibilityEnabledInSystem:
-        accessibilityEnabledInSystem ?? this.accessibilityEnabledInSystem,
     overlayGranted: overlayGranted ?? this.overlayGranted,
     notificationsGranted: notificationsGranted ?? this.notificationsGranted,
   );
@@ -97,10 +86,6 @@ class SettingsController extends AsyncNotifier<SettingsState> {
       source: source,
       target: target,
       models: await _models(source, target),
-      // The switch only counts as on while the system service is really enabled.
-      accessibilityMode:
-          all['accessibility_mode'] == true && permissions.accessibility,
-      accessibilityEnabledInSystem: permissions.accessibility,
       overlayGranted: permissions.overlay,
       notificationsGranted: permissions.notifications,
     );
@@ -114,35 +99,13 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     }
   }
 
-  bool _setupPending = false;
-
-  /// Sends the user to system settings. The choice is saved only once the service is really
-  /// enabled (see [refreshAccessibility]), so backing out leaves the switch off.
-  Future<void> startAccessibilitySetup() async {
-    _setupPending = true;
-    await openAccessibilitySettings();
-  }
-
-  /// Re-reads the system accessibility state (e.g. after returning from system settings).
-  Future<void> refreshAccessibility() async {
+  /// Re-reads permission states (e.g. after returning from system settings).
+  Future<void> refreshPermissions() async {
     final current = state.value;
     if (current == null) return;
     final permissions = await ref.read(permissionsChannelProvider).getStatus();
-    final system = permissions.accessibility;
-    var mode = current.accessibilityMode;
-    if (_setupPending) {
-      _setupPending = false;
-      if (system) mode = true;
-    } else if (mode && !system) {
-      mode = false; // the user switched the service off in system settings
-    }
-    if (mode != current.accessibilityMode) {
-      await ref.read(settingsChannelProvider).set('accessibility_mode', mode);
-    }
     state = AsyncData(
       current.copyWith(
-        accessibilityMode: mode,
-        accessibilityEnabledInSystem: system,
         overlayGranted: permissions.overlay,
         notificationsGranted: permissions.notifications,
       ),
@@ -154,32 +117,11 @@ class SettingsController extends AsyncNotifier<SettingsState> {
 
   Future<void> requestNotifications() async {
     await ref.read(permissionsChannelProvider).requestNotifications();
-    await refreshAccessibility();
-  }
-
-  /// Turning off also switches the service off in system settings, so turning it on again
-  /// goes through the system screen again.
-  Future<void> setAccessibilityMode(bool enabled) async {
-    final current = state.requireValue;
-    await ref.read(settingsChannelProvider).set('accessibility_mode', enabled);
-    var system = current.accessibilityEnabledInSystem;
-    if (!enabled && system) {
-      await ref.read(permissionsChannelProvider).disableAccessibility();
-      system = false;
-    }
-    state = AsyncData(
-      current.copyWith(
-        accessibilityMode: enabled,
-        accessibilityEnabledInSystem: system,
-      ),
-    );
+    await refreshPermissions();
   }
 
   Future<void> openBatterySettings() =>
       ref.read(permissionsChannelProvider).openBatterySettings();
-
-  Future<void> openAccessibilitySettings() =>
-      ref.read(permissionsChannelProvider).openAccessibilitySettings();
 
   Future<void> refreshModels() async {
     final current = state.value;

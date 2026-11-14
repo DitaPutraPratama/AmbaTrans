@@ -33,8 +33,6 @@ class TranslateScreenUseCase(
     private val capture: suspend () -> Bitmap,
     private val recognize: suspend (Bitmap, OcrScript) -> List<TextBlock>,
     private val translate: suspend (List<TextBlock>, String, String) -> List<TranslatedBlock>,
-    /** Accessibility text nodes (F-10); empty when accurate mode is off or the service is disabled. */
-    private val extraBlocks: () -> List<TextBlock> = { emptyList() },
 ) {
     suspend fun run() {
         val (source, target) = languages()
@@ -48,7 +46,7 @@ class TranslateScreenUseCase(
             } finally {
                 bitmap.recycle() // the screenshot must not outlive OCR (F-04)
             }
-            val lines = TextFilter.filter(TextMerger.merge(blocks, extraBlocks()))
+            val lines = TextFilter.filter(blocks)
             if (lines.isEmpty()) return ui.showError(TranslateError.NO_TEXT)
             ui.showResult(translate(lines, source, target))
         } catch (e: CancellationException) {

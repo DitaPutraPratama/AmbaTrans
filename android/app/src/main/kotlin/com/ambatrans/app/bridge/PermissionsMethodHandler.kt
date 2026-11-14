@@ -1,6 +1,5 @@
 package com.ambatrans.app.bridge
 
-import com.ambatrans.app.access.AccessibilityBridge
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
@@ -14,16 +13,11 @@ class PermissionsMethodHandler(
                 mapOf(
                     "overlay" to permissions.overlayGranted(),
                     "notifications" to permissions.notificationsGranted(),
-                    "accessibility" to permissions.accessibilityEnabled(),
                     "capture" to captureReady(),
                 ),
             )
             "openOverlaySettings" -> {
                 permissions.openOverlaySettings()
-                result.success(null)
-            }
-            "disableAccessibility" -> {
-                AccessibilityBridge.disable()
                 result.success(null)
             }
             "requestCapture" -> {
@@ -32,10 +26,6 @@ class PermissionsMethodHandler(
             }
             "openBatterySettings" -> {
                 permissions.openBatterySettings()
-                result.success(null)
-            }
-            "openAccessibilitySettings" -> {
-                permissions.openAccessibilitySettings()
                 result.success(null)
             }
             "requestNotifications" -> permissions.requestNotifications { result.success(it) }

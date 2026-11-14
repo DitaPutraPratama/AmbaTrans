@@ -6,7 +6,7 @@ Menerjemahkan layar aplikasi apa pun. OCR dan terjemahan jalan di HP lewat Googl
 
 Semua versi ada di [Releases](../../releases). Ambil `app-arm64-v8a-release.apk` kecuali HP-mu 32-bit (`armeabi-v7a`). Android 8.0 ke atas.
 
-Kalau Play Protect memblokir: aplikasi ini meminta izin Aksesibilitas, overlay, dan tangkap layar, dan Play Protect curiga pada aplikasi di luar Play Store yang meminta itu. Matikan "Pindai aplikasi dengan Play Protect" sebentar (Play Store, ikon profil, Play Protect, gerigi), pasang, lalu nyalakan lagi. Atau pasang dari komputer:
+Kalau Play Protect memblokir: aplikasi ini meminta izin overlay dan tangkap layar, dan Play Protect curiga pada aplikasi di luar Play Store yang meminta itu. Matikan "Pindai aplikasi dengan Play Protect" sebentar (Play Store, ikon profil, Play Protect, gerigi), pasang, lalu nyalakan lagi. Atau pasang dari komputer:
 
 ```bash
 adb install -r app-arm64-v8a-release.apk

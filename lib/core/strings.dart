@@ -39,13 +39,6 @@ abstract final class Strings {
   static const tipsTitle = 'Agar bubble tidak mati';
   static const tipsBody = 'Izinkan AmbaTrans tanpa batasan baterai.';
   static const tipsAction = 'Buka pengaturan baterai';
-  static const accurateMode = 'Mode akurat (Aksesibilitas)';
-  static const accurateModeDescription =
-      'Hasil lebih akurat lewat Aksesibilitas.';
-  static const accurateSheetTitle = 'Mode akurat';
-  static const accurateSheetBody =
-      'AmbaTrans hanya membaca teks dan posisinya di layar. Tidak ada data yang disimpan atau dikirim, dan tidak ada tindakan atas nama Anda.';
-  static const proceed = 'Lanjutkan';
   static const cancel = 'Batal';
   static const autoDetect = 'Deteksi otomatis';
 

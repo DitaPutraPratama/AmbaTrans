@@ -5,20 +5,17 @@ class FakePermissionsChannel implements PermissionsChannel {
   FakePermissionsChannel({
     this.overlay = false,
     this.notifications = false,
-    this.accessibility = false,
     this.capture = false,
     this.grantNotificationsOnRequest = true,
   });
 
   bool overlay;
   bool notifications;
-  bool accessibility;
   bool capture;
   int requestCaptureCalls = 0;
   bool grantNotificationsOnRequest;
 
   int openOverlaySettingsCalls = 0;
-  int openAccessibilitySettingsCalls = 0;
   int requestNotificationsCalls = 0;
   int openBatterySettingsCalls = 0;
 
@@ -26,17 +23,8 @@ class FakePermissionsChannel implements PermissionsChannel {
   Future<PermissionStatus> getStatus() async => PermissionStatus(
     overlay: overlay,
     notifications: notifications,
-    accessibility: accessibility,
     capture: capture,
   );
-
-  int disableAccessibilityCalls = 0;
-
-  @override
-  Future<void> disableAccessibility() async {
-    disableAccessibilityCalls++;
-    accessibility = false;
-  }
 
   @override
   Future<void> requestCapture() async {
@@ -49,10 +37,6 @@ class FakePermissionsChannel implements PermissionsChannel {
 
   @override
   Future<void> openBatterySettings() async => openBatterySettingsCalls++;
-
-  @override
-  Future<void> openAccessibilitySettings() async =>
-      openAccessibilitySettingsCalls++;
 
   @override
   Future<bool> requestNotifications() async {
