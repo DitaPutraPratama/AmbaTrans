@@ -6,7 +6,7 @@ Sebuah bubble kecil melayang di atas aplikasi lain. Ketuk bubble itu, lalu AmbaT
 
 ## Unduh dan pasang
 
-1. Buka halaman [Releases](../../releases) dan unduh `app-arm64-v8a-release.apk`. Kalau HP-mu 32-bit, ambil `app-armeabi-v7a-release.apk`.
+1. Buka halaman [Releases](../../releases) dan unduh file yang berakhiran `arm64-v8a.apk`, misalnya `AmbaTrans-1.0.0-arm64-v8a.apk`. Kalau HP-mu 32-bit, ambil yang berakhiran `armeabi-v7a.apk`.
 2. Buka file APK itu dan izinkan pemasangan dari sumber tidak dikenal kalau diminta.
 
 Butuh Android 8.0 atau lebih baru.
@@ -20,7 +20,7 @@ Cara melewatinya: buka Play Store, ketuk ikon profil, pilih Play Protect, ketuk 
 Kalau punya komputer, bisa juga lewat kabel USB:
 
 ```bash
-adb install -r app-arm64-v8a-release.apk
+adb install -r AmbaTrans-1.0.0-arm64-v8a.apk
 ```
 
 ## Cara pakai
