@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- The splash artwork has a light background, so dark mode keeps the same colour. -->
-    <color name="splash_background">#EFF1FD</color>
+    <color name="splash_background">#EFEFFB</color>
 </resources>
