@@ -4,6 +4,10 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# Without key.properties Gradle falls back to the debug key: Play Protect flags debug-signed APKs and
+# users cannot update across builds made on different machines. Refuse to publish those.
+[[ -f android/key.properties ]] || { echo "android/key.properties missing: create a release keystore first" >&2; exit 1; }
+
 version=$(sed -n 's/^version: *\([^+]*\).*/\1/p' pubspec.yaml)
 out=build/app/outputs/flutter-apk
 
