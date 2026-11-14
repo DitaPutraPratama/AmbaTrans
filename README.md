@@ -1,26 +1,52 @@
 # AmbaTrans
 
-Menerjemahkan layar aplikasi apa pun. OCR dan terjemahan jalan di HP lewat Google ML Kit.
+Aplikasi Android untuk menerjemahkan teks di layar, di aplikasi apa pun. Cocok untuk komik, game, atau aplikasi yang tidak punya pilihan bahasa Indonesia.
 
-## Unduh
+Sebuah bubble kecil melayang di atas aplikasi lain. Ketuk bubble itu, lalu AmbaTrans memotret layar, membaca teksnya, menerjemahkan, dan menempelkan hasilnya tepat di atas teks asli. Semua proses jalan di HP. Tidak perlu akun, dan tidak ada data yang dikirim ke server.
 
-Semua versi ada di [Releases](../../releases). Ambil `app-arm64-v8a-release.apk` kecuali HP-mu 32-bit (`armeabi-v7a`). Android 8.0 ke atas.
+## Unduh dan pasang
 
-Kalau Play Protect memblokir: aplikasi ini meminta izin overlay dan tangkap layar, dan Play Protect curiga pada aplikasi di luar Play Store yang meminta itu. Matikan "Pindai aplikasi dengan Play Protect" sebentar (Play Store, ikon profil, Play Protect, gerigi), pasang, lalu nyalakan lagi. Atau pasang dari komputer:
+1. Buka halaman [Releases](../../releases) dan unduh `app-arm64-v8a-release.apk`. Kalau HP-mu 32-bit, ambil `app-armeabi-v7a-release.apk`.
+2. Buka file APK itu dan izinkan pemasangan dari sumber tidak dikenal kalau diminta.
+
+Butuh Android 8.0 atau lebih baru.
+
+### Kalau diblokir Play Protect
+
+Play Protect sering mencurigai aplikasi di luar Play Store yang meminta izin tampil di atas aplikasi lain dan izin merekam layar. AmbaTrans butuh dua izin itu untuk bubble dan untuk membaca layar.
+
+Cara melewatinya: buka Play Store, ketuk ikon profil, pilih Play Protect, ketuk ikon gerigi, lalu matikan "Pindai aplikasi dengan Play Protect". Pasang APK-nya, lalu nyalakan lagi pengaturan tadi.
+
+Kalau punya komputer, bisa juga lewat kabel USB:
 
 ```bash
 adb install -r app-arm64-v8a-release.apk
 ```
 
-## Pakai
+## Cara pakai
 
-Pilih bahasa dan unduh model saat pertama buka, beri izin overlay dan notifikasi, tekan Mulai. Ketuk bubble untuk menerjemahkan layar. Sentuh layar di luar bubble untuk menghapus hasilnya. Tekan lama bubble untuk menutupnya.
+1. Buka AmbaTrans. Pilih bahasa asal dan bahasa tujuan, lalu unduh model bahasanya. Ini satu-satunya saat aplikasi butuh internet.
+2. Beri izin "Tampil di atas aplikasi lain" dan izin notifikasi.
+3. Tekan Mulai. Bubble muncul di pinggir layar.
+4. Buka aplikasi yang mau diterjemahkan, lalu ketuk bubble. Saat pertama kali, Android akan bertanya apakah AmbaTrans boleh merekam layar. Pilih izinkan.
+5. Terjemahan muncul di atas teks asli. Sentuh layar di mana saja untuk menghapusnya, lalu ketuk bubble lagi untuk halaman berikutnya.
 
-Internet hanya dipakai untuk mengunduh model. Screenshot tidak disimpan.
+Tekan lama bubble untuk menutupnya. Bahasa bisa diganti kapan saja di Pengaturan.
 
-## Jalankan dari source
+## Yang perlu diketahui
 
-Butuh Flutter stable (Dart 3.14+), Android SDK, JDK 17+, dan HP dengan USB debugging. Overlay dan tangkap layar diuji di HP, bukan emulator.
+- Terjemahannya memakai model Google ML Kit yang berjalan offline. Hasilnya bisa kaku, terutama untuk bahasa gaul atau teks bergaya.
+- Teks dibaca dari gambar layar. Huruf yang sangat kecil, miring, atau bertumpuk dengan gambar bisa salah baca.
+- Huruf yang bisa dibaca: Latin, Mandarin, Jepang, Korea, dan Devanagari (Hindi, Marathi).
+- Beberapa aplikasi melarang layarnya direkam, misalnya aplikasi bank dan streaming. Di aplikasi seperti itu AmbaTrans menampilkan pesan "Layar ini tidak dapat ditangkap".
+- Tangkapan layar hanya disimpan di memori sampai teksnya selesai dibaca, lalu dibuang. Tidak ada yang tersimpan ke galeri atau penyimpanan.
+- Kalau bubble hilang sendiri setelah beberapa lama, izinkan AmbaTrans berjalan tanpa batasan baterai. Pintasannya ada di Pengaturan.
+
+## Untuk pengembang
+
+AmbaTrans dibuat dengan Flutter untuk layar aplikasinya (Home, Onboarding, Pengaturan) dan Kotlin untuk bagian yang berjalan di atas aplikasi lain: bubble, perekaman layar, OCR, terjemahan, dan overlay.
+
+Kebutuhan: Flutter stable (Dart 3.14+), Android SDK, JDK 17+, dan HP Android dengan USB debugging. Bubble dan perekaman layar tidak berjalan baik di emulator, jadi pakai HP sungguhan.
 
 ```bash
 git clone <url-repo>
@@ -29,23 +55,23 @@ flutter pub get
 flutter run
 ```
 
-Tes:
+Menjalankan tes:
 
 ```bash
-flutter test
 flutter analyze
+flutter test
 cd android && ./gradlew testDebugUnitTest ktlintCheck lintDebug   # perlu JAVA_HOME
 ```
 
-## Rilis
+Membuat APK rilis:
 
 ```bash
 flutter build apk --release --split-per-abi
 ```
 
-APK ada di `build/app/outputs/flutter-apk/`. Untuk menerbitkan ke GitHub, naikkan `version:` di `pubspec.yaml` (angka setelah `+` harus naik) lalu jalankan `scripts/release.sh "catatan"`. Perlu `gh` yang sudah login. Satu versi satu release, versi lama tetap ada.
+Hasilnya ada di `build/app/outputs/flutter-apk/`. Sebelum merilis versi baru, naikkan `version:` di `pubspec.yaml`. Angka setelah `+` harus lebih besar dari rilis sebelumnya, kalau tidak HP akan menolak update.
 
-Tanpa `android/key.properties`, APK ditandatangani kunci debug. Pakai satu keystore untuk semua rilis; ganti kunci berarti pemakai harus uninstall dulu.
+APK rilis perlu ditandatangani dengan kunci milikmu sendiri. Buat file `android/key.properties` (jangan di-commit):
 
 ```properties
 storeFile=/path/ke/keystore.jks
@@ -53,6 +79,8 @@ storePassword=...
 keyAlias=...
 keyPassword=...
 ```
+
+Tanpa file itu, APK ditandatangani kunci debug. Play Protect lebih curiga pada APK seperti itu, dan pemakai tidak bisa update ke versi yang ditandatangani kunci lain tanpa uninstall dulu. Pakai satu keystore yang sama untuk semua rilis dan simpan cadangannya.
 
 ## Pustaka
 
@@ -66,6 +94,8 @@ keyPassword=...
 
 Daftar paket Dart lengkap ada di `pubspec.lock`.
 
-[Google ML Kit](https://developers.google.com/ml-kit) (Text Recognition, Translation) bukan open source, pakai [syarat layanan Google](https://developers.google.com/ml-kit/terms).
+[Google ML Kit](https://developers.google.com/ml-kit) (Text Recognition, Translation) bukan open source dan memakai [syarat layanan Google](https://developers.google.com/ml-kit/terms).
 
-AmbaTrans memakai lisensi [MIT](LICENSE).
+## Lisensi
+
+[MIT](LICENSE).
