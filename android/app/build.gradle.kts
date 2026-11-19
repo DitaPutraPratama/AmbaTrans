@@ -58,6 +58,14 @@ android {
             signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
+
+    // Compress the native libraries (ML Kit, Flutter) in the APK: the download roughly halves, and Android
+    // extracts them on install, so the installed size grows by about the compressed size (ADR-023).
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 kotlin {
