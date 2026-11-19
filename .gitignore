@@ -59,3 +59,6 @@ AGENTS.md
 .claude/
 docs/
 scripts/
+
+# Local landing page, not published from this repo
+/landing.html
