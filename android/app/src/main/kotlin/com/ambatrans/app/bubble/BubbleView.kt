@@ -53,6 +53,19 @@ class BubbleView(context: Context) : View(context) {
             invalidate()
         }
 
+    /** Partial mode: a small "selection box" badge in the bottom corner. */
+    var regionMode = false
+        set(value) {
+            field = value
+            invalidate()
+        }
+
+    private val badgeBox = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = ContextCompat.getColor(context, R.color.bubble_primary)
+        style = Paint.Style.STROKE
+        strokeWidth = 1.5f * density
+    }
+
     /** Full opacity while touched or loading, [IDLE_ALPHA] resting, [FADED_ALPHA] after a quiet spell. */
     fun fadeTo(target: Float) {
         animate().alpha(target).setDuration(FADE_MS).start()
@@ -80,6 +93,13 @@ class BubbleView(context: Context) : View(context) {
             val half = (ICON_DP * density / 2).toInt()
             icon.setBounds((c - half).toInt(), (c - half).toInt(), (c + half).toInt(), (c + half).toInt())
             icon.draw(canvas)
+        }
+        if (regionMode) {
+            val bx = c + r * 0.7f
+            val by = c + r * 0.7f
+            canvas.drawCircle(bx, by, BADGE_DP * density / 2, dotRing)
+            val half = BADGE_DP * density / 5
+            canvas.drawRect(bx - half, by - half, bx + half, by + half, badgeBox)
         }
         if (overlayActive) {
             val dotR = DOT_DP * density / 2
@@ -122,6 +142,7 @@ class BubbleView(context: Context) : View(context) {
         private const val SHADOW_DP = 8f
         private const val ICON_DP = 24f
         private const val DOT_DP = 12f
+        private const val BADGE_DP = 18f
         private const val SWEEP_DEGREES = 270f
         private const val FULL_TURN = 360f
         private const val SPIN_MS = 900L

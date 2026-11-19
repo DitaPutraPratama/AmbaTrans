@@ -13,6 +13,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
     val bubbleEdge: String get() = prefs.getString(KEY_BUBBLE_EDGE, DEFAULT_BUBBLE_EDGE) ?: DEFAULT_BUBBLE_EDGE
     val bubbleYFraction: Float get() = prefs.getFloat(KEY_BUBBLE_Y_FRACTION, DEFAULT_BUBBLE_Y_FRACTION)
     val onboardingDone: Boolean get() = prefs.getBoolean(KEY_ONBOARDING_DONE, false)
+    val translateMode: String get() = prefs.getString(KEY_TRANSLATE_MODE, MODE_FULL) ?: MODE_FULL
 
     /** Overlay label colours as 0xRRGGBB (no alpha; the overlay window sets the opacity). */
     val overlayTextColor: Int get() = prefs.getInt(KEY_OVERLAY_TEXT_COLOR, DEFAULT_OVERLAY_TEXT_COLOR)
@@ -32,6 +33,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
         KEY_OVERLAY_TEXT_COLOR to overlayTextColor,
         KEY_OVERLAY_BG_COLOR to overlayBgColor,
         KEY_OVERLAY_BG_OPACITY to overlayBgOpacity,
+        KEY_TRANSLATE_MODE to translateMode,
     )
 
     /** Validates and stores one value. Throws [InvalidSettingException] when the rules are violated. */
@@ -61,6 +63,10 @@ class SettingsStore(private val prefs: SharedPreferences) {
                 editor.putFloat(key, fraction)
             }
             KEY_OVERLAY_TEXT_COLOR, KEY_OVERLAY_BG_COLOR -> editor.putInt(key, value.asRgb(key))
+            KEY_TRANSLATE_MODE -> {
+                if (value != MODE_FULL && value != MODE_REGION) throw InvalidSettingException("invalid translate_mode")
+                editor.putString(key, value as String)
+            }
             KEY_OVERLAY_BG_OPACITY -> {
                 val percent = value as? Int
                 if (percent == null || percent !in 0..100) throw InvalidSettingException("$key must be 0..100")
@@ -110,6 +116,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
         const val KEY_OVERLAY_TEXT_COLOR = "overlay_text_color"
         const val KEY_OVERLAY_BG_COLOR = "overlay_bg_color"
         const val KEY_OVERLAY_BG_OPACITY = "overlay_bg_opacity"
+        const val KEY_TRANSLATE_MODE = "translate_mode"
 
         const val DEFAULT_SOURCE_LANG = "en"
         const val DEFAULT_TARGET_LANG = "id"
@@ -122,6 +129,8 @@ class SettingsStore(private val prefs: SharedPreferences) {
         const val EDGE_LEFT = "left"
         const val EDGE_RIGHT = "right"
         const val AUTO = "auto"
+        const val MODE_FULL = "full"
+        const val MODE_REGION = "region"
 
         // ponytail: shape check only; membership in the ML Kit language list is enforced once LanguageCatalog exists (T-022).
         private val LANG_CODE = Regex("[a-z]{2,3}(-[A-Za-z0-9]{2,8})*")

@@ -5,7 +5,12 @@
     <string name="notification_title">AmbaTrans aktif</string>
     <string name="notification_text">Ketuk bubble untuk menerjemahkan layar</string>
     <string name="notification_action_stop">Berhenti</string>
-    <string name="bubble_description">AmbaTrans, ketuk untuk menerjemahkan</string>
+    <string name="bubble_description">AmbaTrans, ketuk untuk menerjemahkan, tekan lama untuk memilih mode</string>
+    <string name="mode_full">Seluruh layar</string>
+    <string name="mode_region">Sebagian layar</string>
+    <string name="region_hint">Seret untuk memilih area</string>
+    <string name="region_translate">Terjemahkan</string>
+    <string name="region_cancel">Batal</string>
     <string name="dismiss_target_description">Lepas bubble di sini untuk menghentikan AmbaTrans</string>
     <string name="toast_capture_needed">Izin tangkap layar diperlukan</string>
     <string name="toast_screen_protected">Layar ini tidak dapat ditangkap</string>

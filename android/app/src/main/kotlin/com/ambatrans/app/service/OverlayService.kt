@@ -19,6 +19,8 @@ import com.ambatrans.app.ocr.LanguageCatalog
 import com.ambatrans.app.ocr.OcrEngine
 import com.ambatrans.app.ocr.RecognizerProvider
 import com.ambatrans.app.overlay.OverlayRenderer
+import com.ambatrans.app.overlay.RegionSelector
+import com.ambatrans.app.pipeline.ScreenRect
 import com.ambatrans.app.pipeline.TranslateError
 import com.ambatrans.app.pipeline.TranslateScreenUseCase
 import com.ambatrans.app.pipeline.TranslateUi
@@ -41,8 +43,10 @@ class OverlayService :
     private var job: Job? = null
     private var bubble: BubbleController? = null
     private var pendingTranslate = false
+    private var pendingRegion: ScreenRect? = null
     private val capture by lazy { CaptureManager(this) }
     private val renderer by lazy { OverlayRenderer(this, store, ::onScreenTouched) }
+    private val selector by lazy { RegionSelector(this) }
     private val recognizers by lazy { RecognizerProvider() }
     private val models by lazy { ModelManager.create() }
     private val translator by lazy { TranslationEngine.create(models) }
@@ -121,12 +125,18 @@ class OverlayService :
             scope.launch { stopTranslation() }
         }
         ServiceStateHolder.setCaptureReady(true)
-        if (pendingTranslate) startTranslation()
+        if (pendingTranslate) startTranslation(pendingRegion)
     }
 
     // BubbleActions
 
-    override fun onTap() = startTranslation()
+    /** Whole screen right away; in partial mode the user first picks the area. */
+    override fun onTap() {
+        if (store.translateMode != SettingsStore.MODE_REGION) return startTranslation()
+        renderer.hide()
+        bubble?.setOverlayActive(false)
+        selector.show(::startTranslation)
+    }
 
     override fun onRemove() {
         stopSelf()
@@ -139,9 +149,10 @@ class OverlayService :
         bubble?.setOverlayActive(false)
     }
 
-    private fun startTranslation() {
+    private fun startTranslation(region: ScreenRect? = null) {
         if (!capture.hasSession) {
             pendingTranslate = true
+            pendingRegion = region
             startActivity(
                 Intent(this, CaptureConsentActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             )
@@ -151,11 +162,12 @@ class OverlayService :
         job?.cancel()
         renderer.hide()
         bubble?.setOverlayActive(false)
-        job = scope.launch { useCase.run() }
+        job = scope.launch { useCase.run(region) }
     }
 
     private fun stopTranslation() {
         pendingTranslate = false
+        selector.hide()
         job?.cancel()
         job = null
         renderer.hide()
@@ -213,6 +225,7 @@ class OverlayService :
 
     override fun onDestroy() {
         scope.cancel()
+        selector.hide()
         renderer.hide()
         bubble?.destroy()
         bubble = null

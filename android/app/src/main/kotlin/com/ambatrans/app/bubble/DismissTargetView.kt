@@ -1,5 +1,6 @@
 package com.ambatrans.app.bubble
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -14,6 +15,7 @@ import com.ambatrans.app.R
  * Bottom strip shown while the bubble is dragged: a dark gradient with a round "X" target.
  * Dropping the bubble on the X stops the service. The X centre sits [bottomGapPx] above the strip's bottom.
  */
+@SuppressLint("ViewConstructor")
 class DismissTargetView(context: Context, private val bottomGapPx: Int) : View(context) {
     private val density = resources.displayMetrics.density
     private val slidePx = SLIDE_DP * density

@@ -123,6 +123,16 @@ class SettingsStoreTest {
     }
 
     @Test
+    fun `translate mode defaults to full screen and accepts full or region only`() {
+        val s = store()
+        assertEquals("full", s.getAll()["translate_mode"])
+        s.set("translate_mode", "region")
+        assertEquals("region", s.translateMode)
+        assertThrows(InvalidSettingException::class.java) { s.set("translate_mode", "half") }
+        assertEquals("region", s.translateMode)
+    }
+
+    @Test
     fun `migrate stamps a fresh install with the current version`() {
         val data = mutableMapOf<String, Any>()
         val s = store(data)

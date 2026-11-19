@@ -23,6 +23,7 @@ interface TranslateUi {
 
 /**
  * One "translate this screen" run: capture, OCR, filter, translate, show (ARCHITECTURE §7.1).
+ * With a region (partial mode) only text inside it is read and it is translated as one sentence.
  * Collaborators are lambdas so the flow is testable without Android or ML Kit.
  */
 class TranslateScreenUseCase(
@@ -31,10 +32,10 @@ class TranslateScreenUseCase(
     private val scriptFor: (String) -> OcrScript?,
     private val modelsReady: suspend (source: String, target: String) -> Boolean,
     private val capture: suspend () -> Bitmap,
-    private val recognize: suspend (Bitmap, OcrScript) -> List<TextBlock>,
+    private val recognize: suspend (Bitmap, OcrScript, ScreenRect?) -> List<TextBlock>,
     private val translate: suspend (List<TextBlock>, String, String) -> List<TranslatedBlock>,
 ) {
-    suspend fun run() {
+    suspend fun run(region: ScreenRect? = null) {
         val (source, target) = languages()
         try {
             if (!modelsReady(source, target)) return ui.showError(TranslateError.MODELS_MISSING)
@@ -42,11 +43,11 @@ class TranslateScreenUseCase(
             val bitmap = capture()
             ui.showLoading()
             val blocks = try {
-                recognize(bitmap, scriptFor(source) ?: OcrScript.LATIN)
+                recognize(bitmap, scriptFor(source) ?: OcrScript.LATIN, region)
             } finally {
                 bitmap.recycle() // the screenshot must not outlive OCR (F-04)
             }
-            val lines = TextFilter.filter(blocks)
+            val lines = if (region == null) TextFilter.filter(blocks) else listOfNotNull(RegionText.merge(blocks))
             if (lines.isEmpty()) return ui.showError(TranslateError.NO_TEXT)
             ui.showResult(translate(lines, source, target))
         } catch (e: CancellationException) {

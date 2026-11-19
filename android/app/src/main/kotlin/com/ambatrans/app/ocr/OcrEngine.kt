@@ -1,6 +1,7 @@
 package com.ambatrans.app.ocr
 
 import android.graphics.Bitmap
+import com.ambatrans.app.pipeline.ScreenRect
 import com.ambatrans.app.pipeline.TextBlock
 import com.ambatrans.app.translate.await
 import com.google.mlkit.vision.common.InputImage
@@ -10,11 +11,29 @@ import com.google.mlkit.vision.common.InputImage
  * sentence wrapped over several lines is translated as one sentence (ADR-013).
  */
 class OcrEngine(private val recognizers: RecognizerProvider) {
-    suspend fun recognize(bitmap: Bitmap, script: OcrScript): List<TextBlock> {
-        val result = recognizers.get(script).process(InputImage.fromBitmap(bitmap, 0)).await()
+    /** With a [region], only that part of the screenshot is read; boxes stay in screen pixels. */
+    suspend fun recognize(bitmap: Bitmap, script: OcrScript, region: ScreenRect? = null): List<TextBlock> {
+        if (region == null) return blocksOf(bitmap, script, 0, 0)
+        val area = region.clampTo(bitmap.width, bitmap.height) ?: return emptyList()
+        val crop = Bitmap.createBitmap(bitmap, area.left, area.top, area.width, area.height)
+        return try {
+            blocksOf(crop, script, area.left, area.top)
+        } finally {
+            if (crop !== bitmap) crop.recycle() // memory only, released right after OCR (F-04)
+        }
+    }
+
+    private suspend fun blocksOf(image: Bitmap, script: OcrScript, dx: Int, dy: Int): List<TextBlock> {
+        val result = recognizers.get(script).process(InputImage.fromBitmap(image, 0)).await()
         return result.textBlocks.mapNotNull { block ->
             val box = block.boundingBox ?: return@mapNotNull null
-            TextBlock(joinLines(block.lines.map { it.text }), box.left, box.top, box.right, box.bottom)
+            TextBlock(
+                joinLines(block.lines.map { it.text }),
+                box.left + dx,
+                box.top + dy,
+                box.right + dx,
+                box.bottom + dy,
+            )
         }
     }
 }

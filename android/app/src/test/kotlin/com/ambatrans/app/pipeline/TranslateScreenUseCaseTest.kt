@@ -40,6 +40,7 @@ class TranslateScreenUseCaseTest {
     private val bitmap: Bitmap = mockk(relaxed = true)
     private val ui = FakeUi()
     private var scriptUsed: OcrScript? = null
+    private var regionUsed: ScreenRect? = null
 
     private fun useCase(
         ready: Boolean = true,
@@ -55,8 +56,9 @@ class TranslateScreenUseCaseTest {
         scriptFor = { if (it == "ja") OcrScript.JAPANESE else OcrScript.LATIN },
         modelsReady = { _, _ -> ready },
         capture = capture,
-        recognize = { _, script ->
+        recognize = { _, script, region ->
             scriptUsed = script
+            regionUsed = region
             lines
         },
         translate = translate,
@@ -68,6 +70,26 @@ class TranslateScreenUseCaseTest {
         assertEquals(listOf("hide", "loading", "result"), ui.events)
         assertEquals("Halo dunia", ui.result!!.single().translated)
         verify { bitmap.recycle() }
+    }
+
+    @Test
+    fun `region mode reads only the region and translates its text as one sentence`() = runBlocking {
+        val region = ScreenRect(0, 0, 200, 200)
+        val parts = listOf(
+            TextBlock("ayo ber-", 10, 10, 90, 30),
+            TextBlock("main bola", 10, 40, 100, 60),
+        )
+        useCase(lines = parts).run(region)
+        assertEquals(region, regionUsed)
+        val shown = ui.result!!.single()
+        assertEquals("ayo bermain bola", shown.block.text)
+        assertEquals(TextBlock("ayo bermain bola", 10, 10, 100, 60), shown.block)
+    }
+
+    @Test
+    fun `region with nothing translatable reports no text`() = runBlocking {
+        useCase(lines = listOf(TextBlock("123", 0, 0, 10, 10))).run(ScreenRect(0, 0, 50, 50))
+        assertEquals(TranslateError.NO_TEXT, ui.error)
     }
 
     @Test

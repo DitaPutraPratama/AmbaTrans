@@ -19,12 +19,13 @@ interface BubbleActions {
     /** Short tap: translate the screen, again if a translation is already showing. */
     fun onTap()
 
-    /** Long press, or drop on the dismiss target: remove the bubble (stops the service). */
+    /** Drop on the dismiss target: remove the bubble (stops the service). */
     fun onRemove()
 }
 
 /**
- * Floating bubble (F-02): drag, snap to an edge, tap to translate, long press or drop on the "X" to remove.
+ * Floating bubble (F-02): drag, snap to an edge, tap to translate, long press for the mode menu,
+ * drop on the "X" to remove.
  * Must be used from the main thread.
  */
 class BubbleController(
@@ -39,6 +40,7 @@ class BubbleController(
 
     private var view: BubbleView? = null
     private var dismissTarget: DismissTargetView? = null
+    private val modeMenu = ModeMenu(context, windowManager)
     private var params: WindowManager.LayoutParams? = null
     private var snapAnimator: ValueAnimator? = null
     private var overlayActive = false
@@ -46,7 +48,7 @@ class BubbleController(
     private val longPressRunnable = Runnable {
         if (!moved) {
             longPressed = true
-            actions.onRemove()
+            showModeMenu()
         }
     }
     private var loading = false
@@ -65,6 +67,7 @@ class BubbleController(
             y = BubbleGeometry.yFor(store.bubbleYFraction, size, usable)
         }
         bubble.overlayActive = overlayActive
+        bubble.regionMode = store.translateMode == SettingsStore.MODE_REGION
         bubble.setOnTouchListener { _, event -> onBubbleTouch(bubble, layout, event) }
         windowManager.addView(bubble, layout)
         view = bubble
@@ -77,6 +80,7 @@ class BubbleController(
         handler.removeCallbacks(fadeRunnable)
         handler.removeCallbacks(longPressRunnable)
         snapAnimator?.cancel()
+        modeMenu.dismiss()
         view?.let { runCatching { windowManager.removeView(it) } }
         view = null
         params = null
@@ -107,6 +111,18 @@ class BubbleController(
 
     private fun hideDismissTarget() {
         dismissTarget?.disappear()
+    }
+
+    private fun showModeMenu() {
+        val bubble = view ?: return
+        val layout = params ?: return
+        bubble.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        val size = bubble.windowSize
+        val area = Bounds(layout.x, layout.y, layout.x + size, layout.y + size)
+        modeMenu.show(store.translateMode, area, store.bubbleEdge, usableBounds()) { mode ->
+            store.set(SettingsStore.KEY_TRANSLATE_MODE, mode)
+            view?.regionMode = mode == SettingsStore.MODE_REGION
+        }
     }
 
     private fun setDismissHot(bubble: BubbleView, hot: Boolean) {
@@ -164,6 +180,7 @@ class BubbleController(
                 if (!moved) {
                     moved = true
                     handler.removeCallbacks(longPressRunnable)
+                    modeMenu.dismiss()
                     showDismissTarget()
                 }
                 moveBubble(bubble, layout, dx, dy)
