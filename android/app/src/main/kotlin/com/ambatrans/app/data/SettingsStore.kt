@@ -14,6 +14,13 @@ class SettingsStore(private val prefs: SharedPreferences) {
     val bubbleYFraction: Float get() = prefs.getFloat(KEY_BUBBLE_Y_FRACTION, DEFAULT_BUBBLE_Y_FRACTION)
     val onboardingDone: Boolean get() = prefs.getBoolean(KEY_ONBOARDING_DONE, false)
     val translateMode: String get() = prefs.getString(KEY_TRANSLATE_MODE, MODE_FULL) ?: MODE_FULL
+    val translateEngine: String get() = prefs.getString(KEY_TRANSLATE_ENGINE, ENGINE_MLKIT) ?: ENGINE_MLKIT
+
+    /** API key of a cloud [engine]; empty when not entered. */
+    fun apiKey(engine: String): String = prefs.getString(apiKeyKey(engine), "") ?: ""
+
+    /** Model ID for the Groq AI engine. */
+    val groqModel: String get() = prefs.getString(KEY_GROQ_MODEL, DEFAULT_GROQ_MODEL) ?: DEFAULT_GROQ_MODEL
 
     /** Overlay label colours as 0xRRGGBB (no alpha; the overlay window sets the opacity). */
     val overlayTextColor: Int get() = prefs.getInt(KEY_OVERLAY_TEXT_COLOR, DEFAULT_OVERLAY_TEXT_COLOR)
@@ -34,6 +41,10 @@ class SettingsStore(private val prefs: SharedPreferences) {
         KEY_OVERLAY_BG_COLOR to overlayBgColor,
         KEY_OVERLAY_BG_OPACITY to overlayBgOpacity,
         KEY_TRANSLATE_MODE to translateMode,
+        KEY_TRANSLATE_ENGINE to translateEngine,
+        KEY_DEEPL_API_KEY to apiKey(ENGINE_DEEPL),
+        KEY_GROQ_API_KEY to apiKey(ENGINE_GROQ),
+        KEY_GROQ_MODEL to groqModel,
     )
 
     /** Validates and stores one value. Throws [InvalidSettingException] when the rules are violated. */
@@ -66,6 +77,24 @@ class SettingsStore(private val prefs: SharedPreferences) {
             KEY_TRANSLATE_MODE -> {
                 if (value != MODE_FULL && value != MODE_REGION) throw InvalidSettingException("invalid translate_mode")
                 editor.putString(key, value as String)
+            }
+            KEY_TRANSLATE_ENGINE -> {
+                if (value !in ENGINES) throw InvalidSettingException("invalid translate_engine")
+                editor.putString(key, value as String)
+            }
+            KEY_DEEPL_API_KEY, KEY_GROQ_API_KEY -> {
+                val apiKey = (value as? String)?.trim()
+                if (apiKey == null || apiKey.length > MAX_API_KEY_LENGTH || apiKey.any { it.isWhitespace() }) {
+                    throw InvalidSettingException("$key must be a key without spaces")
+                }
+                editor.putString(key, apiKey)
+            }
+            KEY_GROQ_MODEL -> {
+                val model = (value as? String)?.trim()
+                if (model.isNullOrEmpty() || model.length > MAX_API_KEY_LENGTH || model.any { it.isWhitespace() }) {
+                    throw InvalidSettingException("$key must be a model ID without spaces")
+                }
+                editor.putString(key, model)
             }
             KEY_OVERLAY_BG_OPACITY -> {
                 val percent = value as? Int
@@ -117,6 +146,11 @@ class SettingsStore(private val prefs: SharedPreferences) {
         const val KEY_OVERLAY_BG_COLOR = "overlay_bg_color"
         const val KEY_OVERLAY_BG_OPACITY = "overlay_bg_opacity"
         const val KEY_TRANSLATE_MODE = "translate_mode"
+        const val KEY_TRANSLATE_ENGINE = "translate_engine"
+        const val KEY_DEEPL_API_KEY = "deepl_api_key"
+        const val KEY_GROQ_API_KEY = "groq_api_key"
+        const val KEY_GROQ_MODEL = "groq_model"
+        const val DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile"
 
         const val DEFAULT_SOURCE_LANG = "en"
         const val DEFAULT_TARGET_LANG = "id"
@@ -131,6 +165,13 @@ class SettingsStore(private val prefs: SharedPreferences) {
         const val AUTO = "auto"
         const val MODE_FULL = "full"
         const val MODE_REGION = "region"
+        const val ENGINE_MLKIT = "mlkit"
+        const val ENGINE_DEEPL = "deepl"
+        const val ENGINE_GROQ = "groq"
+        private val ENGINES = setOf(ENGINE_MLKIT, ENGINE_DEEPL, ENGINE_GROQ)
+        private const val MAX_API_KEY_LENGTH = 200
+
+        private fun apiKeyKey(engine: String) = "${engine}_api_key"
 
         // ponytail: shape check only; membership in the ML Kit language list is enforced once LanguageCatalog exists (T-022).
         private val LANG_CODE = Regex("[a-z]{2,3}(-[A-Za-z0-9]{2,8})*")

@@ -93,4 +93,6 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.14.12")
+    // Real org.json for unit tests: android.jar only ships stubs that throw (ADR-024).
+    testImplementation("org.json:json:20250517")
 }

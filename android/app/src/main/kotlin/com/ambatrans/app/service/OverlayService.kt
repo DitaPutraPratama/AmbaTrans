@@ -21,12 +21,15 @@ import com.ambatrans.app.ocr.RecognizerProvider
 import com.ambatrans.app.overlay.OverlayRenderer
 import com.ambatrans.app.overlay.RegionSelector
 import com.ambatrans.app.pipeline.ScreenRect
+import com.ambatrans.app.pipeline.TextBlock
 import com.ambatrans.app.pipeline.TranslateError
 import com.ambatrans.app.pipeline.TranslateScreenUseCase
 import com.ambatrans.app.pipeline.TranslateUi
 import com.ambatrans.app.pipeline.TranslatedBlock
+import com.ambatrans.app.translate.CloudTranslators
 import com.ambatrans.app.translate.ModelManager
 import com.ambatrans.app.translate.TranslationEngine
+import com.ambatrans.app.translate.translateAll
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -57,11 +60,24 @@ class OverlayService :
             ui = this,
             languages = { store.sourceLang to store.targetLang },
             scriptFor = LanguageCatalog::scriptFor,
-            modelsReady = { source, target -> models.getStatus(source, target).ready },
+            // Online engines need no downloaded models.
+            modelsReady = { source, target ->
+                store.translateEngine != SettingsStore.ENGINE_MLKIT || models.getStatus(source, target).ready
+            },
             capture = capture::captureBitmap,
             recognize = ocr::recognize,
-            translate = translator::translateAll,
+            translate = ::translateBlocks,
         )
+    }
+
+    private suspend fun translateBlocks(
+        blocks: List<TextBlock>,
+        source: String,
+        target: String,
+    ): List<TranslatedBlock> {
+        val cloud = CloudTranslators.forEngine(store)
+            ?: return translator.translateAll(blocks, source, target)
+        return cloud.translateAll(blocks, source, target)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -214,6 +230,10 @@ class OverlayService :
                 TranslateError.NO_TEXT -> R.string.toast_no_text
                 TranslateError.ALREADY_IN_TARGET -> R.string.toast_already_in_target
                 TranslateError.FAILED -> R.string.toast_failed
+                TranslateError.API_KEY_MISSING -> R.string.toast_api_key_missing
+                TranslateError.API_KEY_REJECTED -> R.string.toast_api_key_rejected
+                TranslateError.QUOTA_EXCEEDED -> R.string.toast_quota_exceeded
+                TranslateError.NETWORK -> R.string.toast_network
             },
         )
         if (error == TranslateError.NEEDS_CAPTURE) {
@@ -222,7 +242,11 @@ class OverlayService :
         }
     }
 
-    private fun toast(message: Int) = Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    private fun toast(message: Int) {
+        // Quota and key problems need the user to act in Settings, so they stay up longer.
+        val long = message == R.string.toast_quota_exceeded || message == R.string.toast_api_key_rejected
+        Toast.makeText(this, message, if (long) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
+    }
 
     override fun onDestroy() {
         scope.cancel()

@@ -9,7 +9,7 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 
 /** Map-backed SharedPreferences; only the calls SettingsStore makes. */
-private fun fakePrefs(data: MutableMap<String, Any> = mutableMapOf()): SharedPreferences {
+internal fun fakePrefs(data: MutableMap<String, Any> = mutableMapOf()): SharedPreferences {
     val prefs = mockk<SharedPreferences>()
     val editor = mockk<SharedPreferences.Editor>()
     every { prefs.getString(any(), any()) } answers { data[firstArg()] as String? ?: secondArg() }
@@ -130,6 +130,22 @@ class SettingsStoreTest {
         assertEquals("region", s.translateMode)
         assertThrows(InvalidSettingException::class.java) { s.set("translate_mode", "half") }
         assertEquals("region", s.translateMode)
+    }
+
+    @Test
+    fun `engine defaults to ML Kit and API keys are stored trimmed per engine`() {
+        val s = store()
+        assertEquals("mlkit", s.getAll()["translate_engine"])
+        assertEquals("", s.apiKey("deepl"))
+        s.set("translate_engine", "groq")
+        s.set("groq_api_key", "  gsk_abc  ")
+        assertEquals("groq", s.translateEngine)
+        assertEquals("gsk_abc", s.apiKey("groq"))
+        assertEquals("", s.getAll()["deepl_api_key"])
+        assertThrows(InvalidSettingException::class.java) { s.set("translate_engine", "bing") }
+        assertThrows(InvalidSettingException::class.java) { s.set("deepl_api_key", "a b") }
+        assertThrows(InvalidSettingException::class.java) { s.set("deepl_api_key", 5) }
+        assertEquals("groq", s.translateEngine)
     }
 
     @Test

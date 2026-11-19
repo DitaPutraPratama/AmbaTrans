@@ -18,4 +18,8 @@
     <string name="toast_models_missing">Model bahasa belum siap</string>
     <string name="toast_failed">Terjemahan gagal, coba lagi</string>
     <string name="toast_already_in_target">Teks sudah dalam bahasa tujuan</string>
+    <string name="toast_api_key_missing">API key belum diisi di Pengaturan</string>
+    <string name="toast_api_key_rejected">API key ditolak, periksa di Pengaturan</string>
+    <string name="toast_quota_exceeded">Kuota API habis. Ganti mesin terjemahan di Pengaturan atau coba lagi nanti</string>
+    <string name="toast_network">Tidak dapat terhubung, periksa internet</string>
 </resources>

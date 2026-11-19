@@ -4,11 +4,25 @@ import android.graphics.Bitmap
 import com.ambatrans.app.capture.NoProjectionException
 import com.ambatrans.app.capture.ScreenProtectedException
 import com.ambatrans.app.ocr.OcrScript
+import com.ambatrans.app.translate.CloudException
 import com.ambatrans.app.translate.ModelNotReadyException
 import com.ambatrans.app.translate.TranslationFailedException
 import kotlinx.coroutines.CancellationException
 
-enum class TranslateError { NEEDS_CAPTURE, SCREEN_PROTECTED, MODELS_MISSING, NO_TEXT, ALREADY_IN_TARGET, FAILED }
+enum class TranslateError {
+    NEEDS_CAPTURE,
+    SCREEN_PROTECTED,
+    MODELS_MISSING,
+    NO_TEXT,
+    ALREADY_IN_TARGET,
+    FAILED,
+
+    // Online engines (ADR-024)
+    API_KEY_MISSING,
+    API_KEY_REJECTED,
+    QUOTA_EXCEEDED,
+    NETWORK,
+}
 
 /** What the pipeline needs from the screen: hiding things before capture and showing progress / results. */
 interface TranslateUi {
@@ -67,6 +81,8 @@ class TranslateScreenUseCase(
             ui.showError(TranslateError.SCREEN_PROTECTED)
         } catch (e: ModelNotReadyException) {
             ui.showError(TranslateError.MODELS_MISSING)
+        } catch (e: CloudException) {
+            ui.showError(e.error)
         } catch (e: TranslationFailedException) {
             ui.showError(TranslateError.FAILED)
         } catch (e: Exception) {

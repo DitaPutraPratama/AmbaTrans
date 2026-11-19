@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import com.ambatrans.app.capture.NoProjectionException
 import com.ambatrans.app.capture.ScreenProtectedException
 import com.ambatrans.app.ocr.OcrScript
+import com.ambatrans.app.translate.CloudException
 import com.ambatrans.app.translate.ModelNotReadyException
 import io.mockk.mockk
 import io.mockk.verify
@@ -156,5 +157,7 @@ class TranslateScreenUseCaseTest {
         assertEquals(TranslateError.MODELS_MISSING, ui.error)
         useCase(translate = { _, _, _ -> throw IllegalStateException("boom") }).run()
         assertEquals(TranslateError.FAILED, ui.error)
+        useCase(translate = { _, _, _ -> throw CloudException(TranslateError.QUOTA_EXCEEDED) }).run()
+        assertEquals(TranslateError.QUOTA_EXCEEDED, ui.error)
     }
 }

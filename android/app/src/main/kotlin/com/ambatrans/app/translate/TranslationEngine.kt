@@ -63,7 +63,7 @@ class TranslationEngine(
     }
 
     private suspend fun translateOrNull(translator: TranslatorClient, text: String): String? = try {
-        translator.translate(text).takeIf { it.isNotBlank() }
+        translator.translate(CaseNormalizer.sentenceCase(text)).takeIf { it.isNotBlank() }
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
