@@ -69,6 +69,7 @@ void main() {
     final all = await settings.getAll();
     expect(all['translate_engine'], 'deepl');
     expect(all['deepl_api_key'], 'k:fx');
+    expect(find.text(Strings.engineSaved('DeepL')), findsOneWidget);
     expect(find.text(Strings.offlineModel), findsNothing);
   });
 
@@ -111,6 +112,21 @@ void main() {
     expect(all['groq_api_key'], 'gsk_1');
   });
 
+  testWidgets('fields unfold under the chosen engine and fold away', (
+    tester,
+  ) async {
+    await pumpScreen(tester, const SettingsScreen());
+    await openEngineSheet(tester);
+    expect(find.byKey(const Key('api-key-field')), findsNothing);
+    await pickEngine(tester, 'Groq');
+    expect(find.byKey(const Key('model-field')), findsOneWidget);
+    await pickEngine(tester, 'DeepL');
+    expect(find.byKey(const Key('model-field')), findsNothing);
+    expect(find.byKey(const Key('api-key-field')), findsOneWidget);
+    await pickEngine(tester, 'ML Kit');
+    expect(find.byKey(const Key('api-key-field')), findsNothing);
+  });
+
   testWidgets('API key and model links open in the browser', (tester) async {
     final permissions = FakePermissionsChannel();
     await pumpScreen(tester, const SettingsScreen(), permissions: permissions);
@@ -140,6 +156,7 @@ void main() {
     await openEngineSheet(tester);
     await pickEngine(tester, 'ML Kit');
     await save(tester);
+    expect(find.text(Strings.engineSaved('ML Kit')), findsOneWidget);
     expect(find.text(Strings.offlineModel), findsOneWidget);
   });
 }

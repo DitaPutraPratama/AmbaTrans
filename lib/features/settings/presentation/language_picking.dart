@@ -4,11 +4,13 @@ import 'package:material_ui/material_ui.dart';
 import '../../../core/platform/settings_channel.dart';
 import '../../../core/strings.dart';
 import '../../../core/widgets/app_bottom_sheet.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../application/settings_controller.dart';
 import 'widgets/language_picker_sheet.dart';
 import 'widgets/model_download_sheet.dart';
 
-/// Opens the language sheet for [side] and saves the choice; shows a snackbar on failure.
+/// Opens the language sheet for [side] and saves the choice; confirms with a
+/// toast, or shows a snackbar on failure.
 Future<void> pickLanguage(
   BuildContext context,
   WidgetRef ref,
@@ -27,6 +29,9 @@ Future<void> pickLanguage(
   if (code == null) return;
   try {
     await ref.read(settingsControllerProvider.notifier).setLanguage(side, code);
+    if (context.mounted) {
+      showAppToast(ScaffoldMessenger.of(context), Strings.languageSaved);
+    }
     final models = ref.read(settingsControllerProvider).value?.models;
     if (models != null && !models.ready && context.mounted) {
       await showModelDownloadSheet(context);

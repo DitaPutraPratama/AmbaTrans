@@ -121,4 +121,10 @@ abstract final class Strings {
   static const save = 'Simpan';
   static const apiKeyRequired = 'Isi API key dulu';
   static const modelRequired = 'Isi nama model dulu';
+
+  // Save confirmations (toast)
+  static String engineSaved(String engine) =>
+      'Tersimpan. Sekarang memakai $engine';
+  static const languageSaved = 'Bahasa tersimpan';
+  static const overlayStyleSaved = 'Tampilan terjemahan tersimpan';
 }

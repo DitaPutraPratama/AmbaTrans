@@ -24,6 +24,17 @@ abstract final class AppRadius {
   static const double pill = 999;
 }
 
+/// Motion durations (docs/DESIGN.md §3). Use [of] so the system
+/// "remove animations" setting turns them off.
+abstract final class AppMotion {
+  static const sheetEnter = Duration(milliseconds: 320);
+  static const sheetExit = Duration(milliseconds: 220);
+  static const reveal = Duration(milliseconds: 240);
+
+  static Duration of(BuildContext context, Duration duration) =>
+      MediaQuery.disableAnimationsOf(context) ? Duration.zero : duration;
+}
+
 /// Background and icon colors of a pastel icon tile.
 class PastelColors {
   const PastelColors(this.background, this.icon);

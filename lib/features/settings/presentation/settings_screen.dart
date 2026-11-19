@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../app/theme.dart';
 import '../../../core/languages.dart';
 import '../../../core/strings.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/icon_circle_button.dart';
 import '../../../core/widgets/section_title.dart';
 import '../application/settings_controller.dart';
@@ -157,6 +158,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                     onChanged: ref
                         .read(settingsControllerProvider.notifier)
                         .setOverlayStyle,
+                    onCommitted: () => showAppToast(
+                      ScaffoldMessenger.of(context),
+                      Strings.overlayStyleSaved,
+                    ),
                   ),
                 const SizedBox(height: AppSpacing.xl),
                 const SectionTitle(Strings.advancedSection),

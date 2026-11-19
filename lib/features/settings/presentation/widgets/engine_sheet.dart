@@ -5,6 +5,7 @@ import '../../../../app/theme.dart';
 import '../../../../core/platform/settings_channel.dart';
 import '../../../../core/strings.dart';
 import '../../../../core/widgets/app_bottom_sheet.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/pill_button.dart';
 import '../../../../core/widgets/selectable_card.dart';
 import '../../application/settings_controller.dart';
@@ -70,7 +71,10 @@ class _EngineSheetState extends ConsumerState<EngineSheet> {
       await ref
           .read(settingsControllerProvider.notifier)
           .setEngine(_engine, apiKey: key, model: model);
-      if (mounted) Navigator.of(context).pop();
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      Navigator.of(context).pop();
+      showAppToast(messenger, Strings.engineSaved(_engine.label));
     } on InvalidValueException {
       setState(() => _error = Strings.settingsSaveFailed);
     } finally {
@@ -132,18 +136,40 @@ class _EngineSheetState extends ConsumerState<EngineSheet> {
         _error = null;
       }),
     ),
-    if (e == _engine && e.online) ...[
-      const SizedBox(height: AppSpacing.sm),
-      EngineFields(
-        key: ValueKey(e),
-        engine: e,
-        apiKey: _keys[e]!,
-        model: _models[e],
-        editing: _editing.contains(e),
-        onEdit: () => setState(() => _editing.add(e)),
-        onOpenUrl: ref.read(settingsControllerProvider.notifier).openUrl,
+    // The fields unfold under the chosen card and fold away from the old one.
+    AnimatedSwitcher(
+      duration: AppMotion.of(context, AppMotion.reveal),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: SizeTransition(
+          sizeFactor: animation,
+          alignment: Alignment.topCenter,
+          child: child,
+        ),
       ),
-    ],
+      layoutBuilder: (current, previous) => Stack(
+        alignment: Alignment.topCenter,
+        children: [...previous, ?current],
+      ),
+      child: e == _engine && e.online
+          ? Padding(
+              key: ValueKey(e),
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: EngineFields(
+                engine: e,
+                apiKey: _keys[e]!,
+                model: _models[e],
+                editing: _editing.contains(e),
+                onEdit: () => setState(() => _editing.add(e)),
+                onOpenUrl: ref
+                    .read(settingsControllerProvider.notifier)
+                    .openUrl,
+              ),
+            )
+          : const SizedBox(key: ValueKey('none'), width: double.infinity),
+    ),
     const SizedBox(height: AppSpacing.sm),
   ];
 }

@@ -24,12 +24,16 @@ class OverlayColorCard extends StatelessWidget {
     required this.bgColor,
     required this.bgOpacity,
     required this.onChanged,
+    this.onCommitted,
   });
 
   final int textColor;
   final int bgColor;
   final int bgOpacity;
   final void Function(OverlayStyle style, int value) onChanged;
+
+  /// The user finished a change (a swatch tap, or letting go of the slider).
+  final VoidCallback? onCommitted;
 
   @override
   Widget build(BuildContext context) {
@@ -68,13 +72,19 @@ class OverlayColorCard extends StatelessWidget {
             Text(Strings.overlayTextColor, style: textTheme.labelLarge),
             _Swatches(
               selected: textColor,
-              onSelected: (v) => onChanged(OverlayStyle.textColor, v),
+              onSelected: (v) {
+                onChanged(OverlayStyle.textColor, v);
+                onCommitted?.call();
+              },
             ),
             const SizedBox(height: AppSpacing.md),
             Text(Strings.overlayBgColor, style: textTheme.labelLarge),
             _Swatches(
               selected: bgColor,
-              onSelected: (v) => onChanged(OverlayStyle.bgColor, v),
+              onSelected: (v) {
+                onChanged(OverlayStyle.bgColor, v);
+                onCommitted?.call();
+              },
             ),
             const SizedBox(height: AppSpacing.md),
             Row(
@@ -95,6 +105,7 @@ class OverlayColorCard extends StatelessWidget {
               label: Strings.percent(bgOpacity),
               semanticFormatterCallback: (v) => Strings.percent(v.round()),
               onChanged: (v) => onChanged(OverlayStyle.bgOpacity, v.round()),
+              onChangeEnd: (_) => onCommitted?.call(),
             ),
           ],
         ),

@@ -4,6 +4,7 @@ import 'package:ambatrans/core/strings.dart';
 import 'package:ambatrans/core/widgets/selectable_card.dart';
 import 'package:ambatrans/features/settings/application/settings_controller.dart';
 import 'package:ambatrans/features/settings/presentation/settings_screen.dart';
+import 'package:ambatrans/features/settings/presentation/widgets/overlay_color_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -91,8 +92,40 @@ void main() {
     await tester.tap(find.text('Jepang'));
     await tester.pumpAndSettle();
     expect((await settings.getAll())['source_lang'], 'ja');
+    expect(find.text(Strings.languageSaved), findsOneWidget);
     expect(find.text('Jepang'), findsOneWidget);
     expect(find.text(Strings.notDownloaded), findsOneWidget);
+  });
+
+  testWidgets('a swatch tap or letting go of the slider shows a toast', (
+    tester,
+  ) async {
+    final settings = FakeSettingsChannel();
+    await pumpScreen(tester, const SettingsScreen(), settings: settings);
+    await tester.scrollUntilVisible(find.byType(Slider), 200);
+    await tester.pumpAndSettle();
+    // Second swatch of the text-colour row.
+    await tester.tap(
+      find
+          .descendant(
+            of: find.byType(OverlayColorCard),
+            matching: find.byType(InkResponse),
+          )
+          .at(1),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.overlayStyleSaved), findsOneWidget);
+    expect((await settings.getAll())['overlay_text_color'], isNot(0xFFFFFF));
+
+    await tester.pump(const Duration(seconds: 3)); // toast times out
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.overlayStyleSaved), findsNothing);
+    final slider = find.byType(Slider);
+    await tester.ensureVisible(slider);
+    await tester.pumpAndSettle();
+    await tester.drag(slider, const Offset(-60, 0));
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.overlayStyleSaved), findsOneWidget);
   });
 
   testWidgets('target sheet disables the source language', (tester) async {

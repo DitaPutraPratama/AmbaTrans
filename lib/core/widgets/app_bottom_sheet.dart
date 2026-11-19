@@ -14,6 +14,11 @@ Future<T?> showAppBottomSheet<T>({
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: context.colors.surface,
+    sheetAnimationStyle: AnimationStyle(
+      duration: AppMotion.of(context, AppMotion.sheetEnter),
+      reverseDuration: AppMotion.of(context, AppMotion.sheetExit),
+      curve: Curves.easeOutCubic,
+    ),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(AppRadius.sheet),
@@ -111,7 +116,7 @@ class AppBottomSheet extends StatelessWidget {
             ),
             if (child != null) ...[
               const SizedBox(height: AppSpacing.lg),
-              Flexible(child: child!),
+              Flexible(child: _FadeUp(child: child!)),
             ],
             if (actions.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.xl),
@@ -122,6 +127,31 @@ class AppBottomSheet extends StatelessWidget {
               ],
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Sheet body eases in (fade + 16 dp rise) just behind the sheet itself, so
+/// the content reads as arriving rather than popping in.
+class _FadeUp extends StatelessWidget {
+  const _FadeUp({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: AppMotion.of(context, AppMotion.sheetEnter),
+      curve: Curves.easeOutCubic,
+      child: child,
+      builder: (context, t, child) => Opacity(
+        opacity: t,
+        child: Transform.translate(
+          offset: Offset(0, (1 - t) * 16),
+          child: child,
         ),
       ),
     );
