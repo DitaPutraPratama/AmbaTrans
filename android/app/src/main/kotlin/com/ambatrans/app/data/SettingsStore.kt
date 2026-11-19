@@ -1,6 +1,7 @@
 package com.ambatrans.app.data
 
 import android.content.SharedPreferences
+import com.ambatrans.app.translate.AiProvider
 
 class InvalidSettingException(message: String) : IllegalArgumentException(message)
 
@@ -19,8 +20,11 @@ class SettingsStore(private val prefs: SharedPreferences) {
     /** API key of a cloud [engine]; empty when not entered. */
     fun apiKey(engine: String): String = prefs.getString(apiKeyKey(engine), "") ?: ""
 
-    /** Model ID for the Groq AI engine. */
-    val groqModel: String get() = prefs.getString(KEY_GROQ_MODEL, DEFAULT_GROQ_MODEL) ?: DEFAULT_GROQ_MODEL
+    /** Model ID of an AI [engine]; its default until the user enters one. */
+    fun model(engine: String): String {
+        val default = AiProvider.of(engine)?.defaultModel ?: ""
+        return prefs.getString(modelKey(engine), default) ?: default
+    }
 
     /** Overlay label colours as 0xRRGGBB (no alpha; the overlay window sets the opacity). */
     val overlayTextColor: Int get() = prefs.getInt(KEY_OVERLAY_TEXT_COLOR, DEFAULT_OVERLAY_TEXT_COLOR)
@@ -42,10 +46,8 @@ class SettingsStore(private val prefs: SharedPreferences) {
         KEY_OVERLAY_BG_OPACITY to overlayBgOpacity,
         KEY_TRANSLATE_MODE to translateMode,
         KEY_TRANSLATE_ENGINE to translateEngine,
-        KEY_DEEPL_API_KEY to apiKey(ENGINE_DEEPL),
-        KEY_GROQ_API_KEY to apiKey(ENGINE_GROQ),
-        KEY_GROQ_MODEL to groqModel,
-    )
+    ) + ONLINE_ENGINES.associate { apiKeyKey(it) to apiKey(it) } +
+        AiProvider.entries.associate { modelKey(it.id) to model(it.id) }
 
     /** Validates and stores one value. Throws [InvalidSettingException] when the rules are violated. */
     fun set(key: String, value: Any?) {
@@ -82,20 +84,8 @@ class SettingsStore(private val prefs: SharedPreferences) {
                 if (value !in ENGINES) throw InvalidSettingException("invalid translate_engine")
                 editor.putString(key, value as String)
             }
-            KEY_DEEPL_API_KEY, KEY_GROQ_API_KEY -> {
-                val apiKey = (value as? String)?.trim()
-                if (apiKey == null || apiKey.length > MAX_API_KEY_LENGTH || apiKey.any { it.isWhitespace() }) {
-                    throw InvalidSettingException("$key must be a key without spaces")
-                }
-                editor.putString(key, apiKey)
-            }
-            KEY_GROQ_MODEL -> {
-                val model = (value as? String)?.trim()
-                if (model.isNullOrEmpty() || model.length > MAX_API_KEY_LENGTH || model.any { it.isWhitespace() }) {
-                    throw InvalidSettingException("$key must be a model ID without spaces")
-                }
-                editor.putString(key, model)
-            }
+            in API_KEY_KEYS -> editor.putString(key, value.asToken(key, allowEmpty = true))
+            in MODEL_KEYS -> editor.putString(key, value.asToken(key, allowEmpty = false))
             KEY_OVERLAY_BG_OPACITY -> {
                 val percent = value as? Int
                 if (percent == null || percent !in 0..100) throw InvalidSettingException("$key must be 0..100")
@@ -112,6 +102,19 @@ class SettingsStore(private val prefs: SharedPreferences) {
         if (stored >= CURRENT_SCHEMA_VERSION) return
         // Version 0 -> 1: fresh install, defaults apply; just stamp the version.
         prefs.edit().putInt(KEY_SCHEMA_VERSION, CURRENT_SCHEMA_VERSION).apply()
+    }
+
+    /** API keys and model IDs: trimmed, no inner spaces, bounded length. */
+    private fun Any?.asToken(key: String, allowEmpty: Boolean): String {
+        val token = (this as? String)?.trim()
+        if (token == null ||
+            token.length > MAX_TOKEN_LENGTH ||
+            token.any { it.isWhitespace() } ||
+            (!allowEmpty && token.isEmpty())
+        ) {
+            throw InvalidSettingException("$key must be text without spaces")
+        }
+        return token
     }
 
     private fun Any?.asBoolean(key: String): Boolean =
@@ -147,10 +150,6 @@ class SettingsStore(private val prefs: SharedPreferences) {
         const val KEY_OVERLAY_BG_OPACITY = "overlay_bg_opacity"
         const val KEY_TRANSLATE_MODE = "translate_mode"
         const val KEY_TRANSLATE_ENGINE = "translate_engine"
-        const val KEY_DEEPL_API_KEY = "deepl_api_key"
-        const val KEY_GROQ_API_KEY = "groq_api_key"
-        const val KEY_GROQ_MODEL = "groq_model"
-        const val DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile"
 
         const val DEFAULT_SOURCE_LANG = "en"
         const val DEFAULT_TARGET_LANG = "id"
@@ -167,11 +166,16 @@ class SettingsStore(private val prefs: SharedPreferences) {
         const val MODE_REGION = "region"
         const val ENGINE_MLKIT = "mlkit"
         const val ENGINE_DEEPL = "deepl"
-        const val ENGINE_GROQ = "groq"
-        private val ENGINES = setOf(ENGINE_MLKIT, ENGINE_DEEPL, ENGINE_GROQ)
-        private const val MAX_API_KEY_LENGTH = 200
+        private val ONLINE_ENGINES = listOf(ENGINE_DEEPL) + AiProvider.entries.map { it.id }
+        private val ENGINES = ONLINE_ENGINES.toSet() + ENGINE_MLKIT
+        private const val MAX_TOKEN_LENGTH = 200
 
         private fun apiKeyKey(engine: String) = "${engine}_api_key"
+
+        private fun modelKey(engine: String) = "${engine}_model"
+
+        private val API_KEY_KEYS = ONLINE_ENGINES.map(::apiKeyKey).toSet()
+        private val MODEL_KEYS = AiProvider.entries.map { modelKey(it.id) }.toSet()
 
         // ponytail: shape check only; membership in the ML Kit language list is enforced once LanguageCatalog exists (T-022).
         private val LANG_CODE = Regex("[a-z]{2,3}(-[A-Za-z0-9]{2,8})*")

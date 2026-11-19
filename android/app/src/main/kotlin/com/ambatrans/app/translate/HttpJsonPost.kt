@@ -38,9 +38,10 @@ object HttpJsonPost : JsonPost {
             }
         }
 
-    /** 456 is DeepL's "quota exceeded"; 429 is the usual rate limit. */
+    /** 456 is DeepL's "quota exceeded"; 429 is the usual rate limit; 404 is an unknown model ID. */
     fun errorFor(httpCode: Int): TranslateError = when (httpCode) {
         401, 403 -> TranslateError.API_KEY_REJECTED
+        404 -> TranslateError.MODEL_NOT_FOUND
         429, 456 -> TranslateError.QUOTA_EXCEEDED
         else -> TranslateError.FAILED
     }

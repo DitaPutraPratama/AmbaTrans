@@ -232,6 +232,7 @@ class OverlayService :
                 TranslateError.FAILED -> R.string.toast_failed
                 TranslateError.API_KEY_MISSING -> R.string.toast_api_key_missing
                 TranslateError.API_KEY_REJECTED -> R.string.toast_api_key_rejected
+                TranslateError.MODEL_NOT_FOUND -> R.string.toast_model_not_found
                 TranslateError.QUOTA_EXCEEDED -> R.string.toast_quota_exceeded
                 TranslateError.NETWORK -> R.string.toast_network
             },
@@ -244,7 +245,7 @@ class OverlayService :
 
     private fun toast(message: Int) {
         // Quota and key problems need the user to act in Settings, so they stay up longer.
-        val long = message == R.string.toast_quota_exceeded || message == R.string.toast_api_key_rejected
+        val long = message in LONG_TOASTS
         Toast.makeText(this, message, if (long) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
     }
 
@@ -268,6 +269,11 @@ class OverlayService :
         private const val ACTION_PROJECTION_DENIED = "com.ambatrans.app.action.PROJECTION_DENIED"
         private const val EXTRA_RESULT_CODE = "result_code"
         private const val EXTRA_DATA = "data"
+        private val LONG_TOASTS = setOf(
+            R.string.toast_quota_exceeded,
+            R.string.toast_api_key_rejected,
+            R.string.toast_model_not_found,
+        )
 
         fun startIntent(context: Context) = Intent(context, OverlayService::class.java)
 

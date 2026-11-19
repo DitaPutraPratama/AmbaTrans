@@ -37,10 +37,8 @@ object CloudTranslators {
         if (engine == SettingsStore.ENGINE_MLKIT) return null
         val apiKey = store.apiKey(engine)
         if (apiKey.isBlank()) throw CloudException(TranslateError.API_KEY_MISSING)
-        return when (engine) {
-            SettingsStore.ENGINE_DEEPL -> DeepLTranslator(apiKey, http)
-            SettingsStore.ENGINE_GROQ -> GroqTranslator(apiKey, store.groqModel, http)
-            else -> null
-        }
+        if (engine == SettingsStore.ENGINE_DEEPL) return DeepLTranslator(apiKey, http)
+        val ai = AiProvider.of(engine) ?: return null
+        return ChatTranslator(ai.url, apiKey, store.model(engine), http)
     }
 }

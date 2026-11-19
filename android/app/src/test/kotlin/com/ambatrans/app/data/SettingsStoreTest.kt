@@ -149,6 +149,18 @@ class SettingsStoreTest {
     }
 
     @Test
+    fun `AI models default per provider and an empty model is rejected`() {
+        val s = store()
+        assertEquals("llama-3.3-70b-versatile", s.getAll()["groq_model"])
+        assertEquals("", s.getAll()["gemini_api_key"])
+        s.set("gemini_model", " gemini-x ")
+        assertEquals("gemini-x", s.model("gemini"))
+        assertThrows(InvalidSettingException::class.java) { s.set("gemini_model", "  ") }
+        assertThrows(InvalidSettingException::class.java) { s.set("deepl_model", "x") }
+        assertEquals("gemini-x", s.model("gemini"))
+    }
+
+    @Test
     fun `migrate stamps a fresh install with the current version`() {
         val data = mutableMapOf<String, Any>()
         val s = store(data)

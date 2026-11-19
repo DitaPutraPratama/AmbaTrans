@@ -20,6 +20,7 @@ enum class TranslateError {
     // Online engines (ADR-024)
     API_KEY_MISSING,
     API_KEY_REJECTED,
+    MODEL_NOT_FOUND,
     QUOTA_EXCEEDED,
     NETWORK,
 }

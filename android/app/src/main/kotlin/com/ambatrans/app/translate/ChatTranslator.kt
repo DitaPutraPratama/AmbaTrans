@@ -5,30 +5,30 @@ import org.json.JSONObject
 import java.util.Locale
 
 /**
- * Translates with an LLM on Groq (OpenAI-compatible chat API). The whole screen goes in one request so
- * the model sees every piece as context for the others (ADR-024).
+ * Translates with an LLM over an OpenAI-compatible chat API ([AiProvider]). The whole screen goes in one
+ * request so the model sees every piece as context for the others (ADR-024).
  */
-class GroqTranslator(private val apiKey: String, private val model: String, private val http: JsonPost) :
-    CloudTranslator {
+class ChatTranslator(
+    private val url: String,
+    private val apiKey: String,
+    private val model: String,
+    private val http: JsonPost,
+) : CloudTranslator {
     override suspend fun translate(texts: List<String>, source: String, target: String): List<String> {
         val messages = JSONArray()
             .put(JSONObject().put("role", "system").put("content", systemPrompt(source, target)))
             .put(JSONObject().put("role", "user").put("content", JSONArray(texts).toString()))
-        val body = JSONObject()
-            .put("model", model)
-            .put("temperature", TEMPERATURE)
-            .put("response_format", JSONObject().put("type", "json_object"))
-            .put("messages", messages)
-        val response = http.post(URL, mapOf("Authorization" to "Bearer $apiKey"), body.toString())
+        // No temperature / response_format: not every provider or model accepts them.
+        val body = JSONObject().put("model", model).put("messages", messages)
+        val response = http.post(url, mapOf("Authorization" to "Bearer $apiKey"), body.toString())
         val content = JSONObject(response).getJSONArray("choices").getJSONObject(0)
             .getJSONObject("message").getString("content")
-        val translations = JSONObject(content).getJSONArray("translations")
+        val translations = JSONObject(jsonIn(content)).getJSONArray("translations")
         return List(translations.length()) { translations.optString(it) }
     }
 
     companion object {
-        private const val URL = "https://api.groq.com/openai/v1/chat/completions"
-        private const val TEMPERATURE = 0.2
+        private val TRANSLATIONS_START = Regex("\\{\\s*\"translations\"")
 
         fun systemPrompt(source: String, target: String): String {
             val from = if (source == "auto") "whatever language it is in" else languageName(source)
@@ -43,5 +43,12 @@ class GroqTranslator(private val apiKey: String, private val model: String, priv
 
         fun languageName(code: String): String =
             Locale.forLanguageTag(code).getDisplayLanguage(Locale.ENGLISH).ifBlank { code }
+
+        /** The answer object, even when a model wraps it in ``` fences or adds reasoning text first. */
+        fun jsonIn(content: String): String {
+            val start = TRANSLATIONS_START.findAll(content).lastOrNull()?.range?.first ?: return content
+            val end = content.lastIndexOf('}')
+            return if (end > start) content.substring(start, end + 1) else content
+        }
     }
 }

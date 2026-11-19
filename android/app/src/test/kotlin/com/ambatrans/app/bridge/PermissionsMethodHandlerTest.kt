@@ -51,6 +51,13 @@ class PermissionsMethodHandlerTest {
     }
 
     @Test
+    fun `openUrl answers whether a browser opened`() {
+        every { permissions.openUrl("https://console.groq.com/keys") } returns true
+        handler.onMethodCall(MethodCall("openUrl", mapOf("url" to "https://console.groq.com/keys")), result)
+        verify { result.success(true) }
+    }
+
+    @Test
     fun `requestNotifications answers when the callback fires`() {
         val callback = slot<(Boolean) -> Unit>()
         every { permissions.requestNotifications(capture(callback)) } returns Unit

@@ -50,6 +50,17 @@ class AndroidPermissions(private val activity: Activity) {
         }
     }
 
+    /** Opens an https link in the browser (API key and model pages). False when nothing can open it. */
+    fun openUrl(url: String): Boolean {
+        if (!url.startsWith("https://")) return false
+        return try {
+            activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            true
+        } catch (e: ActivityNotFoundException) {
+            false
+        }
+    }
+
     /** Asks for POST_NOTIFICATIONS (Android 13+); [onResult] receives whether notifications are allowed. */
     fun requestNotifications(onResult: (Boolean) -> Unit) {
         if (notificationsGranted()) {

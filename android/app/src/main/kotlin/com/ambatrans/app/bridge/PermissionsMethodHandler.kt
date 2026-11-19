@@ -32,6 +32,7 @@ class PermissionsMethodHandler(
                 permissions.openBatterySettings()
                 result.success(null)
             }
+            "openUrl" -> result.success(permissions.openUrl(call.argument<String>("url").orEmpty()))
             "requestNotifications" -> permissions.requestNotifications { result.success(it) }
             else -> result.notImplemented()
         }

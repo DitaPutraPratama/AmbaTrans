@@ -51,20 +51,33 @@ class CloudTranslatorTest {
     }
 
     @Test
-    fun `Groq uses the chosen model and reads the translations array from the reply`() = runBlocking {
+    fun `AI chat uses the chosen model and reads the translations array from the reply`() = runBlocking {
         val content = JSONObject().put("translations", JSONArray(listOf("Halo", "Dunia"))).toString()
         val reply = JSONObject().put(
             "choices",
             JSONArray().put(JSONObject().put("message", JSONObject().put("content", content))),
         )
         val http = FakeHttp(reply.toString())
-        val out = GroqTranslator("gsk", "my-model", http).translate(listOf("Hello", "World"), "en", "id")
+        val out = ChatTranslator(
+            "https://x/chat",
+            "gsk",
+            "my-model",
+            http,
+        ).translate(listOf("Hello", "World"), "en", "id")
         assertEquals(listOf("Halo", "Dunia"), out)
         assertEquals("Bearer gsk", http.headers["Authorization"])
         assertEquals("my-model", http.body.getString("model"))
         val messages = http.body.getJSONArray("messages")
         assertTrue(messages.getJSONObject(0).getString("content").contains("into Indonesian"))
         assertEquals("[\"Hello\",\"World\"]", messages.getJSONObject(1).getString("content"))
+    }
+
+    @Test
+    fun `the answer is found inside code fences or after reasoning text`() {
+        val answer = """{"translations": ["Halo"]}"""
+        assertEquals(answer, ChatTranslator.jsonIn("```json\n$answer\n```"))
+        assertEquals(answer, ChatTranslator.jsonIn("Thinking {not this}... $answer"))
+        assertEquals(answer, ChatTranslator.jsonIn(answer))
     }
 
     @Test
@@ -92,11 +105,15 @@ class CloudTranslatorTest {
         assertEquals(TranslateError.API_KEY_MISSING, e.error)
         store.set("deepl_api_key", "k:fx")
         assertTrue(CloudTranslators.forEngine(store) is DeepLTranslator)
+        store.set("translate_engine", "gemini")
+        store.set("gemini_api_key", "g")
+        assertTrue(CloudTranslators.forEngine(store) is ChatTranslator)
     }
 
     @Test
     fun `HTTP codes map to the errors the user can act on`() {
         assertEquals(TranslateError.API_KEY_REJECTED, HttpJsonPost.errorFor(403))
+        assertEquals(TranslateError.MODEL_NOT_FOUND, HttpJsonPost.errorFor(404))
         assertEquals(TranslateError.QUOTA_EXCEEDED, HttpJsonPost.errorFor(456))
         assertEquals(TranslateError.QUOTA_EXCEEDED, HttpJsonPost.errorFor(429))
         assertEquals(TranslateError.FAILED, HttpJsonPost.errorFor(500))
