@@ -51,11 +51,10 @@ class CloudTranslatorTest {
     }
 
     @Test
-    fun `AI chat uses the chosen model and reads the translations array from the reply`() = runBlocking {
-        val content = JSONObject().put("translations", JSONArray(listOf("Halo", "Dunia"))).toString()
+    fun `AI chat sends numbered lines and reads numbered answers`() = runBlocking {
         val reply = JSONObject().put(
             "choices",
-            JSONArray().put(JSONObject().put("message", JSONObject().put("content", content))),
+            JSONArray().put(JSONObject().put("message", JSONObject().put("content", "1. Halo\n2. Dunia"))),
         )
         val http = FakeHttp(reply.toString())
         val out = ChatTranslator(
@@ -69,15 +68,32 @@ class CloudTranslatorTest {
         assertEquals("my-model", http.body.getString("model"))
         val messages = http.body.getJSONArray("messages")
         assertTrue(messages.getJSONObject(0).getString("content").contains("into Indonesian"))
-        assertEquals("[\"Hello\",\"World\"]", messages.getJSONObject(1).getString("content"))
+        assertEquals("1. Hello\n2. World", messages.getJSONObject(1).getString("content"))
     }
 
     @Test
-    fun `the answer is found inside code fences or after reasoning text`() {
-        val answer = """{"translations": ["Halo"]}"""
-        assertEquals(answer, ChatTranslator.jsonIn("```json\n$answer\n```"))
-        assertEquals(answer, ChatTranslator.jsonIn("Thinking {not this}... $answer"))
-        assertEquals(answer, ChatTranslator.jsonIn(answer))
+    fun `numbered answers - skipped lines stay blank, reasoning before the answer is ignored`() {
+        val content = "Thinking: 1. draft\n```\n1) Halo\n3: Tiga\n9. out of range\n```"
+        assertEquals(listOf("Halo", "", "Tiga"), ChatTranslator.parseNumbered(content, 3))
+    }
+
+    @Test
+    fun `the prompt stays short`() {
+        assertTrue(ChatTranslator.systemPrompt("en", "id").length < 260)
+        assertTrue(!ChatTranslator.systemPrompt("auto", "id").contains("English"))
+        assertTrue(ChatTranslator.systemPrompt("en", "id").contains("from English"))
+    }
+
+    @Test
+    fun `repeated texts are translated once`() = runBlocking {
+        val sent = mutableListOf<List<String>>()
+        val api = CloudTranslator { texts, _, _ ->
+            sent += texts
+            texts.map { "<$it>" }
+        }
+        val out = api.translateAll(blocks("Like", "Post", "Like"), "en", "id")
+        assertEquals(listOf(listOf("Like", "Post")), sent)
+        assertEquals(listOf("<Like>", "<Post>", "<Like>"), out.map { it.translated })
     }
 
     @Test

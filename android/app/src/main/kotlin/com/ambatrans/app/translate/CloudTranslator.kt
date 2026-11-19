@@ -14,18 +14,23 @@ fun interface CloudTranslator {
 /** A cloud failure the user can act on (no key, key rejected, quota, no connection). */
 class CloudException(val error: TranslateError) : Exception(error.name)
 
-/** Pairs each block with its translation; blank answers are skipped like failed ML Kit blocks (F-06). */
+/**
+ * Pairs each block with its translation; blank answers are skipped like failed ML Kit blocks (F-06).
+ * Repeated texts (e.g. several "Like" buttons) are sent once, saving tokens and DeepL characters.
+ */
 suspend fun CloudTranslator.translateAll(
     blocks: List<TextBlock>,
     source: String,
     target: String,
 ): List<TranslatedBlock> {
     if (blocks.isEmpty()) return emptyList()
-    val texts = translate(blocks.map { it.text }, source, target)
-    if (texts.size != blocks.size) throw TranslationFailedException()
-    val translated = blocks.zip(texts)
-        .filter { (_, text) -> text.isNotBlank() }
-        .map { (block, text) -> TranslatedBlock(block, text.trim()) }
+    val unique = blocks.map { it.text }.distinct()
+    val answers = translate(unique, source, target)
+    if (answers.size != unique.size) throw TranslationFailedException()
+    val byText = unique.zip(answers).toMap()
+    val translated = blocks.mapNotNull { block ->
+        byText[block.text]?.takeIf { it.isNotBlank() }?.let { TranslatedBlock(block, it.trim()) }
+    }
     if (translated.isEmpty()) throw TranslationFailedException()
     return translated
 }
