@@ -99,6 +99,20 @@ class TranslateScreenUseCaseTest {
     }
 
     @Test
+    fun `text already in the target language gets no label`() = runBlocking {
+        val lines = listOf(TextBlock("Share", 0, 0, 50, 20), TextBlock("Bagikan", 0, 40, 50, 60))
+        useCase(lines = lines, translate = { b, _, _ -> b.map { TranslatedBlock(it, "Bagikan") } }).run()
+        assertEquals(listOf("Share"), ui.result!!.map { it.block.text })
+    }
+
+    @Test
+    fun `when everything is already in the target language the user is told so`() = runBlocking {
+        val lines = listOf(TextBlock("Bagikan", 0, 0, 50, 20))
+        useCase(lines = lines, translate = { b, _, _ -> b.map { TranslatedBlock(it, it.text) } }).run()
+        assertEquals(TranslateError.ALREADY_IN_TARGET, ui.error)
+    }
+
+    @Test
     fun `region with nothing translatable reports no text`() = runBlocking {
         useCase(lines = listOf(TextBlock("123", 0, 0, 10, 10))).run(ScreenRect(0, 0, 50, 50))
         assertEquals(TranslateError.NO_TEXT, ui.error)

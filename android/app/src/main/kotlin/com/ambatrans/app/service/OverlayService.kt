@@ -212,6 +212,7 @@ class OverlayService :
                 TranslateError.SCREEN_PROTECTED -> R.string.toast_screen_protected
                 TranslateError.MODELS_MISSING -> R.string.toast_models_missing
                 TranslateError.NO_TEXT -> R.string.toast_no_text
+                TranslateError.ALREADY_IN_TARGET -> R.string.toast_already_in_target
                 TranslateError.FAILED -> R.string.toast_failed
             },
         )

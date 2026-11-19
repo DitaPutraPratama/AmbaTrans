@@ -10,6 +10,11 @@ object TextFilter {
 
     fun filter(blocks: List<TextBlock>): List<TextBlock> = blocks.filter { isTranslatable(it.text) }
 
+    /** True when translating changed nothing but case, spaces or punctuation (e.g. "Bagikan" in id -> id). */
+    fun isUnchanged(original: String, translated: String): Boolean = letters(original) == letters(translated)
+
+    private fun letters(text: String) = text.filter { it.isLetterOrDigit() }.lowercase()
+
     fun isTranslatable(text: String): Boolean {
         val stripped = CURRENCY_TOKEN.replace(text, " ")
         val letters = stripped.filter { it.isLetter() }

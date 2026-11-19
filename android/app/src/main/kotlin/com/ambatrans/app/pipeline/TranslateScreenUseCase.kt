@@ -8,7 +8,7 @@ import com.ambatrans.app.translate.ModelNotReadyException
 import com.ambatrans.app.translate.TranslationFailedException
 import kotlinx.coroutines.CancellationException
 
-enum class TranslateError { NEEDS_CAPTURE, SCREEN_PROTECTED, MODELS_MISSING, NO_TEXT, FAILED }
+enum class TranslateError { NEEDS_CAPTURE, SCREEN_PROTECTED, MODELS_MISSING, NO_TEXT, ALREADY_IN_TARGET, FAILED }
 
 /** What the pipeline needs from the screen: hiding things before capture and showing progress / results. */
 interface TranslateUi {
@@ -53,7 +53,12 @@ class TranslateScreenUseCase(
                 listOfNotNull(RegionText.merge(blocks))
             }
             if (lines.isEmpty()) return ui.showError(TranslateError.NO_TEXT)
-            ui.showResult(translate(lines, source, target))
+            // Text already in the target language (e.g. the app's own buttons) needs no label.
+            val changed = translate(lines, source, target).filterNot {
+                TextFilter.isUnchanged(it.block.text, it.translated)
+            }
+            if (changed.isEmpty()) return ui.showError(TranslateError.ALREADY_IN_TARGET)
+            ui.showResult(changed)
         } catch (e: CancellationException) {
             throw e
         } catch (e: NoProjectionException) {

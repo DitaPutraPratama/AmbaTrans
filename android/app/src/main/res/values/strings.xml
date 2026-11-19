@@ -17,4 +17,5 @@
     <string name="toast_no_text">Tidak ada teks ditemukan</string>
     <string name="toast_models_missing">Model bahasa belum siap</string>
     <string name="toast_failed">Terjemahan gagal, coba lagi</string>
+    <string name="toast_already_in_target">Teks sudah dalam bahasa tujuan</string>
 </resources>

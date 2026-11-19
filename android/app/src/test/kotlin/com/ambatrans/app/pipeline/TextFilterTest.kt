@@ -7,6 +7,13 @@ import org.junit.Test
 
 class TextFilterTest {
     @Test
+    fun `a translation that only differs in case, spaces or punctuation is unchanged`() {
+        assertTrue(TextFilter.isUnchanged("Buka >", "Buka"))
+        assertTrue(TextFilter.isUnchanged("Bagikan", "bagikan."))
+        assertFalse(TextFilter.isUnchanged("Share", "Bagikan"))
+    }
+
+    @Test
     fun `numbers symbols and prices are not translatable`() {
         listOf(
             "", "   ", "123", "12.000", "1,234.56", "Rp 12.000", "Rp12.000", "IDR 1,000", "USD 9.99", "$9.99",
