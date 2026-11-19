@@ -8,16 +8,24 @@ import '../../../core/platform/models_channel.dart';
 import '../../../core/platform/settings_channel.dart';
 
 /// Translation engines (ADR-024). [id] is the stored `translate_engine` value.
+/// AI engines (everything after DeepL) also need a model ID.
 enum TranslationEngine {
   mlkit('mlkit'),
   deepl('deepl'),
-  groq('groq');
+  groq('groq'),
+  gemini('gemini'),
+  cerebras('cerebras'),
+  mistral('mistral'),
+  openai('openai'),
+  deepseek('deepseek');
 
   const TranslationEngine(this.id);
 
   final String id;
 
   bool get online => this != mlkit;
+
+  bool get hasModel => online && this != deepl;
 
   static TranslationEngine fromId(Object? id) =>
       values.firstWhere((e) => e.id == id, orElse: () => mlkit);
@@ -36,10 +44,9 @@ class SettingsState {
     this.overlayBgOpacity = defaultOverlayBgOpacity,
     this.engine = TranslationEngine.mlkit,
     this.apiKeys = const {},
-    this.groqModel = defaultGroqModel,
+    this.aiModels = const {},
   });
 
-  static const defaultGroqModel = 'llama-3.3-70b-versatile';
   static const defaultOverlayTextColor = 0xFFFFFF;
   static const defaultOverlayBgColor = 0x424242;
   static const defaultOverlayBgOpacity = 100;
@@ -61,7 +68,9 @@ class SettingsState {
 
   /// Saved API key per online engine; kept when switching engines.
   final Map<TranslationEngine, String> apiKeys;
-  final String groqModel;
+
+  /// Model ID per AI engine (native fills in each provider's default).
+  final Map<TranslationEngine, String> aiModels;
 
   SettingsState copyWith({
     String? source,
@@ -74,7 +83,7 @@ class SettingsState {
     int? overlayBgOpacity,
     TranslationEngine? engine,
     Map<TranslationEngine, String>? apiKeys,
-    String? groqModel,
+    Map<TranslationEngine, String>? aiModels,
   }) => SettingsState(
     source: source ?? this.source,
     target: target ?? this.target,
@@ -86,7 +95,7 @@ class SettingsState {
     overlayBgOpacity: overlayBgOpacity ?? this.overlayBgOpacity,
     engine: engine ?? this.engine,
     apiKeys: apiKeys ?? this.apiKeys,
-    groqModel: groqModel ?? this.groqModel,
+    aiModels: aiModels ?? this.aiModels,
   );
 }
 
@@ -165,7 +174,10 @@ class SettingsController extends AsyncNotifier<SettingsState> {
         for (final e in TranslationEngine.values.where((e) => e.online))
           e: all['${e.id}_api_key'] as String? ?? '',
       },
-      groqModel: all['groq_model'] as String? ?? SettingsState.defaultGroqModel,
+      aiModels: {
+        for (final e in TranslationEngine.values.where((e) => e.hasModel))
+          e: all['${e.id}_model'] as String? ?? '',
+      },
     );
   }
 
@@ -234,7 +246,7 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     final settings = ref.read(settingsChannelProvider);
     final current = state.requireValue;
     if (apiKey != null) await settings.set('${engine.id}_api_key', apiKey);
-    if (model != null) await settings.set('groq_model', model);
+    if (model != null) await settings.set('${engine.id}_model', model);
     await settings.set('translate_engine', engine.id);
     state = AsyncData(
       current.copyWith(
@@ -242,10 +254,16 @@ class SettingsController extends AsyncNotifier<SettingsState> {
         apiKeys: apiKey == null
             ? null
             : {...current.apiKeys, engine: apiKey.trim()},
-        groqModel: model?.trim(),
+        aiModels: model == null
+            ? null
+            : {...current.aiModels, engine: model.trim()},
       ),
     );
   }
+
+  /// Opens an API key or model list page in the browser.
+  Future<void> openUrl(String url) =>
+      ref.read(permissionsChannelProvider).openUrl(url);
 
   /// Saves [code] for [side]. Throws [InvalidValueException] if native rejects it
   /// (e.g. source equal to target); the stored state is then unchanged.

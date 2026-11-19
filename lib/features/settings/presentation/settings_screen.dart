@@ -9,6 +9,7 @@ import '../../../core/widgets/section_title.dart';
 import '../application/settings_controller.dart';
 import 'language_picking.dart';
 import 'widgets/battery_tips_card.dart';
+import 'widgets/engine_info.dart';
 import 'widgets/engine_sheet.dart';
 import 'widgets/model_download_sheet.dart';
 import 'widgets/model_status_card.dart';

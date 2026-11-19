@@ -19,6 +19,7 @@ class FakePermissionsChannel implements PermissionsChannel {
   int requestNotificationsCalls = 0;
   int openBatterySettingsCalls = 0;
   int openNotificationSettingsCalls = 0;
+  final openedUrls = <String>[];
 
   @override
   Future<PermissionStatus> getStatus() async => PermissionStatus(
@@ -42,6 +43,12 @@ class FakePermissionsChannel implements PermissionsChannel {
   @override
   Future<void> openNotificationSettings() async =>
       openNotificationSettingsCalls++;
+
+  @override
+  Future<bool> openUrl(String url) async {
+    openedUrls.add(url);
+    return true;
+  }
 
   @override
   Future<bool> requestNotifications() async {

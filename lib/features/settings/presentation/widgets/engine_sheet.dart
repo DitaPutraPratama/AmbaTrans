@@ -8,32 +8,16 @@ import '../../../../core/widgets/app_bottom_sheet.dart';
 import '../../../../core/widgets/pill_button.dart';
 import '../../../../core/widgets/selectable_card.dart';
 import '../../application/settings_controller.dart';
-
-const _deeplKeysUrl = 'https://www.deepl.com/your-account/keys';
-const _groqKeysUrl = 'https://console.groq.com/keys';
-const _groqModelsUrl = 'https://console.groq.com/docs/models';
+import 'engine_fields.dart';
+import 'engine_info.dart';
 
 Future<void> showEngineSheet(BuildContext context) => showAppBottomSheet<void>(
   context: context,
   builder: (_) => const EngineSheet(),
 );
 
-extension TranslationEngineLabel on TranslationEngine {
-  String get label => switch (this) {
-    TranslationEngine.mlkit => Strings.engineMlkit,
-    TranslationEngine.deepl => Strings.engineDeepl,
-    TranslationEngine.groq => Strings.engineGroq,
-  };
-
-  String get body => switch (this) {
-    TranslationEngine.mlkit => Strings.engineMlkitBody,
-    TranslationEngine.deepl => Strings.engineDeeplBody,
-    TranslationEngine.groq => Strings.engineGroqBody,
-  };
-}
-
-/// Pick the engine; online engines ask for their API key (and model for AI).
-/// Saved keys stay, so switching back needs no retyping.
+/// Pick the engine, grouped offline / free / paid. The key (and model) fields
+/// open under the chosen online engine; saved values stay per engine.
 class EngineSheet extends ConsumerStatefulWidget {
   const EngineSheet({super.key});
 
@@ -46,26 +30,36 @@ class _EngineSheetState extends ConsumerState<EngineSheet> {
       .read(settingsControllerProvider)
       .requireValue;
   late TranslationEngine _engine = _initial.engine;
-  late final Map<TranslationEngine, TextEditingController> _keys = {
+  late final _keys = {
     for (final e in TranslationEngine.values.where((e) => e.online))
       e: TextEditingController(text: _initial.apiKeys[e] ?? ''),
   };
-  late final _model = TextEditingController(text: _initial.groqModel);
+  late final _models = {
+    for (final e in TranslationEngine.values.where((e) => e.hasModel))
+      e: TextEditingController(text: _initial.aiModels[e] ?? ''),
+  };
+
+  /// Engines whose fields are unlocked: those without a saved key, plus any
+  /// the user tapped "Ubah" on.
+  late final _editing = {
+    for (final e in _keys.keys)
+      if ((_initial.apiKeys[e] ?? '').isEmpty) e,
+  };
   String? _error;
   bool _saving = false;
 
   @override
   void dispose() {
-    for (final c in _keys.values) {
+    for (final c in [..._keys.values, ..._models.values]) {
       c.dispose();
     }
-    _model.dispose();
     super.dispose();
   }
 
   Future<void> _save() async {
-    final key = _keys[_engine]?.text.trim();
-    final model = _engine == TranslationEngine.groq ? _model.text.trim() : null;
+    final editing = _editing.contains(_engine);
+    final key = editing ? _keys[_engine]?.text.trim() : null;
+    final model = editing ? _models[_engine]?.text.trim() : null;
     final error = key != null && key.isEmpty
         ? Strings.apiKeyRequired
         : (model != null && model.isEmpty ? Strings.modelRequired : null);
@@ -86,6 +80,7 @@ class _EngineSheetState extends ConsumerState<EngineSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return AppBottomSheet(
       icon: Icons.auto_awesome_rounded,
       iconColors: AppPastels.purple,
@@ -93,6 +88,12 @@ class _EngineSheetState extends ConsumerState<EngineSheet> {
       subtitle: Strings.engineSheetSubtitle,
       closeLabel: Strings.close,
       actions: [
+        if (_error != null)
+          Text(
+            _error!,
+            textAlign: TextAlign.center,
+            style: textTheme.bodySmall?.copyWith(color: context.colors.error),
+          ),
         PillButton(
           label: Strings.save,
           expand: true,
@@ -105,26 +106,15 @@ class _EngineSheetState extends ConsumerState<EngineSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (final e in TranslationEngine.values) ...[
-              SelectableCard(
-                title: e.label,
-                subtitle: e.body,
-                selected: e == _engine,
-                onTap: () => setState(() {
-                  _engine = e;
-                  _error = null;
-                }),
+            for (final group in EngineGroup.values) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: Text(group.title, style: textTheme.labelLarge),
               ),
-              const SizedBox(height: AppSpacing.sm),
-            ],
-            if (_engine.online) ..._onlineFields(context),
-            if (_error != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                _error!,
-                style: Theme.of(context).textTheme.bodySmall
-                    ?.copyWith(color: context.colors.error),
-              ),
+              for (final e in TranslationEngine.values.where(
+                (e) => e.group == group,
+              ))
+                ..._engineCard(e),
             ],
           ],
         ),
@@ -132,44 +122,28 @@ class _EngineSheetState extends ConsumerState<EngineSheet> {
     );
   }
 
-  List<Widget> _onlineFields(BuildContext context) {
-    final small = Theme.of(context).textTheme.bodySmall;
-    final isGroq = _engine == TranslationEngine.groq;
-    return [
+  List<Widget> _engineCard(TranslationEngine e) => [
+    SelectableCard(
+      title: e.label,
+      subtitle: e.note,
+      selected: e == _engine,
+      onTap: () => setState(() {
+        _engine = e;
+        _error = null;
+      }),
+    ),
+    if (e == _engine && e.online) ...[
       const SizedBox(height: AppSpacing.sm),
-      TextField(
-        key: const Key('api-key-field'),
-        controller: _keys[_engine],
-        obscureText: true,
-        autocorrect: false,
-        enableSuggestions: false,
-        decoration: const InputDecoration(
-          labelText: Strings.apiKey,
-          prefixIcon: Icon(Icons.key_rounded),
-        ),
+      EngineFields(
+        key: ValueKey(e),
+        engine: e,
+        apiKey: _keys[e]!,
+        model: _models[e],
+        editing: _editing.contains(e),
+        onEdit: () => setState(() => _editing.add(e)),
+        onOpenUrl: ref.read(settingsControllerProvider.notifier).openUrl,
       ),
-      const SizedBox(height: AppSpacing.xs),
-      SelectableText(
-        Strings.getApiKeyAt(isGroq ? _groqKeysUrl : _deeplKeysUrl),
-        style: small,
-      ),
-      if (isGroq) ...[
-        const SizedBox(height: AppSpacing.md),
-        TextField(
-          key: const Key('model-field'),
-          controller: _model,
-          autocorrect: false,
-          enableSuggestions: false,
-          decoration: const InputDecoration(
-            labelText: Strings.aiModel,
-            prefixIcon: Icon(Icons.memory_rounded),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        SelectableText(Strings.modelListAt(_groqModelsUrl), style: small),
-      ],
-      const SizedBox(height: AppSpacing.md),
-      Text(Strings.sentOnline(isGroq ? 'Groq' : 'DeepL'), style: small),
-    ];
-  }
+    ],
+    const SizedBox(height: AppSpacing.sm),
+  ];
 }

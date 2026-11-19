@@ -43,6 +43,9 @@ abstract class PermissionsChannel {
 
   /// Opens battery-optimization settings so the user can exempt the app (F-02 reliability).
   Future<void> openBatterySettings();
+
+  /// Opens an https [url] in the browser; false when nothing could open it.
+  Future<bool> openUrl(String url);
 }
 
 class MethodPermissionsChannel implements PermissionsChannel {
@@ -82,4 +85,8 @@ class MethodPermissionsChannel implements PermissionsChannel {
   @override
   Future<void> openBatterySettings() =>
       _channel.invokeMethod<void>('openBatterySettings');
+
+  @override
+  Future<bool> openUrl(String url) async =>
+      await _channel.invokeMethod<bool>('openUrl', {'url': url}) ?? false;
 }

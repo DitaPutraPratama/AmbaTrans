@@ -97,20 +97,27 @@ abstract final class Strings {
   // Translation engine (ADR-024)
   static const engineSection = 'Mesin terjemahan';
   static const engine = 'Mesin';
-  static const engineSheetSubtitle = 'Pilih yang dipakai saat menerjemahkan';
-  static const engineMlkit = 'ML Kit (offline)';
-  static const engineMlkitBody = 'Gratis, tanpa internet. Perlu unduh model.';
-  static const engineDeepl = 'DeepL';
-  static const engineDeeplBody = 'Lebih natural. Butuh internet dan API key.';
-  static const engineGroq = 'AI (Groq)';
-  static const engineGroqBody =
-      'Paham konteks. Butuh internet, API key, dan model.';
-  static const apiKey = 'API key';
-  static const aiModel = 'Model';
-  static String getApiKeyAt(String url) => 'Dapatkan API key di $url';
-  static String modelListAt(String url) => 'Daftar model: $url';
-  static String sentOnline(String service) =>
-      'Teks di layar dikirim ke $service saat menerjemahkan.';
+  static const engineSheetSubtitle = 'Dipakai saat menerjemahkan';
+  static const groupOffline = 'Offline';
+  static const groupFree = 'Gratis · perlu API key';
+  static const groupPaid = 'Berbayar · perlu API key';
+  static const engineMlkitBody = 'Tanpa internet, perlu unduh model';
+  static const engineDeeplBody = 'Terjemahan natural';
+  static const engineGroqBody = 'AI cepat';
+  static const engineGeminiBody = 'AI dari Google';
+  static const engineCerebrasBody = 'AI sangat cepat';
+  static const engineMistralBody = 'AI dari Eropa';
+  static const engineOpenaiBody = 'Model ChatGPT';
+  static const engineDeepseekBody = 'AI murah';
+  static const apiKeyHint = 'Tempel API key';
+  static const modelHint = 'Nama model';
+  static const showKey = 'Tampilkan API key';
+  static const hideKey = 'Sembunyikan API key';
+  static const editKey = 'Ubah key';
+  static const editKeyAndModel = 'Ubah key & model';
+  static const getApiKey = 'Dapatkan API key';
+  static const modelList = 'Daftar model';
+  static String sentTo(String service) => 'Teks layar dikirim ke $service.';
   static const save = 'Simpan';
   static const apiKeyRequired = 'Isi API key dulu';
   static const modelRequired = 'Isi nama model dulu';

@@ -19,6 +19,7 @@ class FakeSettingsChannel implements SettingsChannel {
         'deepl_api_key': '',
         'groq_api_key': '',
         'groq_model': 'llama-3.3-70b-versatile',
+        'gemini_model': 'gemini-3.5-flash-lite',
         ...?initial,
       };
 
