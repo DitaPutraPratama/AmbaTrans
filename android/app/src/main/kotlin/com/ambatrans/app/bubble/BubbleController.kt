@@ -9,7 +9,6 @@ import android.os.Looper
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
-import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import com.ambatrans.app.data.SettingsStore
@@ -87,8 +86,8 @@ class BubbleController(
 
     /** Added hidden (GONE windows are skipped by touch-occlusion checks); shown only while dragging. */
     private fun addDismissTarget() {
-        val target = DismissTargetView(context).apply { visibility = View.GONE }
-        val layout = baseParams(target.windowSize, target.windowSize, focusable = false).apply {
+        val target = DismissTargetView(context, (DISMISS_GAP_DP * density).toInt())
+        val layout = baseParams(usableBounds().width, target.areaHeight, focusable = false).apply {
             flags = flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
         }
         windowManager.addView(target, layout)
@@ -98,19 +97,16 @@ class BubbleController(
     private fun showDismissTarget() {
         val target = dismissTarget ?: return
         val layout = target.layoutParams as WindowManager.LayoutParams
-        val (cx, cy) = dismissCenter(usableBounds())
-        layout.x = cx - target.windowSize / 2
-        layout.y = cy - target.windowSize / 2
-        target.hot = false
-        target.visibility = View.VISIBLE
+        val usable = usableBounds() // re-read: the screen may have rotated
+        layout.x = usable.left
+        layout.y = usable.bottom - target.areaHeight
+        layout.width = usable.width
         windowManager.updateViewLayout(target, layout)
+        target.appear()
     }
 
     private fun hideDismissTarget() {
-        dismissTarget?.apply {
-            hot = false
-            visibility = View.GONE
-        }
+        dismissTarget?.disappear()
     }
 
     private fun setDismissHot(bubble: BubbleView, hot: Boolean) {
