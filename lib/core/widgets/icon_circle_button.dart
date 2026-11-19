@@ -26,6 +26,7 @@ class IconCircleButton extends StatelessWidget {
       excludeSemantics: true,
       child: PressScale(
         enabled: onPressed != null,
+        scale: 0.85, // small button: 96% would be barely visible
         child: SizedBox.square(
           dimension: 48,
           child: Center(
@@ -34,6 +35,8 @@ class IconCircleButton extends StatelessWidget {
               shape: const CircleBorder(),
               child: InkWell(
                 customBorder: const CircleBorder(),
+                splashColor: colors.primary.withValues(alpha: 0.24),
+                highlightColor: colors.primary.withValues(alpha: 0.12),
                 onTap: onPressed,
                 child: SizedBox.square(
                   dimension: 44,
