@@ -44,6 +44,28 @@ void main() {
     await tester.pumpAndSettle();
     expect(permissions.requestNotificationsCalls, 1);
     expect(isOn(tester, Strings.notificationsTitle), isTrue);
+    expect(permissions.openNotificationSettingsCalls, 0);
+  });
+
+  testWidgets('notifications switch opens system settings when on or denied', (
+    tester,
+  ) async {
+    final permissions = FakePermissionsChannel(notifications: true);
+    await pumpScreen(tester, const SettingsScreen(), permissions: permissions);
+    await tester.tap(switchOf(Strings.notificationsTitle));
+    await tester.pumpAndSettle();
+    expect(permissions.requestNotificationsCalls, 0);
+    expect(permissions.openNotificationSettingsCalls, 1);
+
+    permissions
+      ..notifications = false
+      ..grantNotificationsOnRequest = false;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    await tester.tap(switchOf(Strings.notificationsTitle));
+    await tester.pumpAndSettle();
+    expect(permissions.requestNotificationsCalls, 1);
+    expect(permissions.openNotificationSettingsCalls, 2);
   });
 
   testWidgets('status updates when the user returns from system settings', (

@@ -11,6 +11,8 @@ class FakeSettingsChannel implements SettingsChannel {
         'target_lang': 'id',
         'bubble_edge': 'right',
         'bubble_y_fraction': 0.35,
+        'overlay_text_color': 0xFFFFFF,
+        'overlay_bg_color': 0x424242,
         ...?initial,
       };
 

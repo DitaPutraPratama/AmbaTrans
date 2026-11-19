@@ -173,6 +173,23 @@ void main() {
       expect(c.read(settingsControllerProvider).requireValue.source, 'en');
     });
 
+    test('overlay colours load with defaults and are saved', () async {
+      final channel = FakeSettingsChannel();
+      final c = container(channel);
+      final loaded = await c.read(settingsControllerProvider.future);
+      expect(loaded.overlayTextColor, 0xFFFFFF);
+      expect(loaded.overlayBgColor, 0x424242);
+      final notifier = c.read(settingsControllerProvider.notifier);
+      await notifier.setOverlayColor(OverlayColorRole.text, 0x000000);
+      await notifier.setOverlayColor(OverlayColorRole.background, 0xFFEB3B);
+      final state = c.read(settingsControllerProvider).requireValue;
+      expect(state.overlayTextColor, 0x000000);
+      expect(state.overlayBgColor, 0xFFEB3B);
+      final stored = await channel.getAll();
+      expect(stored['overlay_text_color'], 0x000000);
+      expect(stored['overlay_bg_color'], 0xFFEB3B);
+    });
+
     test('supportedLanguagesProvider sorts by Indonesian name', () async {
       final c = container(FakeSettingsChannel());
       final codes = await c.read(supportedLanguagesProvider.future);

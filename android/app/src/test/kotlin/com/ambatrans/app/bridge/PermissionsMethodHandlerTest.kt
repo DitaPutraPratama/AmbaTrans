@@ -37,6 +37,13 @@ class PermissionsMethodHandlerTest {
     }
 
     @Test
+    fun `openNotificationSettings calls through and succeeds`() {
+        handler.onMethodCall(MethodCall("openNotificationSettings", null), result)
+        verify { permissions.openNotificationSettings() }
+        verify { result.success(null) }
+    }
+
+    @Test
     fun `openBatterySettings calls through and succeeds`() {
         handler.onMethodCall(MethodCall("openBatterySettings", null), result)
         verify { permissions.openBatterySettings() }

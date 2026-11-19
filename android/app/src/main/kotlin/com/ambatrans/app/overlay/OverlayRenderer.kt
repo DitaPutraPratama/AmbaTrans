@@ -1,7 +1,6 @@
 package com.ambatrans.app.overlay
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
@@ -15,6 +14,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.TextView
+import com.ambatrans.app.data.SettingsStore
 import com.ambatrans.app.pipeline.TranslatedBlock
 
 /**
@@ -22,7 +22,11 @@ import com.ambatrans.app.pipeline.TranslatedBlock
  * scrollable. A 1 px watcher window reports touches outside the bubble through [onOutsideTouch]; the
  * caller removes the overlay then.
  */
-class OverlayRenderer(private val context: Context, private val onOutsideTouch: () -> Unit) {
+class OverlayRenderer(
+    private val context: Context,
+    private val store: SettingsStore,
+    private val onOutsideTouch: () -> Unit,
+) {
     private val windowManager = context.getSystemService(WindowManager::class.java)
     private val density = context.resources.displayMetrics.density
     private var root: FrameLayout? = null
@@ -34,7 +38,9 @@ class OverlayRenderer(private val context: Context, private val onOutsideTouch: 
     fun show(blocks: List<TranslatedBlock>) {
         hide()
         val container = FrameLayout(context)
-        blocks.forEach { container.addView(label(it)) }
+        val textColor = OPAQUE or store.overlayTextColor
+        val bgColor = OPAQUE or store.overlayBgColor
+        blocks.forEach { container.addView(label(it, textColor, bgColor)) }
         windowManager.addView(container, windowParams())
         root = container
         addWatcher()
@@ -94,7 +100,7 @@ class OverlayRenderer(private val context: Context, private val onOutsideTouch: 
         }
     }
 
-    private fun label(item: TranslatedBlock): View {
+    private fun label(item: TranslatedBlock, textColor: Int, bgColor: Int): View {
         val block = item.block
         val padH = (PAD_H_DP * density).toInt()
         val padV = (PAD_V_DP * density).toInt()
@@ -111,14 +117,14 @@ class OverlayRenderer(private val context: Context, private val onOutsideTouch: 
         )
         return TextView(context).apply {
             text = item.translated
-            setTextColor(Color.WHITE)
+            setTextColor(textColor)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, fit.sizeSp)
             maxLines = fit.maxLines
             ellipsize = TextUtils.TruncateAt.END
             gravity = Gravity.CENTER_VERTICAL
             setPadding(padH, padV, padH, padV)
             background = GradientDrawable().apply {
-                setColor(LABEL_COLOR)
+                setColor(bgColor)
                 cornerRadius = CORNER_DP * density
             }
             layoutParams = FrameLayout.LayoutParams(fit.width, fit.height).apply {
@@ -142,7 +148,7 @@ class OverlayRenderer(private val context: Context, private val onOutsideTouch: 
         // as 1 - (1 - a)(1 - b), so 0.8 + any watcher already goes over; keep a margin.
         private const val WINDOW_ALPHA = 0.75f
         private const val WATCHER_ALPHA = 0.01f
-        private const val LABEL_COLOR = 0xFF424242.toInt()
+        private const val OPAQUE = 0xFF000000.toInt()
         private const val PAD_H_DP = 4f
         private const val PAD_V_DP = 2f
         private const val CORNER_DP = 4f

@@ -20,7 +20,6 @@ abstract final class Strings {
   static const completePermissions = 'Lengkapi izin';
   static const problemOverlay =
       'Izin "Tampil di atas aplikasi lain" belum diberikan';
-  static const problemNotifications = 'Izin notifikasi belum diberikan';
   static const problemCapture = 'Izin tangkap layar belum diberikan';
   static const problemModels = 'Model bahasa belum diunduh';
   static const problemStoppedBySystem = 'Layanan berhenti. Ketuk untuk mulai.';
@@ -52,6 +51,18 @@ abstract final class Strings {
   static const alreadyChosenAsTarget = 'Sudah dipilih sebagai bahasa tujuan';
   static const alreadyChosenAsSource = 'Sudah dipilih sebagai bahasa sumber';
   static const settingsSaveFailed = 'Pengaturan tidak dapat disimpan';
+  static const overlayColorSection = 'Tampilan terjemahan';
+  static const overlayTextColor = 'Warna teks';
+  static const overlayBgColor = 'Warna latar';
+  static const overlayPreview = 'Contoh teks terjemahan';
+  static const colorWhite = 'Putih';
+  static const colorBlack = 'Hitam';
+  static const colorGrey = 'Abu-abu';
+  static const colorYellow = 'Kuning';
+  static const colorBlue = 'Biru';
+  static const colorGreen = 'Hijau';
+  static const colorRed = 'Merah';
+  static const colorPurple = 'Ungu';
 
   // Onboarding
   static String stepOf(int step, int total) => 'Langkah $step dari $total';
@@ -64,7 +75,8 @@ abstract final class Strings {
   static const overlayTitle = 'Tampil di atas aplikasi lain';
   static const overlayBody = 'Agar bubble tampil di atas aplikasi lain.';
   static const notificationsTitle = 'Notifikasi';
-  static const notificationsBody = 'Tanda bahwa layanan aktif.';
+  static const notificationsBody =
+      'Tanda bahwa layanan aktif. Boleh dimatikan; bubble tetap jalan.';
   static const readyTitle = 'Siap digunakan';
   static const readyBody = 'Buka aplikasi lain, lalu ketuk bubble.';
   static const startApp = 'Mulai AmbaTrans';

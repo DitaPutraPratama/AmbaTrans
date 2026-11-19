@@ -1,6 +1,8 @@
 package com.ambatrans.app.bubble
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BubbleGeometryTest {
@@ -33,5 +35,13 @@ class BubbleGeometryTest {
         assertEquals(1850, BubbleGeometry.yFor(2f, 150, usable))
         assertEquals(0f, BubbleGeometry.fractionFor(0, 150, usable), 0f)
         assertEquals(1f, BubbleGeometry.fractionFor(5000, 150, usable), 0f)
+    }
+
+    @Test
+    fun `dismiss target sits centred above the bottom and catches nearby points`() {
+        val (cx, cy) = BubbleGeometry.dismissCenter(usable, 200)
+        assertEquals(500 to 1800, cx to cy)
+        assertTrue(BubbleGeometry.isNear(cx + 60, cy + 80, cx, cy, 100))
+        assertFalse(BubbleGeometry.isNear(cx + 80, cy + 80, cx, cy, 100))
     }
 }

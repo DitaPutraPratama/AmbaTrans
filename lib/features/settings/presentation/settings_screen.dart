@@ -11,6 +11,7 @@ import 'language_picking.dart';
 import 'widgets/battery_tips_card.dart';
 import 'widgets/model_download_sheet.dart';
 import 'widgets/model_status_card.dart';
+import 'widgets/overlay_color_card.dart';
 import 'widgets/setting_group.dart';
 import 'widgets/setting_row.dart';
 import 'widgets/switch_card.dart';
@@ -122,9 +123,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                     value: state.notificationsGranted,
                     onChanged: (_) => ref
                         .read(settingsControllerProvider.notifier)
-                        .requestNotifications(),
+                        .toggleNotifications(),
                   ),
                 ],
+                const SizedBox(height: AppSpacing.xl),
+                const SectionTitle(Strings.overlayColorSection),
+                const SizedBox(height: AppSpacing.md),
+                if (state != null)
+                  OverlayColorCard(
+                    textColor: state.overlayTextColor,
+                    bgColor: state.overlayBgColor,
+                    onTextColor: (rgb) => ref
+                        .read(settingsControllerProvider.notifier)
+                        .setOverlayColor(OverlayColorRole.text, rgb),
+                    onBgColor: (rgb) => ref
+                        .read(settingsControllerProvider.notifier)
+                        .setOverlayColor(OverlayColorRole.background, rgb),
+                  ),
                 const SizedBox(height: AppSpacing.xl),
                 const SectionTitle(Strings.advancedSection),
                 const SizedBox(height: AppSpacing.md),

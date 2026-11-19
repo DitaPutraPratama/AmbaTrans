@@ -30,6 +30,15 @@ class AndroidPermissions(private val activity: Activity) {
         activity.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, uri))
     }
 
+    /** Opens this app's notification settings, where the user can turn the service notification on or off. */
+    fun openNotificationSettings() {
+        activity.startActivity(
+            Intent(
+                Settings.ACTION_APP_NOTIFICATION_SETTINGS,
+            ).putExtra(Settings.EXTRA_APP_PACKAGE, activity.packageName),
+        )
+    }
+
     /** Opens the battery-optimization list; falls back to this app's details page. */
     fun openBatterySettings() {
         val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)

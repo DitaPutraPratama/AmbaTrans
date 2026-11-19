@@ -42,7 +42,7 @@ class OverlayService :
     private var bubble: BubbleController? = null
     private var pendingTranslate = false
     private val capture by lazy { CaptureManager(this) }
-    private val renderer by lazy { OverlayRenderer(this, ::onScreenTouched) }
+    private val renderer by lazy { OverlayRenderer(this, store, ::onScreenTouched) }
     private val recognizers by lazy { RecognizerProvider() }
     private val models by lazy { ModelManager.create() }
     private val translator by lazy { TranslationEngine.create(models) }
@@ -128,7 +128,7 @@ class OverlayService :
 
     override fun onTap() = startTranslation()
 
-    override fun onLongPress() {
+    override fun onRemove() {
         stopSelf()
     }
 

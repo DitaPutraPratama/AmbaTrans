@@ -18,7 +18,7 @@ class ProblemsSection extends StatelessWidget {
 
   final HomeState state;
 
-  /// Opens Settings, where overlay, notification and model problems are fixed.
+  /// Opens Settings, where overlay and model problems are fixed.
   final VoidCallback onSettings;
   final VoidCallback onStart;
   final VoidCallback onCapture;
@@ -28,8 +28,6 @@ class ProblemsSection extends StatelessWidget {
     final problems = <Widget>[
       if (!state.permissions.overlay)
         ProblemTile(text: Strings.problemOverlay, onTap: onSettings),
-      if (!state.permissions.notifications)
-        ProblemTile(text: Strings.problemNotifications, onTap: onSettings),
       if (!state.models.ready)
         ProblemTile(text: Strings.problemModels, onTap: onSettings),
       if (state.running && !state.permissions.capture)

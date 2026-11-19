@@ -7,7 +7,9 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import com.ambatrans.app.data.SettingsStore
@@ -18,12 +20,12 @@ interface BubbleActions {
     /** Short tap: translate the screen, again if a translation is already showing. */
     fun onTap()
 
-    /** Long press: remove the bubble (stops the service). */
-    fun onLongPress()
+    /** Long press, or drop on the dismiss target: remove the bubble (stops the service). */
+    fun onRemove()
 }
 
 /**
- * Floating bubble (F-02): drag, snap to an edge, tap to translate, long press to remove.
+ * Floating bubble (F-02): drag, snap to an edge, tap to translate, long press or drop on the "X" to remove.
  * Must be used from the main thread.
  */
 class BubbleController(
@@ -37,6 +39,7 @@ class BubbleController(
     private val touchSlop = TOUCH_SLOP_DP * density
 
     private var view: BubbleView? = null
+    private var dismissTarget: DismissTargetView? = null
     private var params: WindowManager.LayoutParams? = null
     private var snapAnimator: ValueAnimator? = null
     private var overlayActive = false
@@ -44,7 +47,7 @@ class BubbleController(
     private val longPressRunnable = Runnable {
         if (!moved) {
             longPressed = true
-            actions.onLongPress()
+            actions.onRemove()
         }
     }
     private var loading = false
@@ -54,6 +57,7 @@ class BubbleController(
 
     fun show() {
         if (view != null) return
+        addDismissTarget() // before the bubble, so the bubble is drawn above it
         val bubble = BubbleView(context)
         val usable = usableBounds()
         val size = bubble.windowSize
@@ -77,7 +81,46 @@ class BubbleController(
         view?.let { runCatching { windowManager.removeView(it) } }
         view = null
         params = null
+        dismissTarget?.let { runCatching { windowManager.removeView(it) } }
+        dismissTarget = null
     }
+
+    /** Added hidden (GONE windows are skipped by touch-occlusion checks); shown only while dragging. */
+    private fun addDismissTarget() {
+        val target = DismissTargetView(context).apply { visibility = View.GONE }
+        val layout = baseParams(target.windowSize, target.windowSize, focusable = false).apply {
+            flags = flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        }
+        windowManager.addView(target, layout)
+        dismissTarget = target
+    }
+
+    private fun showDismissTarget() {
+        val target = dismissTarget ?: return
+        val layout = target.layoutParams as WindowManager.LayoutParams
+        val (cx, cy) = dismissCenter(usableBounds())
+        layout.x = cx - target.windowSize / 2
+        layout.y = cy - target.windowSize / 2
+        target.hot = false
+        target.visibility = View.VISIBLE
+        windowManager.updateViewLayout(target, layout)
+    }
+
+    private fun hideDismissTarget() {
+        dismissTarget?.apply {
+            hot = false
+            visibility = View.GONE
+        }
+    }
+
+    private fun setDismissHot(bubble: BubbleView, hot: Boolean) {
+        val target = dismissTarget ?: return
+        if (target.hot == hot) return
+        target.hot = hot
+        if (hot) bubble.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+    }
+
+    private fun dismissCenter(usable: Bounds) = BubbleGeometry.dismissCenter(usable, (DISMISS_GAP_DP * density).toInt())
 
     fun destroy() = hide()
 
@@ -125,15 +168,19 @@ class BubbleController(
                 if (!moved) {
                     moved = true
                     handler.removeCallbacks(longPressRunnable)
+                    showDismissTarget()
                 }
-                val usable = usableBounds()
-                layout.x = BubbleGeometry.clampX(startX + dx.toInt(), bubble.windowSize, usable)
-                layout.y = BubbleGeometry.clampY(startY + dy.toInt(), bubble.windowSize, usable)
-                windowManager.updateViewLayout(bubble, layout)
+                moveBubble(bubble, layout, dx, dy)
             }
             MotionEvent.ACTION_UP -> {
                 handler.removeCallbacks(longPressRunnable)
+                val dismiss = dismissTarget?.hot == true
+                hideDismissTarget()
                 when {
+                    dismiss -> {
+                        actions.onRemove()
+                        return true
+                    }
                     moved -> snapToEdge(bubble, layout)
                     !longPressed -> actions.onTap()
                 }
@@ -141,6 +188,7 @@ class BubbleController(
             }
             MotionEvent.ACTION_CANCEL -> {
                 handler.removeCallbacks(longPressRunnable)
+                hideDismissTarget()
                 if (moved) snapToEdge(bubble, layout)
                 if (!loading) scheduleFade()
             }
@@ -153,6 +201,28 @@ class BubbleController(
     private var startX = 0
     private var startY = 0
     private var moved = false
+
+    /** Follows the finger; near the dismiss target the bubble sticks to it. */
+    private fun moveBubble(bubble: BubbleView, layout: WindowManager.LayoutParams, dx: Float, dy: Float) {
+        val usable = usableBounds()
+        val size = bubble.windowSize
+        layout.x = BubbleGeometry.clampX(startX + dx.toInt(), size, usable)
+        layout.y = BubbleGeometry.clampY(startY + dy.toInt(), size, usable)
+        val (cx, cy) = dismissCenter(usable)
+        val hot = BubbleGeometry.isNear(
+            layout.x + size / 2,
+            layout.y + size / 2,
+            cx,
+            cy,
+            (DISMISS_RADIUS_DP * density).toInt(),
+        )
+        if (hot) {
+            layout.x = cx - size / 2
+            layout.y = cy - size / 2
+        }
+        setDismissHot(bubble, hot)
+        windowManager.updateViewLayout(bubble, layout)
+    }
 
     private fun snapToEdge(bubble: BubbleView, layout: WindowManager.LayoutParams) {
         val usable = usableBounds()
@@ -215,5 +285,7 @@ class BubbleController(
         const val SNAP_MS = 150L
         const val IDLE_FADE_MS = 2_000L
         const val LONG_PRESS_MS = 450L
+        const val DISMISS_GAP_DP = 72f
+        const val DISMISS_RADIUS_DP = 64f
     }
 }

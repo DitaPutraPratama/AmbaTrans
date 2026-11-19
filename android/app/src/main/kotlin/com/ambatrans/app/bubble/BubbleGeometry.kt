@@ -32,4 +32,15 @@ object BubbleGeometry {
 
     fun clampY(y: Int, size: Int, usable: Bounds): Int =
         y.coerceIn(usable.top, (usable.bottom - size).coerceAtLeast(usable.top))
+
+    /** Centre of the dismiss target: horizontally centred, [bottomGap] px above the usable bottom. */
+    fun dismissCenter(usable: Bounds, bottomGap: Int): Pair<Int, Int> =
+        (usable.left + usable.width / 2) to (usable.bottom - bottomGap)
+
+    /** True when two points are within [radius] px of each other. */
+    fun isNear(ax: Int, ay: Int, bx: Int, by: Int, radius: Int): Boolean {
+        val dx = (ax - bx).toLong()
+        val dy = (ay - by).toLong()
+        return dx * dx + dy * dy <= radius.toLong() * radius
+    }
 }

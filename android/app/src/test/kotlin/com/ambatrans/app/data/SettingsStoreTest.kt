@@ -95,6 +95,21 @@ class SettingsStoreTest {
     }
 
     @Test
+    fun `overlay colours default to white on grey and accept 0xRRGGBB only`() {
+        val s = store()
+        assertEquals(0xFFFFFF, s.getAll()["overlay_text_color"])
+        assertEquals(0x424242, s.getAll()["overlay_bg_color"])
+        s.set("overlay_text_color", 0x000000)
+        s.set("overlay_bg_color", 0xFFEB3BL) // Long, as the channel may deliver it
+        assertEquals(0x000000, s.overlayTextColor)
+        assertEquals(0xFFEB3B, s.overlayBgColor)
+        assertThrows(InvalidSettingException::class.java) { s.set("overlay_bg_color", 0xFF424242L) }
+        assertThrows(InvalidSettingException::class.java) { s.set("overlay_text_color", -1) }
+        assertThrows(InvalidSettingException::class.java) { s.set("overlay_text_color", "#FFFFFF") }
+        assertEquals(0xFFEB3B, s.overlayBgColor)
+    }
+
+    @Test
     fun `migrate stamps a fresh install with the current version`() {
         val data = mutableMapOf<String, Any>()
         val s = store(data)

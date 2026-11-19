@@ -6,6 +6,7 @@
     <string name="notification_text">Ketuk bubble untuk menerjemahkan layar</string>
     <string name="notification_action_stop">Berhenti</string>
     <string name="bubble_description">AmbaTrans, ketuk untuk menerjemahkan</string>
+    <string name="dismiss_target_description">Lepas bubble di sini untuk menghentikan AmbaTrans</string>
     <string name="toast_capture_needed">Izin tangkap layar diperlukan</string>
     <string name="toast_screen_protected">Layar ini tidak dapat ditangkap</string>
     <string name="toast_no_text">Tidak ada teks ditemukan</string>

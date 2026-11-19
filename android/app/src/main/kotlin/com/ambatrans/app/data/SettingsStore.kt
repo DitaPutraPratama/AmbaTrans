@@ -14,6 +14,10 @@ class SettingsStore(private val prefs: SharedPreferences) {
     val bubbleYFraction: Float get() = prefs.getFloat(KEY_BUBBLE_Y_FRACTION, DEFAULT_BUBBLE_Y_FRACTION)
     val onboardingDone: Boolean get() = prefs.getBoolean(KEY_ONBOARDING_DONE, false)
 
+    /** Overlay label colours as 0xRRGGBB (no alpha; the overlay window sets the opacity). */
+    val overlayTextColor: Int get() = prefs.getInt(KEY_OVERLAY_TEXT_COLOR, DEFAULT_OVERLAY_TEXT_COLOR)
+    val overlayBgColor: Int get() = prefs.getInt(KEY_OVERLAY_BG_COLOR, DEFAULT_OVERLAY_BG_COLOR)
+
     fun getAll(): Map<String, Any> = mapOf(
         KEY_SCHEMA_VERSION to prefs.getInt(KEY_SCHEMA_VERSION, CURRENT_SCHEMA_VERSION),
         KEY_ONBOARDING_DONE to onboardingDone,
@@ -22,6 +26,8 @@ class SettingsStore(private val prefs: SharedPreferences) {
         KEY_BUBBLE_EDGE to bubbleEdge,
         // Doubles: the platform channel codec transports doubles, not floats.
         KEY_BUBBLE_Y_FRACTION to bubbleYFraction.toDouble(),
+        KEY_OVERLAY_TEXT_COLOR to overlayTextColor,
+        KEY_OVERLAY_BG_COLOR to overlayBgColor,
     )
 
     /** Validates and stores one value. Throws [InvalidSettingException] when the rules are violated. */
@@ -50,6 +56,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
                 }
                 editor.putFloat(key, fraction)
             }
+            KEY_OVERLAY_TEXT_COLOR, KEY_OVERLAY_BG_COLOR -> editor.putInt(key, value.asRgb(key))
             else -> throw InvalidSettingException("unknown or read-only key: $key")
         }
         editor.apply()
@@ -65,6 +72,13 @@ class SettingsStore(private val prefs: SharedPreferences) {
 
     private fun Any?.asBoolean(key: String): Boolean =
         this as? Boolean ?: throw InvalidSettingException("$key must be a bool")
+
+    private fun Any?.asRgb(key: String): Int {
+        // Long, not Int: the channel codec sends Dart ints above 2^31 as Long.
+        val rgb = (this as? Int)?.toLong() ?: this as? Long
+        if (rgb == null || rgb !in 0L..0xFFFFFFL) throw InvalidSettingException("$key must be 0xRRGGBB")
+        return rgb.toInt()
+    }
 
     private fun Any?.asLanguage(key: String, allowAuto: Boolean): String {
         val lang = this as? String
@@ -84,11 +98,15 @@ class SettingsStore(private val prefs: SharedPreferences) {
         const val KEY_TARGET_LANG = "target_lang"
         const val KEY_BUBBLE_EDGE = "bubble_edge"
         const val KEY_BUBBLE_Y_FRACTION = "bubble_y_fraction"
+        const val KEY_OVERLAY_TEXT_COLOR = "overlay_text_color"
+        const val KEY_OVERLAY_BG_COLOR = "overlay_bg_color"
 
         const val DEFAULT_SOURCE_LANG = "en"
         const val DEFAULT_TARGET_LANG = "id"
         const val DEFAULT_BUBBLE_EDGE = "right"
         const val DEFAULT_BUBBLE_Y_FRACTION = 0.35f
+        const val DEFAULT_OVERLAY_TEXT_COLOR = 0xFFFFFF
+        const val DEFAULT_OVERLAY_BG_COLOR = 0x424242
 
         const val EDGE_LEFT = "left"
         const val EDGE_RIGHT = "right"

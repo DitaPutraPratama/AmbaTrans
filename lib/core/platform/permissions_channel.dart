@@ -35,6 +35,9 @@ abstract class PermissionsChannel {
   /// Resolves to whether notifications are allowed after the request.
   Future<bool> requestNotifications();
 
+  /// Opens the app's notification settings, where the user can turn them off.
+  Future<void> openNotificationSettings();
+
   /// Shows the system screen-capture dialog (service must be running).
   Future<void> requestCapture();
 
@@ -67,6 +70,10 @@ class MethodPermissionsChannel implements PermissionsChannel {
   @override
   Future<bool> requestNotifications() async =>
       await _channel.invokeMethod<bool>('requestNotifications') ?? false;
+
+  @override
+  Future<void> openNotificationSettings() =>
+      _channel.invokeMethod<void>('openNotificationSettings');
 
   @override
   Future<void> requestCapture() =>

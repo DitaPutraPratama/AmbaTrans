@@ -24,6 +24,10 @@ class PermissionsMethodHandler(
                 permissions.requestCapture()
                 result.success(null)
             }
+            "openNotificationSettings" -> {
+                permissions.openNotificationSettings()
+                result.success(null)
+            }
             "openBatterySettings" -> {
                 permissions.openBatterySettings()
                 result.success(null)

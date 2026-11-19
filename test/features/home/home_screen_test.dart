@@ -103,33 +103,10 @@ void main() {
     expect(find.byType(SettingsScreen), findsOneWidget);
   });
 
-  testWidgets('permission problems open Settings, where they are fixed', (
+  testWidgets('notifications are optional: no problem tile when off', (
     tester,
   ) async {
-    final permissions = FakePermissionsChannel(overlay: true);
-    await pumpHome(tester, permissions: permissions);
-    expect(find.text(Strings.problemNotifications), findsOneWidget);
-    await tester.tap(find.text(Strings.problemNotifications));
-    await tester.pumpAndSettle();
-    expect(find.byType(SettingsScreen), findsOneWidget);
-    expect(permissions.requestNotificationsCalls, 0);
-
-    await tester.tap(
-      find.descendant(
-        of: find
-            .ancestor(
-              of: find.text(Strings.notificationsTitle),
-              matching: find.byType(Row),
-            )
-            .first,
-        matching: find.byType(Switch),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(permissions.requestNotificationsCalls, 1);
-    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
-    await tester.pumpAndSettle();
-    expect(find.text(Strings.problemNotifications), findsNothing);
+    await pumpHome(tester, permissions: FakePermissionsChannel(overlay: true));
     expect(find.text(Strings.allReady), findsOneWidget);
   });
 
