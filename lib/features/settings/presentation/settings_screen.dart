@@ -9,6 +9,7 @@ import '../../../core/widgets/section_title.dart';
 import '../application/settings_controller.dart';
 import 'language_picking.dart';
 import 'widgets/battery_tips_card.dart';
+import 'widgets/engine_sheet.dart';
 import 'widgets/model_download_sheet.dart';
 import 'widgets/model_status_card.dart';
 import 'widgets/overlay_color_card.dart';
@@ -98,13 +99,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   ],
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                const SectionTitle(Strings.offlineModel),
+                const SectionTitle(Strings.engineSection),
                 const SizedBox(height: AppSpacing.md),
-                if (state != null)
+                SettingGroup(
+                  children: [
+                    SettingRow(
+                      label: Strings.engine,
+                      value: state?.engine.label,
+                      onTap: state == null
+                          ? null
+                          : () => showEngineSheet(context),
+                    ),
+                  ],
+                ),
+                // Offline models matter only to ML Kit.
+                if (state != null && !state.engine.online) ...[
+                  const SizedBox(height: AppSpacing.xl),
+                  const SectionTitle(Strings.offlineModel),
+                  const SizedBox(height: AppSpacing.md),
                   ModelStatusCard(
                     ready: state.models.ready,
                     onDownload: () => showModelDownloadSheet(context),
                   ),
+                ],
                 const SizedBox(height: AppSpacing.xl),
                 const SectionTitle(Strings.permissionsSection),
                 const SizedBox(height: AppSpacing.md),

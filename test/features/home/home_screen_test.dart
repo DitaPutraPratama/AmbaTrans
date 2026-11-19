@@ -103,6 +103,20 @@ void main() {
     expect(find.byType(SettingsScreen), findsOneWidget);
   });
 
+  testWidgets('online engines need no models, so no model problem', (
+    tester,
+  ) async {
+    await pumpHome(
+      tester,
+      models: FakeModelsChannel(),
+      settings: FakeSettingsChannel({
+        'onboarding_done': true,
+        'translate_engine': 'deepl',
+      }),
+    );
+    expect(find.text(Strings.problemModels), findsNothing);
+  });
+
   testWidgets('notifications are optional: no problem tile when off', (
     tester,
   ) async {

@@ -93,4 +93,25 @@ abstract final class Strings {
   static const downloadModelTitle = 'Unduh model bahasa';
   static String downloading(int seconds) => 'Mengunduh… $seconds dtk';
   static const later = 'Nanti saja';
+
+  // Translation engine (ADR-024)
+  static const engineSection = 'Mesin terjemahan';
+  static const engine = 'Mesin';
+  static const engineSheetSubtitle = 'Pilih yang dipakai saat menerjemahkan';
+  static const engineMlkit = 'ML Kit (offline)';
+  static const engineMlkitBody = 'Gratis, tanpa internet. Perlu unduh model.';
+  static const engineDeepl = 'DeepL';
+  static const engineDeeplBody = 'Lebih natural. Butuh internet dan API key.';
+  static const engineGroq = 'AI (Groq)';
+  static const engineGroqBody =
+      'Paham konteks. Butuh internet, API key, dan model.';
+  static const apiKey = 'API key';
+  static const aiModel = 'Model';
+  static String getApiKeyAt(String url) => 'Dapatkan API key di $url';
+  static String modelListAt(String url) => 'Daftar model: $url';
+  static String sentOnline(String service) =>
+      'Teks di layar dikirim ke $service saat menerjemahkan.';
+  static const save = 'Simpan';
+  static const apiKeyRequired = 'Isi API key dulu';
+  static const modelRequired = 'Isi nama model dulu';
 }

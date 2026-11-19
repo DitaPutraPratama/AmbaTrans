@@ -23,7 +23,8 @@ void main() {
     tester,
   ) async {
     await pumpScreen(tester, const SettingsScreen(), settle: false);
-    expect(find.byKey(const Key('value-placeholder')), findsNWidgets(2));
+    // Source, target and engine rows.
+    expect(find.byKey(const Key('value-placeholder')), findsNWidgets(3));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('value-placeholder')), findsNothing);
     expect(find.text('Inggris'), findsOneWidget);

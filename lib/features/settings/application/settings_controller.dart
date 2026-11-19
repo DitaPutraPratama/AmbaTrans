@@ -7,6 +7,22 @@ import '../../../core/platform/channel_providers.dart';
 import '../../../core/platform/models_channel.dart';
 import '../../../core/platform/settings_channel.dart';
 
+/// Translation engines (ADR-024). [id] is the stored `translate_engine` value.
+enum TranslationEngine {
+  mlkit('mlkit'),
+  deepl('deepl'),
+  groq('groq');
+
+  const TranslationEngine(this.id);
+
+  final String id;
+
+  bool get online => this != mlkit;
+
+  static TranslationEngine fromId(Object? id) =>
+      values.firstWhere((e) => e.id == id, orElse: () => mlkit);
+}
+
 @immutable
 class SettingsState {
   const SettingsState({
@@ -18,8 +34,12 @@ class SettingsState {
     this.overlayTextColor = defaultOverlayTextColor,
     this.overlayBgColor = defaultOverlayBgColor,
     this.overlayBgOpacity = defaultOverlayBgOpacity,
+    this.engine = TranslationEngine.mlkit,
+    this.apiKeys = const {},
+    this.groqModel = defaultGroqModel,
   });
 
+  static const defaultGroqModel = 'llama-3.3-70b-versatile';
   static const defaultOverlayTextColor = 0xFFFFFF;
   static const defaultOverlayBgColor = 0x424242;
   static const defaultOverlayBgOpacity = 100;
@@ -37,6 +57,12 @@ class SettingsState {
   /// Background opacity in percent (0–100).
   final int overlayBgOpacity;
 
+  final TranslationEngine engine;
+
+  /// Saved API key per online engine; kept when switching engines.
+  final Map<TranslationEngine, String> apiKeys;
+  final String groqModel;
+
   SettingsState copyWith({
     String? source,
     String? target,
@@ -46,6 +72,9 @@ class SettingsState {
     int? overlayTextColor,
     int? overlayBgColor,
     int? overlayBgOpacity,
+    TranslationEngine? engine,
+    Map<TranslationEngine, String>? apiKeys,
+    String? groqModel,
   }) => SettingsState(
     source: source ?? this.source,
     target: target ?? this.target,
@@ -55,6 +84,9 @@ class SettingsState {
     overlayTextColor: overlayTextColor ?? this.overlayTextColor,
     overlayBgColor: overlayBgColor ?? this.overlayBgColor,
     overlayBgOpacity: overlayBgOpacity ?? this.overlayBgOpacity,
+    engine: engine ?? this.engine,
+    apiKeys: apiKeys ?? this.apiKeys,
+    groqModel: groqModel ?? this.groqModel,
   );
 }
 
@@ -128,6 +160,12 @@ class SettingsController extends AsyncNotifier<SettingsState> {
       overlayBgOpacity:
           all['overlay_bg_opacity'] as int? ??
           SettingsState.defaultOverlayBgOpacity,
+      engine: TranslationEngine.fromId(all['translate_engine']),
+      apiKeys: {
+        for (final e in TranslationEngine.values.where((e) => e.online))
+          e: all['${e.id}_api_key'] as String? ?? '',
+      },
+      groqModel: all['groq_model'] as String? ?? SettingsState.defaultGroqModel,
     );
   }
 
@@ -184,6 +222,29 @@ class SettingsController extends AsyncNotifier<SettingsState> {
       OverlayStyle.bgColor => current.copyWith(overlayBgColor: value),
       OverlayStyle.bgOpacity => current.copyWith(overlayBgOpacity: value),
     });
+  }
+
+  /// Saves the key (and model) first, then switches to [engine], so an online
+  /// engine is never active without its key. Throws [InvalidValueException].
+  Future<void> setEngine(
+    TranslationEngine engine, {
+    String? apiKey,
+    String? model,
+  }) async {
+    final settings = ref.read(settingsChannelProvider);
+    final current = state.requireValue;
+    if (apiKey != null) await settings.set('${engine.id}_api_key', apiKey);
+    if (model != null) await settings.set('groq_model', model);
+    await settings.set('translate_engine', engine.id);
+    state = AsyncData(
+      current.copyWith(
+        engine: engine,
+        apiKeys: apiKey == null
+            ? null
+            : {...current.apiKeys, engine: apiKey.trim()},
+        groqModel: model?.trim(),
+      ),
+    );
   }
 
   /// Saves [code] for [side]. Throws [InvalidValueException] if native rejects it

@@ -15,6 +15,10 @@ class FakeSettingsChannel implements SettingsChannel {
         'overlay_bg_color': 0x424242,
         'overlay_bg_opacity': 100,
         'translate_mode': 'full',
+        'translate_engine': 'mlkit',
+        'deepl_api_key': '',
+        'groq_api_key': '',
+        'groq_model': 'llama-3.3-70b-versatile',
         ...?initial,
       };
 

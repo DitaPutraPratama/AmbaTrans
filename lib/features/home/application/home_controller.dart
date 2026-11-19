@@ -30,7 +30,12 @@ class HomeController extends AsyncNotifier<HomeState> {
     final source = settings['source_lang'] as String? ?? 'en';
     final target = settings['target_lang'] as String? ?? 'id';
     final permissions = await ref.read(permissionsChannelProvider).getStatus();
-    final models = await _modelStatus(source, target);
+    // Online engines (ADR-024) need no downloaded models.
+    final models =
+        settings['translate_engine'] == 'mlkit' ||
+            settings['translate_engine'] == null
+        ? await _modelStatus(source, target)
+        : const ModelStatus(ready: true, missing: []);
     final running = await ref.read(serviceChannelProvider).isRunning();
     final previous = state.value;
     return HomeState(
