@@ -2,7 +2,7 @@
 <img src="android/app/src/main/res/drawable-nodpi/splash_logo.png" width="200" alt="Logo AmbaTrans">
 <h1>AmbaTrans</h1>
 Terjemahkan teks di layar aplikasi apa pun, langsung di atas teks aslinya.<br>
-Untuk komik, game, dan aplikasi yang tidak punya pilihan bahasa Indonesia. Offline, tanpa akun, gratis.
+Untuk komik, game, dan aplikasi yang tidak punya pilihan bahasa Indonesia. Offline secara bawaan, tanpa akun, gratis.
 <br>
 <br>
 <a href="https://github.com/DitaPutraPratama/AmbaTrans/releases/latest"><img src="https://img.shields.io/github/v/release/DitaPutraPratama/AmbaTrans" alt="Versi terbaru"></a>
@@ -17,20 +17,24 @@ Untuk komik, game, dan aplikasi yang tidak punya pilihan bahasa Indonesia. Offli
 
 ## Fitur ✨
 
+- Pilih mesin terjemahan di Pengaturan: ML Kit (offline), DeepL, atau AI. Layanan AI yang tersedia: Groq, Google Gemini, Cerebras, dan Mistral (punya paket gratis), serta OpenAI dan DeepSeek (berbayar). Cukup tempel API key milikmu sendiri; nama model AI juga bisa diganti (BARU)
+- Satu layar dikirim dalam satu permintaan, jadi AI bisa membaca semua teks di layar sebagai konteks. Teks yang sama tidak dikirim dua kali supaya hemat kuota (BARU)
+- Kalau API key ditolak, kuota habis, nama model salah, atau internet putus, muncul pesan yang jelas (BARU)
+- Teks komik yang ditulis HURUF KAPITAL SEMUA dirapikan dulu sebelum diterjemahkan ML Kit, jadi hasilnya lebih masuk akal (BARU)
 - Bubble melayang di atas aplikasi apa pun: ketuk sekali, terjemahan muncul tepat di atas teks asli
-- Mode **Sebagian layar**: tarik kotak di area yang mau diterjemahkan, geser atau ubah ukurannya lewat sudut kotak, lalu tekan Terjemahkan. Teks di dalam kotak diterjemahkan sebagai satu kalimat, pas untuk gelembung komik (BARU)
-- Tekan lama bubble untuk memilih mode Seluruh layar atau Sebagian layar. Pilihan tetap tersimpan walaupun AmbaTrans dimatikan (BARU)
-- Satu gelembung teks yang terbaca per baris digabung jadi satu kalimat, termasuk kata yang terputus tanda sambung seperti "ber-main" (BARU)
-- Atur warna teks, warna latar, dan opasitas latar terjemahan, lengkap dengan pratinjau (BARU)
-- Seret bubble ke tanda X di bawah layar untuk mematikan AmbaTrans (BARU)
-- Notifikasi "AmbaTrans aktif" boleh dimatikan, bubble tetap jalan (BARU)
-- Membaca teks dan menerjemahkan sepenuhnya di HP dengan Google ML Kit, tanpa server dan tanpa akun
+- Mode **Sebagian layar**: tarik kotak di area yang mau diterjemahkan, geser atau ubah ukurannya lewat sudut kotak, lalu tekan Terjemahkan. Teks di dalam kotak diterjemahkan sebagai satu kalimat, pas untuk gelembung komik
+- Tekan lama bubble untuk memilih mode Seluruh layar atau Sebagian layar. Pilihan tetap tersimpan walaupun AmbaTrans dimatikan
+- Satu gelembung teks yang terbaca per baris digabung jadi satu kalimat, termasuk kata yang terputus tanda sambung seperti "ber-main"
+- Atur warna teks, warna latar, dan opasitas latar terjemahan, lengkap dengan pratinjau
+- Seret bubble ke tanda X di bawah layar untuk mematikan AmbaTrans
+- Notifikasi "AmbaTrans aktif" boleh dimatikan, bubble tetap jalan
+- Membaca teks di HP dengan Google ML Kit; dengan mesin ML Kit, terjemahan juga berjalan sepenuhnya di HP tanpa server dan tanpa akun
 - Membaca huruf Latin, Mandarin, Jepang, Korea, dan Devanagari (Hindi, Marathi)
 - Pilih bahasa asal dan bahasa tujuan; model bahasa cukup diunduh sekali
 - Halaman tetap bisa di-scroll; sentuh layar di mana saja untuk menghapus terjemahan
 
 > **Catatan**
-> Terjemahan memakai model offline Google ML Kit, jadi hasilnya bisa kaku, terutama untuk bahasa gaul atau teks bergaya. Huruf yang sangat kecil, miring, atau bertumpuk dengan gambar bisa salah baca. Kalau menemukan masalah, buat [issue](https://github.com/DitaPutraPratama/AmbaTrans/issues).
+> Mesin bawaan memakai model offline Google ML Kit, jadi hasilnya bisa kaku, terutama untuk bahasa gaul atau teks bergaya. Untuk hasil yang lebih natural, pilih DeepL atau salah satu layanan AI di Pengaturan → Mesin terjemahan. Huruf yang sangat kecil, miring, atau bertumpuk dengan gambar bisa salah baca. Kalau menemukan masalah, buat [issue](https://github.com/DitaPutraPratama/AmbaTrans/issues).
 
 ## Unduh dan pasang
 
@@ -70,11 +74,21 @@ adb install -r AmbaTrans-<versi>-arm64-v8a.apk
 
 Di mode Sebagian, tekan **Batal**, tombol Kembali, atau ketuk di luar kotak untuk membatalkan.
 
-Bahasa, warna terjemahan, dan izin bisa diubah kapan saja di **Pengaturan**.
+Bahasa, mesin terjemahan, warna terjemahan, dan izin bisa diubah kapan saja di **Pengaturan**.
+
+### Memakai DeepL atau AI
+
+1. Buka **Pengaturan → Mesin terjemahan** dan pilih layanannya.
+2. Ketuk **Dapatkan API key**, buat key di situs layanan itu, lalu tempel di kolom API key. Tombol mata menampilkan key untuk dicek.
+3. Untuk layanan AI, kolom model sudah terisi model bawaan. Ganti kalau layanan itu sudah memensiunkan modelnya (lihat **Daftar model**).
+4. Tekan **Simpan**. Setelah tersimpan, key dan model terkunci; ketuk **Ubah** untuk menggantinya.
+
+Bahasa asal dan tujuan tetap diatur di bagian Bahasa, apa pun mesinnya. Key tiap layanan disimpan terpisah, jadi kamu bisa berpindah mesin tanpa mengetik ulang.
 
 ## Privasi
 
-- Tidak ada akun, iklan, pelacak, atau server. Satu-satunya akses internet adalah unduhan model bahasa ML Kit.
+- Tidak ada akun, iklan, pelacak, atau server AmbaTrans. Dengan mesin ML Kit, satu-satunya akses internet adalah unduhan model bahasa.
+- Kalau kamu memilih DeepL atau layanan AI, teks yang terbaca di layar (bukan gambarnya) dikirim ke layanan itu memakai API key milikmu. API key disimpan di HP saja.
 - Tangkapan layar hanya ada di memori sampai teksnya selesai dibaca, lalu dibuang. Tidak ada yang disimpan ke galeri atau penyimpanan.
 - Pengaturan disimpan di HP saja.
 - Beberapa aplikasi melarang layarnya direkam, misalnya aplikasi bank dan streaming. Di aplikasi seperti itu AmbaTrans menampilkan "Layar ini tidak dapat ditangkap".
@@ -91,11 +105,14 @@ Pakai mode Sebagian: tekan lama bubble, pilih Sebagian layar, lalu kotakkan gele
 Atur warna dan opasitas latarnya di Pengaturan → Tampilan terjemahan. Opasitas maksimal dibatasi Android supaya layar di bawahnya tetap bisa disentuh.
 
 #### 4. Ada bagian kalimat yang tidak ikut diterjemahkan?
-Itu keterbatasan model terjemahan offline ML Kit. Coba mode Sebagian supaya kalimatnya terbaca utuh.
+Itu keterbatasan model terjemahan offline ML Kit. Coba mode Sebagian supaya kalimatnya terbaca utuh, atau pakai DeepL/AI.
+
+#### 5. Muncul "Kuota API habis" atau "Model tidak ditemukan"?
+Paket gratis tiap layanan punya batas pemakaian. Tunggu sebentar atau pindah ke mesin lain di Pengaturan → Mesin terjemahan. Kalau modelnya tidak ditemukan, ketuk **Ubah**, lalu ganti nama model dengan yang ada di **Daftar model**.
 
 ## Untuk pengembang
 
-AmbaTrans dibuat dengan Flutter untuk layar aplikasinya (Home, Onboarding, Pengaturan) dan Kotlin untuk bagian yang berjalan di atas aplikasi lain: bubble, perekaman layar, OCR, terjemahan, dan overlay.
+AmbaTrans dibuat dengan Flutter untuk layar aplikasinya (Home, Onboarding, Pengaturan) dan Kotlin untuk bagian yang berjalan di atas aplikasi lain: bubble, perekaman layar, OCR, terjemahan, dan overlay. Mesin online memakai `HttpURLConnection` bawaan Android, tanpa pustaka HTTP tambahan.
 
 Kebutuhan: Flutter stable (Dart 3.14+), Android SDK, JDK 17+, dan HP Android dengan USB debugging. Bubble dan perekaman layar tidak berjalan baik di emulator, jadi pakai HP sungguhan.
 
@@ -143,6 +160,7 @@ Tanpa file itu, APK ditandatangani kunci debug. Play Protect lebih curiga pada A
 - [ktlint](https://github.com/pinterest/ktlint): MIT
 - [JUnit 4](https://github.com/junit-team/junit4): EPL-1.0
 - [MockK](https://github.com/mockk/mockk): Apache-2.0
+- [JSON-java (org.json)](https://github.com/stleary/JSON-java), hanya untuk tes: Public Domain
 
 Daftar paket Dart lengkap ada di `pubspec.lock`.
 
