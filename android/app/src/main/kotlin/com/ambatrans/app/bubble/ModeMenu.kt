@@ -2,18 +2,22 @@ package com.ambatrans.app.bubble
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PixelFormat
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.RippleDrawable
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RadioButton
-import android.widget.RadioGroup
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import com.ambatrans.app.R
 import com.ambatrans.app.data.SettingsStore
 
@@ -69,32 +73,77 @@ class ModeMenu(private val context: Context, private val windowManager: WindowMa
         view = null
     }
 
+    /** One card per mode, stacked with a gap; the active one gets a blue outline. */
     private fun options(themed: Context, current: String, onPick: (String) -> Unit): View {
-        val pad = (PAD_DP * density).toInt()
-        return RadioGroup(themed).apply {
+        val gap = (GAP_DP * density).toInt()
+        return LinearLayout(themed).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(pad, pad / 2, pad * 2, pad / 2)
-            background = GradientDrawable().apply {
-                setColor(Color.WHITE)
-                setStroke(density.toInt().coerceAtLeast(1), BORDER_COLOR)
-                cornerRadius = CORNER_DP * density
-            }
+            val shadowRoom = (SHADOW_ROOM_DP * density).toInt()
+            setPadding(shadowRoom, shadowRoom, shadowRoom, shadowRoom)
             listOf(
-                SettingsStore.MODE_FULL to R.string.mode_full,
-                SettingsStore.MODE_REGION to R.string.mode_region,
-            ).forEach { (mode, label) ->
+                Triple(SettingsStore.MODE_FULL, R.string.mode_full, R.drawable.ic_mode_full),
+                Triple(SettingsStore.MODE_REGION, R.string.mode_region, R.drawable.ic_mode_region),
+            ).forEachIndexed { index, (mode, label, icon) ->
+                val card = card(themed, context.getString(label), icon, selected = mode == current) {
+                    onPick(mode)
+                    dismiss()
+                }
                 addView(
-                    RadioButton(themed).apply {
-                        id = View.generateViewId()
-                        text = context.getString(label)
-                        isChecked = mode == current
-                        setOnClickListener {
-                            onPick(mode)
-                            dismiss()
-                        }
-                    },
+                    card,
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                    )
+                        .apply { if (index > 0) topMargin = gap },
                 )
             }
+        }
+    }
+
+    private fun card(themed: Context, label: String, icon: Int, selected: Boolean, onClick: () -> Unit): View {
+        val accent = ContextCompat.getColor(context, R.color.menu_selected)
+        val shape = GradientDrawable().apply {
+            setColor(Color.WHITE)
+            cornerRadius = CORNER_DP * density
+            if (selected) {
+                setStroke((SELECTED_STROKE_DP * density).toInt(), accent)
+            } else {
+                setStroke(density.toInt().coerceAtLeast(1), BORDER_COLOR)
+            }
+        }
+        val padH = (CARD_PAD_H_DP * density).toInt()
+        val padV = (CARD_PAD_V_DP * density).toInt()
+        return LinearLayout(themed).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(padH, padV, padH * 2, padV)
+            background = RippleDrawable(ColorStateList.valueOf(RIPPLE_COLOR), shape, null)
+            elevation = ELEVATION_DP * density
+            isSelected = selected
+            contentDescription = label
+            setOnClickListener { onClick() }
+            addView(
+                ImageView(themed).apply {
+                    setImageResource(icon)
+                    imageTintList = ColorStateList.valueOf(if (selected) accent else TEXT_COLOR)
+                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                },
+                LinearLayout.LayoutParams((ICON_DP * density).toInt(), (ICON_DP * density).toInt()),
+            )
+            addView(
+                TextView(themed).apply {
+                    text = label
+                    textSize = LABEL_SP
+                    setTextColor(if (selected) accent else TEXT_COLOR)
+                    if (selected) setTypeface(typeface, Typeface.BOLD)
+                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                },
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                )
+                    .apply { marginStart = padH },
+            )
         }
     }
 
@@ -112,10 +161,18 @@ class ModeMenu(private val context: Context, private val windowManager: WindowMa
 
     private companion object {
         const val GAP_DP = 8f
-        const val PAD_DP = 8f
+        const val SHADOW_ROOM_DP = 6f
         const val CORNER_DP = 16f
+        const val SELECTED_STROKE_DP = 2f
+        const val CARD_PAD_H_DP = 14f
+        const val CARD_PAD_V_DP = 12f
+        const val ELEVATION_DP = 3f
+        const val ICON_DP = 22f
+        const val LABEL_SP = 15f
         const val START_SCALE = 0.85f
         const val ENTER_MS = 150L
         val BORDER_COLOR = Color.rgb(0xDD, 0xDD, 0xDD)
+        val TEXT_COLOR = Color.rgb(0x1F, 0x1F, 0x1F)
+        val RIPPLE_COLOR = Color.argb(0x33, 0x00, 0x47, 0xBB)
     }
 }

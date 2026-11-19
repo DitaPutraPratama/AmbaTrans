@@ -14,7 +14,7 @@ class RegionTextTest {
                 TextBlock("Halo!", 0, 90, 40, 110),
             ),
         )
-        assertEquals(TextBlock("Kami bermain di taman. Halo!", 0, 10, 120, 110), merged)
+        assertEquals(TextBlock("Kami bermain di taman. Halo!", 0, 10, 120, 110, lineHeight = 20), merged)
     }
 
     @Test

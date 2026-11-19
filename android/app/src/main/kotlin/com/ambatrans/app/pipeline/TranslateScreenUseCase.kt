@@ -47,7 +47,11 @@ class TranslateScreenUseCase(
             } finally {
                 bitmap.recycle() // the screenshot must not outlive OCR (F-04)
             }
-            val lines = if (region == null) TextFilter.filter(blocks) else listOfNotNull(RegionText.merge(blocks))
+            val lines = if (region == null) {
+                TextFilter.filter(BlockMerger.paragraphs(blocks))
+            } else {
+                listOfNotNull(RegionText.merge(blocks))
+            }
             if (lines.isEmpty()) return ui.showError(TranslateError.NO_TEXT)
             ui.showResult(translate(lines, source, target))
         } catch (e: CancellationException) {

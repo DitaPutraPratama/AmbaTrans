@@ -27,12 +27,15 @@ class OcrEngine(private val recognizers: RecognizerProvider) {
         val result = recognizers.get(script).process(InputImage.fromBitmap(image, 0)).await()
         return result.textBlocks.mapNotNull { block ->
             val box = block.boundingBox ?: return@mapNotNull null
+            val lineHeight = block.lines.mapNotNull { it.boundingBox?.height() }.average()
+                .takeIf { !it.isNaN() }?.toInt() ?: box.height()
             TextBlock(
                 joinLines(block.lines.map { it.text }),
                 box.left + dx,
                 box.top + dy,
                 box.right + dx,
                 box.bottom + dy,
+                lineHeight,
             )
         }
     }

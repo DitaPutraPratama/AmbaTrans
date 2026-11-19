@@ -83,7 +83,19 @@ class TranslateScreenUseCaseTest {
         assertEquals(region, regionUsed)
         val shown = ui.result!!.single()
         assertEquals("ayo bermain bola", shown.block.text)
-        assertEquals(TextBlock("ayo bermain bola", 10, 10, 100, 60), shown.block)
+        assertEquals(TextBlock("ayo bermain bola", 10, 10, 100, 60, lineHeight = 20), shown.block)
+    }
+
+    @Test
+    fun `whole screen joins a paragraph that OCR split into one block per line`() = runBlocking {
+        val bubble = listOf(
+            TextBlock("THE NATIONAL", 40, 100, 160, 120),
+            TextBlock("DAY IS APPROACHING", 10, 126, 190, 146),
+            TextBlock("SOON.", 75, 152, 125, 172),
+            TextBlock("Far away", 10, 400, 90, 420),
+        )
+        useCase(lines = bubble).run()
+        assertEquals(listOf("THE NATIONAL DAY IS APPROACHING SOON.", "Far away"), ui.result!!.map { it.block.text })
     }
 
     @Test
