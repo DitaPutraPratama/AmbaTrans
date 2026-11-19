@@ -110,6 +110,19 @@ class SettingsStoreTest {
     }
 
     @Test
+    fun `overlay background opacity defaults to 100 and accepts 0 to 100`() {
+        val s = store()
+        assertEquals(100, s.getAll()["overlay_bg_opacity"])
+        s.set("overlay_bg_opacity", 0)
+        assertEquals(0, s.overlayBgOpacity)
+        s.set("overlay_bg_opacity", 40)
+        assertThrows(InvalidSettingException::class.java) { s.set("overlay_bg_opacity", 101) }
+        assertThrows(InvalidSettingException::class.java) { s.set("overlay_bg_opacity", -1) }
+        assertThrows(InvalidSettingException::class.java) { s.set("overlay_bg_opacity", 0.5) }
+        assertEquals(40, s.overlayBgOpacity)
+    }
+
+    @Test
     fun `migrate stamps a fresh install with the current version`() {
         val data = mutableMapOf<String, Any>()
         val s = store(data)

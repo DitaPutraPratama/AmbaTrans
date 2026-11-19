@@ -54,6 +54,8 @@ abstract final class Strings {
   static const overlayColorSection = 'Tampilan terjemahan';
   static const overlayTextColor = 'Warna teks';
   static const overlayBgColor = 'Warna latar';
+  static const overlayBgOpacity = 'Opasitas latar';
+  static String percent(int value) => '$value%';
   static const overlayPreview = 'Contoh teks terjemahan';
   static const colorWhite = 'Putih';
   static const colorBlack = 'Hitam';

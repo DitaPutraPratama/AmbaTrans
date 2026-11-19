@@ -29,6 +29,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // The controller may be cached from onboarding, before the permissions were granted.
+    ref.read(settingsControllerProvider.notifier).refreshPermissions();
   }
 
   @override
@@ -133,12 +135,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   OverlayColorCard(
                     textColor: state.overlayTextColor,
                     bgColor: state.overlayBgColor,
-                    onTextColor: (rgb) => ref
+                    bgOpacity: state.overlayBgOpacity,
+                    onChanged: ref
                         .read(settingsControllerProvider.notifier)
-                        .setOverlayColor(OverlayColorRole.text, rgb),
-                    onBgColor: (rgb) => ref
-                        .read(settingsControllerProvider.notifier)
-                        .setOverlayColor(OverlayColorRole.background, rgb),
+                        .setOverlayStyle,
                   ),
                 const SizedBox(height: AppSpacing.xl),
                 const SectionTitle(Strings.advancedSection),

@@ -17,10 +17,12 @@ class SettingsState {
     this.notificationsGranted = false,
     this.overlayTextColor = defaultOverlayTextColor,
     this.overlayBgColor = defaultOverlayBgColor,
+    this.overlayBgOpacity = defaultOverlayBgOpacity,
   });
 
   static const defaultOverlayTextColor = 0xFFFFFF;
   static const defaultOverlayBgColor = 0x424242;
+  static const defaultOverlayBgOpacity = 100;
 
   final String source;
   final String target;
@@ -32,6 +34,9 @@ class SettingsState {
   final int overlayTextColor;
   final int overlayBgColor;
 
+  /// Background opacity in percent (0–100).
+  final int overlayBgOpacity;
+
   SettingsState copyWith({
     String? source,
     String? target,
@@ -40,6 +45,7 @@ class SettingsState {
     bool? notificationsGranted,
     int? overlayTextColor,
     int? overlayBgColor,
+    int? overlayBgOpacity,
   }) => SettingsState(
     source: source ?? this.source,
     target: target ?? this.target,
@@ -48,16 +54,19 @@ class SettingsState {
     notificationsGranted: notificationsGranted ?? this.notificationsGranted,
     overlayTextColor: overlayTextColor ?? this.overlayTextColor,
     overlayBgColor: overlayBgColor ?? this.overlayBgColor,
+    overlayBgOpacity: overlayBgOpacity ?? this.overlayBgOpacity,
   );
 }
 
 enum LanguageSide { source, target }
 
-enum OverlayColorRole {
-  text('overlay_text_color'),
-  background('overlay_bg_color');
+/// Overlay label settings, each stored as an int under [key].
+enum OverlayStyle {
+  textColor('overlay_text_color'),
+  bgColor('overlay_bg_color'),
+  bgOpacity('overlay_bg_opacity');
 
-  const OverlayColorRole(this.key);
+  const OverlayStyle(this.key);
 
   final String key;
 }
@@ -116,6 +125,9 @@ class SettingsController extends AsyncNotifier<SettingsState> {
       overlayBgColor:
           all['overlay_bg_color'] as int? ??
           SettingsState.defaultOverlayBgColor,
+      overlayBgOpacity:
+          all['overlay_bg_opacity'] as int? ??
+          SettingsState.defaultOverlayBgOpacity,
     );
   }
 
@@ -164,14 +176,14 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     state = AsyncData(current.copyWith(models: models));
   }
 
-  Future<void> setOverlayColor(OverlayColorRole role, int rgb) async {
+  Future<void> setOverlayStyle(OverlayStyle style, int value) async {
     final current = state.requireValue;
-    await ref.read(settingsChannelProvider).set(role.key, rgb);
-    state = AsyncData(
-      role == OverlayColorRole.text
-          ? current.copyWith(overlayTextColor: rgb)
-          : current.copyWith(overlayBgColor: rgb),
-    );
+    await ref.read(settingsChannelProvider).set(style.key, value);
+    state = AsyncData(switch (style) {
+      OverlayStyle.textColor => current.copyWith(overlayTextColor: value),
+      OverlayStyle.bgColor => current.copyWith(overlayBgColor: value),
+      OverlayStyle.bgOpacity => current.copyWith(overlayBgOpacity: value),
+    });
   }
 
   /// Saves [code] for [side]. Throws [InvalidValueException] if native rejects it

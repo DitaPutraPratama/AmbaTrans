@@ -1,5 +1,7 @@
 import 'package:ambatrans/core/strings.dart';
+import 'package:ambatrans/features/settings/application/settings_controller.dart';
 import 'package:ambatrans/features/settings/presentation/settings_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -66,6 +68,35 @@ void main() {
     await tester.pumpAndSettle();
     expect(permissions.requestNotificationsCalls, 1);
     expect(permissions.openNotificationSettingsCalls, 2);
+  });
+
+  testWidgets('opening Settings re-reads permissions cached earlier', (
+    tester,
+  ) async {
+    // Onboarding builds the controller before the permissions are granted.
+    final permissions = FakePermissionsChannel();
+    await pumpScreen(
+      tester,
+      Consumer(
+        builder: (context, ref, _) {
+          ref.watch(settingsControllerProvider);
+          return TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
+            ),
+            child: const Text('open'),
+          );
+        },
+      ),
+      permissions: permissions,
+    );
+    permissions
+      ..overlay = true
+      ..notifications = true;
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(isOn(tester, Strings.overlayTitle), isTrue);
+    expect(isOn(tester, Strings.notificationsTitle), isTrue);
   });
 
   testWidgets('status updates when the user returns from system settings', (

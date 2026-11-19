@@ -39,7 +39,7 @@ class OverlayRenderer(
         hide()
         val container = FrameLayout(context)
         val textColor = OPAQUE or store.overlayTextColor
-        val bgColor = OPAQUE or store.overlayBgColor
+        val bgColor = (store.overlayBgOpacity * 255 / 100 shl 24) or store.overlayBgColor
         blocks.forEach { container.addView(label(it, textColor, bgColor)) }
         windowManager.addView(container, windowParams())
         root = container

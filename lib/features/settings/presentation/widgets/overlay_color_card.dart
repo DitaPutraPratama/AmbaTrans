@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../../app/theme.dart';
 import '../../../../core/strings.dart';
+import '../../application/settings_controller.dart';
 
 /// Colours offered for overlay labels, as 0xRRGGBB with their names.
 const overlayPalette = <(int, String)>[
@@ -21,14 +22,14 @@ class OverlayColorCard extends StatelessWidget {
     super.key,
     required this.textColor,
     required this.bgColor,
-    required this.onTextColor,
-    required this.onBgColor,
+    required this.bgOpacity,
+    required this.onChanged,
   });
 
   final int textColor;
   final int bgColor;
-  final ValueChanged<int> onTextColor;
-  final ValueChanged<int> onBgColor;
+  final int bgOpacity;
+  final void Function(OverlayStyle style, int value) onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,7 @@ class OverlayColorCard extends StatelessWidget {
                   vertical: 2,
                 ),
                 decoration: BoxDecoration(
-                  color: Color(0xFF000000 | bgColor),
+                  color: Color(((bgOpacity * 255) ~/ 100) << 24 | bgColor),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -65,10 +66,36 @@ class OverlayColorCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(Strings.overlayTextColor, style: textTheme.labelLarge),
-            _Swatches(selected: textColor, onSelected: onTextColor),
+            _Swatches(
+              selected: textColor,
+              onSelected: (v) => onChanged(OverlayStyle.textColor, v),
+            ),
             const SizedBox(height: AppSpacing.md),
             Text(Strings.overlayBgColor, style: textTheme.labelLarge),
-            _Swatches(selected: bgColor, onSelected: onBgColor),
+            _Swatches(
+              selected: bgColor,
+              onSelected: (v) => onChanged(OverlayStyle.bgColor, v),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    Strings.overlayBgOpacity,
+                    style: textTheme.labelLarge,
+                  ),
+                ),
+                Text(Strings.percent(bgOpacity), style: textTheme.labelLarge),
+              ],
+            ),
+            Slider(
+              value: bgOpacity.toDouble(),
+              max: 100,
+              divisions: 10,
+              label: Strings.percent(bgOpacity),
+              semanticFormatterCallback: (v) => Strings.percent(v.round()),
+              onChanged: (v) => onChanged(OverlayStyle.bgOpacity, v.round()),
+            ),
           ],
         ),
       ),

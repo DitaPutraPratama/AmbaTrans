@@ -18,6 +18,9 @@ class SettingsStore(private val prefs: SharedPreferences) {
     val overlayTextColor: Int get() = prefs.getInt(KEY_OVERLAY_TEXT_COLOR, DEFAULT_OVERLAY_TEXT_COLOR)
     val overlayBgColor: Int get() = prefs.getInt(KEY_OVERLAY_BG_COLOR, DEFAULT_OVERLAY_BG_COLOR)
 
+    /** Label background opacity in percent, on top of the overlay window's own opacity. */
+    val overlayBgOpacity: Int get() = prefs.getInt(KEY_OVERLAY_BG_OPACITY, DEFAULT_OVERLAY_BG_OPACITY)
+
     fun getAll(): Map<String, Any> = mapOf(
         KEY_SCHEMA_VERSION to prefs.getInt(KEY_SCHEMA_VERSION, CURRENT_SCHEMA_VERSION),
         KEY_ONBOARDING_DONE to onboardingDone,
@@ -28,6 +31,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
         KEY_BUBBLE_Y_FRACTION to bubbleYFraction.toDouble(),
         KEY_OVERLAY_TEXT_COLOR to overlayTextColor,
         KEY_OVERLAY_BG_COLOR to overlayBgColor,
+        KEY_OVERLAY_BG_OPACITY to overlayBgOpacity,
     )
 
     /** Validates and stores one value. Throws [InvalidSettingException] when the rules are violated. */
@@ -57,6 +61,11 @@ class SettingsStore(private val prefs: SharedPreferences) {
                 editor.putFloat(key, fraction)
             }
             KEY_OVERLAY_TEXT_COLOR, KEY_OVERLAY_BG_COLOR -> editor.putInt(key, value.asRgb(key))
+            KEY_OVERLAY_BG_OPACITY -> {
+                val percent = value as? Int
+                if (percent == null || percent !in 0..100) throw InvalidSettingException("$key must be 0..100")
+                editor.putInt(key, percent)
+            }
             else -> throw InvalidSettingException("unknown or read-only key: $key")
         }
         editor.apply()
@@ -100,6 +109,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
         const val KEY_BUBBLE_Y_FRACTION = "bubble_y_fraction"
         const val KEY_OVERLAY_TEXT_COLOR = "overlay_text_color"
         const val KEY_OVERLAY_BG_COLOR = "overlay_bg_color"
+        const val KEY_OVERLAY_BG_OPACITY = "overlay_bg_opacity"
 
         const val DEFAULT_SOURCE_LANG = "en"
         const val DEFAULT_TARGET_LANG = "id"
@@ -107,6 +117,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
         const val DEFAULT_BUBBLE_Y_FRACTION = 0.35f
         const val DEFAULT_OVERLAY_TEXT_COLOR = 0xFFFFFF
         const val DEFAULT_OVERLAY_BG_COLOR = 0x424242
+        const val DEFAULT_OVERLAY_BG_OPACITY = 100
 
         const val EDGE_LEFT = "left"
         const val EDGE_RIGHT = "right"
