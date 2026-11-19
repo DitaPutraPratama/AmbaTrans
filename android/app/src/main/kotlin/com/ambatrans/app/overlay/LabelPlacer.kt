@@ -1,5 +1,6 @@
 package com.ambatrans.app.overlay
 
+import com.ambatrans.app.pipeline.ScreenRect
 import com.ambatrans.app.pipeline.TextBlock
 
 /** Final label rectangle (screen px) and text settings. */
@@ -7,7 +8,8 @@ data class LabelFit(val left: Int, val top: Int, val width: Int, val height: Int
 
 /**
  * Chooses a label size and rectangle. The original OCR box is used when the translation fits at a readable
- * size; otherwise the label grows (wider first, then taller) around the box centre instead of cutting letters.
+ * size; otherwise the label grows (wider first, then taller) around the box centre, but never out of [room]
+ * (see [LabelRoom]): when the room is too small the text shrinks, and only as a last resort is it cut.
  */
 object LabelPlacer {
     private val widthFactors = floatArrayOf(1.3f, 1.7f, 2.2f)
@@ -20,53 +22,58 @@ object LabelPlacer {
     fun place(
         text: String,
         box: TextBlock,
-        screenWidth: Int,
-        screenHeight: Int,
+        room: ScreenRect,
         padH: Int,
         padV: Int,
         pxPerSp: Float,
         measurer: Measurer,
     ): LabelFit {
+        // The size comes from one line of the original text, not the whole block: a two-line paragraph must
+        // not get letters twice as big as a one-line text of the same size.
+        val lineSpace = (box.lineHeight.coerceAtMost(box.height) - 2 * padV).coerceAtLeast(1)
+
         fun fitIn(width: Int, height: Int) = FontFitter.fit(
             text = text,
             widthPx = (width - 2 * padH).coerceAtLeast(1),
             heightPx = (height - 2 * padV).coerceAtLeast(1),
             pxPerSp = pxPerSp,
             measurer = measurer,
-            startHeightPx = (box.height - 2 * padV).coerceAtLeast(1),
+            startHeightPx = lineSpace,
         )
 
         // Text counts as comfortable when it keeps most of its natural size, but never needs more than READABLE_SP.
-        val startSize = FontFitter.startSize((box.height - 2 * padV).coerceAtLeast(1), pxPerSp)
+        val startSize = FontFitter.startSize(lineSpace, pxPerSp)
         val comfortable = minOf(startSize * COMFORT_FRACTION, READABLE_SP).coerceAtLeast(FontFitter.MIN_SP)
 
         val original = fitIn(box.width, box.height)
         if (original.maxLines == Int.MAX_VALUE && original.sizeSp >= comfortable) {
-            return rect(box, box.width, box.height, original, screenWidth, screenHeight)
+            return rect(box, box.width, box.height, original, room)
         }
 
         var best: LabelFit? = original.takeIf { it.maxLines == Int.MAX_VALUE }
-            ?.let { rect(box, box.width, box.height, it, screenWidth, screenHeight) }
-        val maxWidth = (screenWidth - 2 * padH).coerceAtLeast(box.width)
+            ?.let { rect(box, box.width, box.height, it, room) }
+        val maxWidth = room.width.coerceAtLeast(box.width)
+        val grownHeight = (box.height * GROWN_HEIGHT_FACTOR).coerceAtMost(room.height).coerceAtLeast(box.height)
         val widths = widthFactors.map { (box.width * it).toInt().coerceAtMost(maxWidth) } + maxWidth
-        for (width in widths) {
-            val fit = fitIn(width, box.height * GROWN_HEIGHT_FACTOR)
+        for (width in widths.distinct()) {
+            val fit = fitIn(width, grownHeight)
             if (fit.maxLines != Int.MAX_VALUE) continue
             val used = measurer.measure(text, fit.sizeSp, (width - 2 * padH).coerceAtLeast(1)).heightPx + 2 * padV
-            val candidate = rect(box, width, used.coerceAtLeast(box.height), fit, screenWidth, screenHeight)
+            val candidate = rect(box, width, used.coerceIn(box.height, grownHeight), fit, room)
             if (best == null || candidate.sizeSp > best.sizeSp) best = candidate
             if (candidate.sizeSp >= comfortable) break
         }
         best?.let { return it }
-        val height = box.height * LAST_RESORT_HEIGHT_FACTOR
-        return rect(box, maxWidth, height, fitIn(maxWidth, height), screenWidth, screenHeight)
+        val height = (box.height * LAST_RESORT_HEIGHT_FACTOR).coerceAtMost(room.height).coerceAtLeast(box.height)
+        return rect(box, maxWidth, height, fitIn(maxWidth, height), room)
     }
 
-    private fun rect(box: TextBlock, width: Int, height: Int, fit: Fit, screenWidth: Int, screenHeight: Int): LabelFit {
+    /** Centred on the box, then pushed inside [room]. */
+    private fun rect(box: TextBlock, width: Int, height: Int, fit: Fit, room: ScreenRect): LabelFit {
         val centerX = (box.left + box.right) / 2
         val centerY = (box.top + box.bottom) / 2
-        val left = (centerX - width / 2).coerceIn(0, (screenWidth - width).coerceAtLeast(0))
-        val top = (centerY - height / 2).coerceIn(0, (screenHeight - height).coerceAtLeast(0))
+        val left = (centerX - width / 2).coerceIn(room.left, (room.right - width).coerceAtLeast(room.left))
+        val top = (centerY - height / 2).coerceIn(room.top, (room.bottom - height).coerceAtLeast(room.top))
         return LabelFit(left, top, width, height, fit.sizeSp, fit.maxLines)
     }
 }

@@ -1,5 +1,6 @@
 package com.ambatrans.app.overlay
 
+import com.ambatrans.app.pipeline.ScreenRect
 import com.ambatrans.app.pipeline.TextBlock
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -13,16 +14,16 @@ class LabelPlacerTest {
         TextMeasure(lines * lineHeight, lineHeight)
     }
 
-    private fun place(text: String, box: TextBlock) = LabelPlacer.place(
-        text,
-        box,
-        screenWidth = 1000,
-        screenHeight = 2000,
-        padH = 4,
-        padV = 2,
-        pxPerSp = 1f,
-        measurer = wrapping,
-    )
+    private fun place(text: String, box: TextBlock, room: ScreenRect = ScreenRect(0, 0, 1000, 2000)) =
+        LabelPlacer.place(
+            text,
+            box,
+            room = room,
+            padH = 4,
+            padV = 2,
+            pxPerSp = 1f,
+            measurer = wrapping,
+        )
 
     @Test
     fun `text that fits keeps the original box`() {
@@ -46,6 +47,24 @@ class LabelPlacerTest {
         val fit = place("x".repeat(80), nearEdge)
         assertTrue(fit.left >= 0 && fit.left + fit.width <= 1000)
         assertTrue(fit.top >= 0 && fit.top + fit.height <= 2000)
+    }
+
+    @Test
+    fun `a long translation stays inside its room and shrinks instead of growing taller`() {
+        val box = TextBlock("x", 300, 500, 500, 530) // 200 x 30
+        val room = ScreenRect(0, 495, 1000, 535) // neighbours 5 px above and below
+        val fit = place("x".repeat(60), box, room)
+        assertTrue(fit.left >= room.left && fit.left + fit.width <= room.right)
+        assertTrue(fit.top >= room.top && fit.top + fit.height <= room.bottom)
+        assertEquals(Int.MAX_VALUE, fit.maxLines)
+        assertTrue(fit.width > box.width) // it grew sideways, where there was space
+    }
+
+    @Test
+    fun `text of the same original size gets the same label size, however many lines it had`() {
+        val oneLine = TextBlock("x", 100, 500, 600, 530) // 500 x 30
+        val threeLines = TextBlock("x", 100, 600, 600, 690, lineHeight = 30) // 500 x 90
+        assertEquals(place("Halo", oneLine).sizeSp, place("Halo dunia", threeLines).sizeSp, 0.001f)
     }
 
     @Test

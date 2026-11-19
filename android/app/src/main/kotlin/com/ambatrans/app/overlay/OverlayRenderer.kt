@@ -15,6 +15,7 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.TextView
 import com.ambatrans.app.data.SettingsStore
+import com.ambatrans.app.pipeline.ScreenRect
 import com.ambatrans.app.pipeline.TranslatedBlock
 
 /**
@@ -40,7 +41,14 @@ class OverlayRenderer(
         val container = FrameLayout(context)
         val textColor = OPAQUE or store.overlayTextColor
         val bgColor = (store.overlayBgOpacity * 255 / 100 shl 24) or store.overlayBgColor
-        blocks.forEach { container.addView(label(it, textColor, bgColor)) }
+        val screen = context.resources.displayMetrics
+        val rooms = LabelRoom.compute(
+            blocks.map {
+                it.block
+            },
+            ScreenRect(0, 0, screen.widthPixels, screen.heightPixels),
+        )
+        blocks.forEachIndexed { i, block -> container.addView(label(block, rooms[i], textColor, bgColor)) }
         windowManager.addView(container, windowParams())
         root = container
         addWatcher()
@@ -100,7 +108,7 @@ class OverlayRenderer(
         }
     }
 
-    private fun label(item: TranslatedBlock, textColor: Int, bgColor: Int): View {
+    private fun label(item: TranslatedBlock, room: ScreenRect, textColor: Int, bgColor: Int): View {
         val block = item.block
         val padH = (PAD_H_DP * density).toInt()
         val padV = (PAD_V_DP * density).toInt()
@@ -108,8 +116,7 @@ class OverlayRenderer(
         val fit = LabelPlacer.place(
             text = item.translated,
             box = block,
-            screenWidth = screen.widthPixels,
-            screenHeight = screen.heightPixels,
+            room = room,
             padH = padH,
             padV = padV,
             pxPerSp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 1f, screen),
