@@ -16,13 +16,21 @@ const overlayPalette = <(int, String)>[
   (0x6A1B9A, Strings.colorPurple),
 ];
 
-/// Preview of an overlay label plus swatches for its text and background colour.
+/// Label text sizes in percent of normal (`overlay_text_scale`), with their names.
+const overlayTextScales = <(int, String)>[
+  (85, Strings.textSizeSmall),
+  (100, Strings.textSizeNormal),
+  (130, Strings.textSizeLarge),
+];
+
+/// Preview of an overlay label plus its colours, opacity and text size.
 class OverlayColorCard extends StatelessWidget {
   const OverlayColorCard({
     super.key,
     required this.textColor,
     required this.bgColor,
     required this.bgOpacity,
+    required this.textScale,
     required this.onChanged,
     this.onCommitted,
   });
@@ -30,6 +38,7 @@ class OverlayColorCard extends StatelessWidget {
   final int textColor;
   final int bgColor;
   final int bgOpacity;
+  final int textScale;
   final void Function(OverlayStyle style, int value) onChanged;
 
   /// The user finished a change (a swatch tap, or letting go of the slider).
@@ -64,6 +73,10 @@ class OverlayColorCard extends StatelessWidget {
                   Strings.overlayPreview,
                   style: textTheme.bodyMedium?.copyWith(
                     color: Color(0xFF000000 | textColor),
+                    fontSize:
+                        (textTheme.bodyMedium?.fontSize ?? 14) *
+                        textScale /
+                        100,
                   ),
                 ),
               ),
@@ -106,6 +119,24 @@ class OverlayColorCard extends StatelessWidget {
               semanticFormatterCallback: (v) => Strings.percent(v.round()),
               onChanged: (v) => onChanged(OverlayStyle.bgOpacity, v.round()),
               onChangeEnd: (_) => onCommitted?.call(),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(Strings.overlayTextSize, style: textTheme.labelLarge),
+            const SizedBox(height: AppSpacing.sm),
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<int>(
+                showSelectedIcon: false,
+                segments: [
+                  for (final (scale, name) in overlayTextScales)
+                    ButtonSegment(value: scale, label: Text(name)),
+                ],
+                selected: {textScale},
+                onSelectionChanged: (v) {
+                  onChanged(OverlayStyle.textScale, v.single);
+                  onCommitted?.call();
+                },
+              ),
             ),
           ],
         ),

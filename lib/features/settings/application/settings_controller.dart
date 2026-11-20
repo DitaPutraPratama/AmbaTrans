@@ -42,6 +42,7 @@ class SettingsState {
     this.overlayTextColor = defaultOverlayTextColor,
     this.overlayBgColor = defaultOverlayBgColor,
     this.overlayBgOpacity = defaultOverlayBgOpacity,
+    this.overlayTextScale = defaultOverlayTextScale,
     this.engine = TranslationEngine.mlkit,
     this.apiKeys = const {},
     this.aiModels = const {},
@@ -50,6 +51,7 @@ class SettingsState {
   static const defaultOverlayTextColor = 0xFFFFFF;
   static const defaultOverlayBgColor = 0x424242;
   static const defaultOverlayBgOpacity = 100;
+  static const defaultOverlayTextScale = 100;
 
   final String source;
   final String target;
@@ -63,6 +65,9 @@ class SettingsState {
 
   /// Background opacity in percent (0–100).
   final int overlayBgOpacity;
+
+  /// Label text size in percent of normal (85, 100 or 130).
+  final int overlayTextScale;
 
   final TranslationEngine engine;
 
@@ -81,6 +86,7 @@ class SettingsState {
     int? overlayTextColor,
     int? overlayBgColor,
     int? overlayBgOpacity,
+    int? overlayTextScale,
     TranslationEngine? engine,
     Map<TranslationEngine, String>? apiKeys,
     Map<TranslationEngine, String>? aiModels,
@@ -93,6 +99,7 @@ class SettingsState {
     overlayTextColor: overlayTextColor ?? this.overlayTextColor,
     overlayBgColor: overlayBgColor ?? this.overlayBgColor,
     overlayBgOpacity: overlayBgOpacity ?? this.overlayBgOpacity,
+    overlayTextScale: overlayTextScale ?? this.overlayTextScale,
     engine: engine ?? this.engine,
     apiKeys: apiKeys ?? this.apiKeys,
     aiModels: aiModels ?? this.aiModels,
@@ -105,7 +112,8 @@ enum LanguageSide { source, target }
 enum OverlayStyle {
   textColor('overlay_text_color'),
   bgColor('overlay_bg_color'),
-  bgOpacity('overlay_bg_opacity');
+  bgOpacity('overlay_bg_opacity'),
+  textScale('overlay_text_scale');
 
   const OverlayStyle(this.key);
 
@@ -169,6 +177,9 @@ class SettingsController extends AsyncNotifier<SettingsState> {
       overlayBgOpacity:
           all['overlay_bg_opacity'] as int? ??
           SettingsState.defaultOverlayBgOpacity,
+      overlayTextScale:
+          all['overlay_text_scale'] as int? ??
+          SettingsState.defaultOverlayTextScale,
       engine: TranslationEngine.fromId(all['translate_engine']),
       apiKeys: {
         for (final e in TranslationEngine.values.where((e) => e.online))
@@ -233,6 +244,7 @@ class SettingsController extends AsyncNotifier<SettingsState> {
       OverlayStyle.textColor => current.copyWith(overlayTextColor: value),
       OverlayStyle.bgColor => current.copyWith(overlayBgColor: value),
       OverlayStyle.bgOpacity => current.copyWith(overlayBgOpacity: value),
+      OverlayStyle.textScale => current.copyWith(overlayTextScale: value),
     });
   }
 

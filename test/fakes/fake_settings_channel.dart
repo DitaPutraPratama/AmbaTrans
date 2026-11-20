@@ -14,6 +14,7 @@ class FakeSettingsChannel implements SettingsChannel {
         'overlay_text_color': 0xFFFFFF,
         'overlay_bg_color': 0x424242,
         'overlay_bg_opacity': 100,
+        'overlay_text_scale': 100,
         'translate_mode': 'full',
         'translate_engine': 'mlkit',
         'deepl_api_key': '',

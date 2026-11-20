@@ -155,6 +155,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                     textColor: state.overlayTextColor,
                     bgColor: state.overlayBgColor,
                     bgOpacity: state.overlayBgOpacity,
+                    textScale: state.overlayTextScale,
                     onChanged: ref
                         .read(settingsControllerProvider.notifier)
                         .setOverlayStyle,

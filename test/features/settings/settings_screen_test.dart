@@ -128,6 +128,20 @@ void main() {
     expect(find.text(Strings.overlayStyleSaved), findsOneWidget);
   });
 
+  testWidgets('choosing a text size saves it and shows a toast', (
+    tester,
+  ) async {
+    final settings = FakeSettingsChannel();
+    await pumpScreen(tester, const SettingsScreen(), settings: settings);
+    final large = find.text(Strings.textSizeLarge);
+    await tester.scrollUntilVisible(large, 200);
+    await tester.pumpAndSettle();
+    await tester.tap(large);
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.overlayStyleSaved), findsOneWidget);
+    expect((await settings.getAll())['overlay_text_scale'], 130);
+  });
+
   testWidgets('target sheet disables the source language', (tester) async {
     await pumpScreen(tester, const SettingsScreen());
     await tester.tap(find.text(Strings.targetLanguage));
@@ -226,6 +240,21 @@ void main() {
       expect(stored['overlay_text_color'], 0x000000);
       expect(stored['overlay_bg_color'], 0xFFEB3B);
       expect(stored['overlay_bg_opacity'], 40);
+    });
+
+    test('overlay text scale loads with default 100 and is saved', () async {
+      final channel = FakeSettingsChannel();
+      final c = container(channel);
+      final loaded = await c.read(settingsControllerProvider.future);
+      expect(loaded.overlayTextScale, 100);
+      await c
+          .read(settingsControllerProvider.notifier)
+          .setOverlayStyle(OverlayStyle.textScale, 85);
+      expect(
+        c.read(settingsControllerProvider).requireValue.overlayTextScale,
+        85,
+      );
+      expect((await channel.getAll())['overlay_text_scale'], 85);
     });
 
     test('supportedLanguagesProvider sorts by Indonesian name', () async {
