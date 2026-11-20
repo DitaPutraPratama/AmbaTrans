@@ -17,10 +17,11 @@ Untuk komik, game, dan aplikasi yang tidak punya pilihan bahasa Indonesia. Offli
 
 ## Fitur ✨
 
-- Pilih mesin terjemahan di Pengaturan: ML Kit (offline), DeepL, atau AI. Layanan AI yang tersedia: Groq, Google Gemini, Cerebras, dan Mistral (punya paket gratis), serta OpenAI dan DeepSeek (berbayar). Cukup tempel API key milikmu sendiri; nama model AI juga bisa diganti (BARU)
-- Satu layar dikirim dalam satu permintaan, jadi AI bisa membaca semua teks di layar sebagai konteks. Teks yang sama tidak dikirim dua kali supaya hemat kuota (BARU)
-- Kalau API key ditolak, kuota habis, nama model salah, atau internet putus, muncul pesan yang jelas (BARU)
-- Teks komik yang ditulis HURUF KAPITAL SEMUA dirapikan dulu sebelum diterjemahkan ML Kit, jadi hasilnya lebih masuk akal (BARU)
+- Ukuran teks terjemahan bisa dipilih di Pengaturan → Tampilan terjemahan: Kecil, Normal, atau Besar. Ukuran bawaannya juga sudah lebih besar dari sebelumnya (BARU)
+- Pilih mesin terjemahan di Pengaturan: ML Kit (offline), DeepL, atau AI. Layanan AI yang tersedia: Groq, Google Gemini, Cerebras, dan Mistral (punya paket gratis), serta OpenAI dan DeepSeek (berbayar). Cukup tempel API key milikmu sendiri; nama model AI juga bisa diganti
+- Satu layar dikirim dalam satu permintaan, jadi AI bisa membaca semua teks di layar sebagai konteks. Teks yang sama tidak dikirim dua kali supaya hemat kuota
+- Kalau API key ditolak, kuota habis, nama model salah, atau internet putus, muncul pesan yang jelas
+- Teks komik yang ditulis HURUF KAPITAL SEMUA dirapikan dulu sebelum diterjemahkan ML Kit, jadi hasilnya lebih masuk akal
 - Bubble melayang di atas aplikasi apa pun: ketuk sekali, terjemahan muncul tepat di atas teks asli
 - Mode **Sebagian layar**: tarik kotak di area yang mau diterjemahkan, geser atau ubah ukurannya lewat sudut kotak, lalu tekan Terjemahkan. Teks di dalam kotak diterjemahkan sebagai satu kalimat, pas untuk gelembung komik
 - Tekan lama bubble untuk memilih mode Seluruh layar atau Sebagian layar. Pilihan tetap tersimpan walaupun AmbaTrans dimatikan
@@ -104,10 +105,13 @@ Pakai mode Sebagian: tekan lama bubble, pilih Sebagian layar, lalu kotakkan gele
 #### 3. Terjemahan menutupi gambar terlalu pekat atau terlalu tipis?
 Atur warna dan opasitas latarnya di Pengaturan → Tampilan terjemahan. Opasitas maksimal dibatasi Android supaya layar di bawahnya tetap bisa disentuh.
 
-#### 4. Ada bagian kalimat yang tidak ikut diterjemahkan?
+#### 4. Teks terjemahan terlalu kecil?
+Pilih ukuran **Besar** di Pengaturan → Tampilan terjemahan. Label akan melebar ke ruang kosong di sekitarnya, tanpa menimpa terjemahan lain.
+
+#### 5. Ada bagian kalimat yang tidak ikut diterjemahkan?
 Itu keterbatasan model terjemahan offline ML Kit. Coba mode Sebagian supaya kalimatnya terbaca utuh, atau pakai DeepL/AI.
 
-#### 5. Muncul "Kuota API habis" atau "Model tidak ditemukan"?
+#### 6. Muncul "Kuota API habis" atau "Model tidak ditemukan"?
 Paket gratis tiap layanan punya batas pemakaian. Tunggu sebentar atau pindah ke mesin lain di Pengaturan → Mesin terjemahan. Kalau modelnya tidak ditemukan, ketuk **Ubah**, lalu ganti nama model dengan yang ada di **Daftar model**.
 
 ## Untuk pengembang
