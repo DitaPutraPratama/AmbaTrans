@@ -33,6 +33,9 @@ class SettingsStore(private val prefs: SharedPreferences) {
     /** Label background opacity in percent, on top of the overlay window's own opacity. */
     val overlayBgOpacity: Int get() = prefs.getInt(KEY_OVERLAY_BG_OPACITY, DEFAULT_OVERLAY_BG_OPACITY)
 
+    /** Label text size in percent of normal: one of [TEXT_SCALES]. */
+    val overlayTextScale: Int get() = prefs.getInt(KEY_OVERLAY_TEXT_SCALE, DEFAULT_OVERLAY_TEXT_SCALE)
+
     fun getAll(): Map<String, Any> = mapOf(
         KEY_SCHEMA_VERSION to prefs.getInt(KEY_SCHEMA_VERSION, CURRENT_SCHEMA_VERSION),
         KEY_ONBOARDING_DONE to onboardingDone,
@@ -44,6 +47,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
         KEY_OVERLAY_TEXT_COLOR to overlayTextColor,
         KEY_OVERLAY_BG_COLOR to overlayBgColor,
         KEY_OVERLAY_BG_OPACITY to overlayBgOpacity,
+        KEY_OVERLAY_TEXT_SCALE to overlayTextScale,
         KEY_TRANSLATE_MODE to translateMode,
         KEY_TRANSLATE_ENGINE to translateEngine,
     ) + ONLINE_ENGINES.associate { apiKeyKey(it) to apiKey(it) } +
@@ -90,6 +94,10 @@ class SettingsStore(private val prefs: SharedPreferences) {
                 val percent = value as? Int
                 if (percent == null || percent !in 0..100) throw InvalidSettingException("$key must be 0..100")
                 editor.putInt(key, percent)
+            }
+            KEY_OVERLAY_TEXT_SCALE -> {
+                if (value !in TEXT_SCALES) throw InvalidSettingException("$key must be one of $TEXT_SCALES")
+                editor.putInt(key, value as Int)
             }
             else -> throw InvalidSettingException("unknown or read-only key: $key")
         }
@@ -148,6 +156,7 @@ class SettingsStore(private val prefs: SharedPreferences) {
         const val KEY_OVERLAY_TEXT_COLOR = "overlay_text_color"
         const val KEY_OVERLAY_BG_COLOR = "overlay_bg_color"
         const val KEY_OVERLAY_BG_OPACITY = "overlay_bg_opacity"
+        const val KEY_OVERLAY_TEXT_SCALE = "overlay_text_scale"
         const val KEY_TRANSLATE_MODE = "translate_mode"
         const val KEY_TRANSLATE_ENGINE = "translate_engine"
 
@@ -158,6 +167,8 @@ class SettingsStore(private val prefs: SharedPreferences) {
         const val DEFAULT_OVERLAY_TEXT_COLOR = 0xFFFFFF
         const val DEFAULT_OVERLAY_BG_COLOR = 0x424242
         const val DEFAULT_OVERLAY_BG_OPACITY = 100
+        const val DEFAULT_OVERLAY_TEXT_SCALE = 100
+        val TEXT_SCALES = listOf(85, 100, 130)
 
         const val EDGE_LEFT = "left"
         const val EDGE_RIGHT = "right"

@@ -121,6 +121,7 @@ class OverlayRenderer(
             padV = padV,
             pxPerSp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 1f, screen),
             measurer = ::measure,
+            scale = store.overlayTextScale / 100f,
         )
         return TextView(context).apply {
             text = item.translated

@@ -14,16 +14,21 @@ class LabelPlacerTest {
         TextMeasure(lines * lineHeight, lineHeight)
     }
 
-    private fun place(text: String, box: TextBlock, room: ScreenRect = ScreenRect(0, 0, 1000, 2000)) =
-        LabelPlacer.place(
-            text,
-            box,
-            room = room,
-            padH = 4,
-            padV = 2,
-            pxPerSp = 1f,
-            measurer = wrapping,
-        )
+    private fun place(
+        text: String,
+        box: TextBlock,
+        room: ScreenRect = ScreenRect(0, 0, 1000, 2000),
+        scale: Float = 1f,
+    ) = LabelPlacer.place(
+        text,
+        box,
+        room = room,
+        padH = 4,
+        padV = 2,
+        pxPerSp = 1f,
+        measurer = wrapping,
+        scale = scale,
+    )
 
     @Test
     fun `text that fits keeps the original box`() {
@@ -73,5 +78,24 @@ class LabelPlacerTest {
         val fit = place("x".repeat(20_000), box)
         assertEquals(FontFitter.MIN_SP, fit.sizeSp, 0.001f)
         assertTrue(fit.maxLines != Int.MAX_VALUE)
+    }
+
+    @Test
+    fun `a larger text scale raises the size of small text`() {
+        val small = TextBlock("x", 100, 500, 600, 516) // 500 x 16: natural size below the minimum
+        assertEquals(FontFitter.MIN_SP, place("Halo", small).sizeSp, 0.001f)
+        assertEquals(FontFitter.MIN_SP * 1.3f, place("Halo", small, scale = 1.3f).sizeSp, 0.001f)
+    }
+
+    @Test
+    fun `a larger text scale grows a cramped label instead of keeping it small`() {
+        // 200 x 50, big source text: the translation fits the box at 19 sp, readable at normal scale only.
+        val box = TextBlock("x", 300, 500, 500, 550)
+        val text = "x".repeat(40)
+        val normal = place(text, box)
+        assertEquals(box.width, normal.width)
+        val large = place(text, box, scale = 1.3f)
+        assertTrue(large.width > box.width)
+        assertTrue(large.sizeSp > normal.sizeSp)
     }
 }

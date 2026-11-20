@@ -123,6 +123,16 @@ class SettingsStoreTest {
     }
 
     @Test
+    fun `overlay text scale defaults to 100 and accepts only the offered sizes`() {
+        val s = store()
+        assertEquals(100, s.getAll()["overlay_text_scale"])
+        s.set("overlay_text_scale", 130)
+        assertThrows(InvalidSettingException::class.java) { s.set("overlay_text_scale", 120) }
+        assertThrows(InvalidSettingException::class.java) { s.set("overlay_text_scale", 1.3) }
+        assertEquals(130, s.overlayTextScale)
+    }
+
+    @Test
     fun `translate mode defaults to full screen and accepts full or region only`() {
         val s = store()
         assertEquals("full", s.getAll()["translate_mode"])

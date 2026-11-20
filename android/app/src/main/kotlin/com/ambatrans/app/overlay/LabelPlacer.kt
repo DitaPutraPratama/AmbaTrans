@@ -16,8 +16,9 @@ object LabelPlacer {
     private const val GROWN_HEIGHT_FACTOR = 2
     private const val LAST_RESORT_HEIGHT_FACTOR = 3
     private const val COMFORT_FRACTION = 0.85f
-    private const val READABLE_SP = 14f
+    private const val READABLE_SP = 16f
 
+    /** [scale] is the user's text size setting (1 = normal); it scales the minimum and the readable size. */
     @Suppress("LongParameterList")
     fun place(
         text: String,
@@ -27,7 +28,9 @@ object LabelPlacer {
         padV: Int,
         pxPerSp: Float,
         measurer: Measurer,
+        scale: Float = 1f,
     ): LabelFit {
+        val minSp = FontFitter.MIN_SP * scale
         // The size comes from one line of the original text, not the whole block: a two-line paragraph must
         // not get letters twice as big as a one-line text of the same size.
         val lineSpace = (box.lineHeight.coerceAtMost(box.height) - 2 * padV).coerceAtLeast(1)
@@ -39,11 +42,12 @@ object LabelPlacer {
             pxPerSp = pxPerSp,
             measurer = measurer,
             startHeightPx = lineSpace,
+            minSp = minSp,
         )
 
         // Text counts as comfortable when it keeps most of its natural size, but never needs more than READABLE_SP.
-        val startSize = FontFitter.startSize(lineSpace, pxPerSp)
-        val comfortable = minOf(startSize * COMFORT_FRACTION, READABLE_SP).coerceAtLeast(FontFitter.MIN_SP)
+        val startSize = FontFitter.startSize(lineSpace, pxPerSp, minSp)
+        val comfortable = minOf(startSize * COMFORT_FRACTION, READABLE_SP * scale).coerceAtLeast(minSp)
 
         val original = fitIn(box.width, box.height)
         if (original.maxLines == Int.MAX_VALUE && original.sizeSp >= comfortable) {
