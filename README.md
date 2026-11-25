@@ -27,6 +27,7 @@ Untuk komik, game, dan aplikasi yang tidak punya pilihan bahasa Indonesia. Offli
 - Satu gelembung teks yang terbaca per baris digabung jadi satu kalimat, termasuk kata yang terputus tanda sambung seperti "ber-main"
 - Atur warna teks, warna latar, dan opasitas latar terjemahan, lengkap dengan pratinjau
 - Seret bubble ke tanda X di bawah layar untuk mematikan AmbaTrans
+- Nyalakan dan matikan bubble dari panel cepat (Quick Settings / Pusat Kontrol) tanpa membuka aplikasi (BARU)
 - Notifikasi "AmbaTrans aktif" boleh dimatikan, bubble tetap jalan
 - Membaca teks di HP dengan Google ML Kit; dengan mesin ML Kit, terjemahan juga berjalan sepenuhnya di HP tanpa server dan tanpa akun
 - Membaca huruf Latin, Mandarin, Jepang, Korea, dan Devanagari (Hindi, Marathi)
@@ -71,6 +72,8 @@ adb install -r AmbaTrans-<versi>-arm64-v8a.apk
 | Tekan lama | Pilih mode: Seluruh layar / Sebagian layar |
 | Seret | Pindahkan bubble; bubble menempel ke pinggir kiri atau kanan |
 | Seret ke tanda X di bawah | Matikan AmbaTrans |
+
+Supaya lebih cepat, pasang tombol AmbaTrans di panel cepat: buka panel, ketuk ikon edit, lalu tarik **AmbaTrans** ke daftar tombol. Ketuk untuk menyalakan bubble, ketuk lagi untuk mematikannya.
 
 Di mode Sebagian, tekan **Batal**, tombol Kembali, atau ketuk di luar kotak untuk membatalkan.
 
